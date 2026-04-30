@@ -1,7 +1,9 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { useEffect } from 'react';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import AiChat from './components/chat/AiChat';
 import KillFeed from './components/feed/KillFeed';
+import { api } from './services/api';
 
 // Pages - Public
 import LandingPage from './pages/public/LandingPage';
@@ -30,10 +32,22 @@ function RequireAdmin({ children }) {
   return children;
 }
 
+// Pings the backend every 3 minutes so Render free tier never sleeps
+function KeepAlive() {
+  useEffect(() => {
+    const ping = () => api.ping().catch(() => {});
+    ping(); // immediate on mount
+    const id = setInterval(ping, 3 * 60 * 1000); // every 3 minutes
+    return () => clearInterval(id);
+  }, []);
+  return null;
+}
+
 export default function App() {
   return (
     <AuthProvider>
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
+        <KeepAlive />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
