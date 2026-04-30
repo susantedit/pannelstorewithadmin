@@ -1,0 +1,3337 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"  content="width=device-width, initial-scale=1.0">
+<title>SUSANTEDIT | Elite Gaming Performance Platform</title>
+<meta name="description" content="Premium gaming enhancement services trusted by 10,000+ competitive players. Instant delivery, secure payment, 24/7 support.">
+<link rel="icon" type="image/png" href="logo.png">
+<link rel="apple-touch-icon" href="logo.png">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@700&display=swap" rel="stylesheet">
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+:root {
+--bg: #0d1117;
+--card: #161b22;
+--border: rgba(255,255,255,0.1);
+--primary: #e63946;
+--text: #f0f0f0;
+--muted: #8b949e;
+--success: #3fb950;
+--discount: #ffa500;
+--transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+body {
+font-family: 'Inter', sans-serif;
+background: var(--bg);
+color: var(--text);
+line-height: 1.6;
+position: relative;
+overflow-x: hidden;
+-webkit-font-smoothing: antialiased;
+-moz-osx-font-smoothing: grayscale;
+transition: background-color 0.5s ease, color 0.5s ease;
+}
+body::before {
+content: '';
+position: fixed;
+top: -50%;
+left: -50%;
+width: 200%;
+height: 200%;
+background: 
+radial-gradient(circle at 20% 50%, rgba(230,57,70,0.08) 0%, transparent 50%),
+radial-gradient(circle at 80% 80%, rgba(230,57,70,0.06) 0%, transparent 50%),
+radial-gradient(circle at 40% 20%, rgba(230,57,70,0.05) 0%, transparent 50%);
+animation: float 20s ease-in-out infinite;
+pointer-events: none;
+z-index: 0;
+transition: all 0.5s ease;
+}
+@keyframes float {
+0%, 100% { transform: translate(0, 0) rotate(0deg); }
+33% { transform: translate(30px, -30px) rotate(120deg); }
+66% { transform: translate(-20px, 20px) rotate(240deg); }
+}
+.hero {
+text-align: center;
+padding: 80px 20px 60px;
+background: linear-gradient(180deg, rgba(230,57,70,0.08) 0%, transparent 100%);
+position: relative;
+}
+.hero::before {
+content: '';
+position: absolute;
+top: 0;
+left: 50%;
+transform: translateX(-50%);
+width: 600px;
+height: 600px;
+background: radial-gradient(circle, rgba(230,57,70,0.15) 0%, transparent 70%);
+pointer-events: none;
+}
+.hero-content { position: relative; z-index: 1; }
+.hero h1 {
+font-family: 'Space Grotesk', sans-serif;
+font-size: 3.5rem;
+font-weight: 700;
+margin-bottom: 16px;
+line-height: 1.1;
+}
+.hero h1 span:first-child { color: #fff; }
+.hero h1 span:last-child { color: var(--primary); }
+.hero-subtitle {
+font-size: 1.2rem;
+color: var(--muted);
+margin-bottom: 32px;
+max-width: 600px;
+margin-left: auto;
+margin-right: auto;
+}
+.hero-cta {
+display: inline-block;
+padding: 16px 40px;
+background: linear-gradient(135deg, var(--primary), #ff6b6b);
+color: white;
+text-decoration: none;
+border-radius: 10px;
+font-weight: 700;
+font-size: 1.1rem;
+transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+box-shadow: 0 4px 20px rgba(230,57,70,0.3);
+position: relative;
+overflow: hidden;
+}
+.hero-cta::before {
+content: '';
+position: absolute;
+top: 0;
+left: -100%;
+width: 100%;
+height: 100%;
+background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+transition: left 0.5s;
+}
+.hero-cta:hover::before {
+left: 100%;
+}
+.hero-cta:hover {
+transform: translateY(-3px) scale(1.05);
+box-shadow: 0 12px 40px rgba(230,57,70,0.6);
+}
+.stats-bar {
+display: flex;
+justify-content: center;
+gap: 60px;
+margin-top: 50px;
+flex-wrap: wrap;
+}
+.stat-item {
+text-align: center;
+}
+.stat-number {
+font-size: 2.5rem;
+font-weight: 800;
+color: var(--primary);
+font-family: 'Space Grotesk', sans-serif;
+}
+.stat-label {
+color: var(--muted);
+font-size: 0.9rem;
+text-transform: uppercase;
+letter-spacing: 1px;
+}
+.container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+header {
+text-align: center;
+padding: 60px 20px 40px;
+background: linear-gradient(180deg, rgba(230,57,70,0.05) 0%, transparent 100%);
+}
+.logo {
+font-family: 'Space Grotesk', sans-serif;
+font-size: 2.8rem;
+font-weight: 700;
+margin-bottom: 8px;
+}
+.logo span:first-child { color: #fff; }
+.logo span:last-child { color: var(--primary); font-weight: 400; }
+.tagline {
+color: var(--muted);
+font-size: 0.95rem;
+letter-spacing: 2px;
+text-transform: uppercase;
+}
+.trust-bar {
+display: flex;
+justify-content: center;
+gap: 30px;
+margin: 30px 0;
+padding: 20px;
+background: rgba(22,27,34,0.6);
+backdrop-filter: blur(20px);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 12px;
+flex-wrap: wrap;
+box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+}
+.trust-item {
+display: flex;
+align-items: center;
+gap: 8px;
+font-size: 0.9rem;
+color: var(--muted);
+}
+.trust-item span:first-child { color: var(--success); font-size: 1.2rem; }
+.contact-bar {
+text-align: center;
+padding: 15px;
+background: var(--card);
+border: 1px solid var(--border);
+border-radius: 10px;
+margin-bottom: 40px;
+font-size: 0.9rem;
+}
+.contact-bar a {
+color: var(--primary);
+text-decoration: none;
+font-weight: 600;
+margin: 0 12px;
+}
+.section-title {
+font-family: 'Space Grotesk', sans-serif;
+font-size: 1.8rem;
+margin: 50px 0 30px;
+text-align: center;
+color: #fff;
+}
+.grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+gap: 20px;
+margin-bottom: 40px;
+margin-top: 20px;
+}
+.card {
+background: rgba(22,27,34,0.6);
+backdrop-filter: blur(20px);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 16px;
+padding: 24px;
+transition: var(--transition);
+position: relative;
+overflow: visible;
+margin-top: 20px;
+box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+will-change: transform, box-shadow;
+}
+.card::before {
+content: '';
+position: absolute;
+top: 0;
+left: 0;
+right: 0;
+height: 3px;
+background: linear-gradient(90deg, var(--primary), #ff6b6b, var(--primary));
+background-size: 200% 100%;
+animation: gradientShift 3s ease infinite;
+}
+.card::after {
+content: '';
+position: absolute;
+inset: 0;
+border-radius: 16px;
+padding: 1px;
+background: linear-gradient(135deg, transparent, rgba(230,57,70,0.3), transparent);
+-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+-webkit-mask-composite: xor;
+mask-composite: exclude;
+opacity: 0;
+transition: opacity 0.5s;
+pointer-events: none;
+}
+.card:hover {
+border-color: rgba(230,57,70,0.6);
+transform: translateY(-12px) scale(1.02);
+box-shadow: 0 24px 60px rgba(230,57,70,0.3), 0 0 60px rgba(230,57,70,0.15);
+}
+.card:hover::after {
+opacity: 1;
+}
+@keyframes gradientShift {
+0%, 100% { background-position: 0% 50%; }
+50% { background-position: 100% 50%; }
+}
+.card-header {
+display: flex;
+justify-content: space-between;
+align-items: flex-start;
+margin-bottom: 20px;
+}
+.card-title {
+font-size: 1.2rem;
+font-weight: 700;
+color: #fff;
+}
+.badge {
+padding: 4px 10px;
+border-radius: 6px;
+font-size: 0.75rem;
+font-weight: 600;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+}
+.badge-hot { background: rgba(230,57,70,0.2); color: var(--primary); }
+.badge-new { background: rgba(63,185,80,0.2); color: var(--success); }
+.badge-pro { background: rgba(88,166,255,0.2); color: #58a6ff; }
+.badge-popular { background: rgba(255,165,0,0.2); color: var(--discount); }
+.price-list {
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+.price-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 16px;
+background: rgba(255,255,255,0.03);
+border-radius: 12px;
+border: 2px solid transparent;
+transition: var(--transition);
+cursor: pointer;
+position: relative;
+overflow: hidden;
+user-select: none;
+min-height: 56px;
+touch-action: manipulation;
+}
+.price-item::before {
+content: '';
+position: absolute;
+inset: 0;
+background: linear-gradient(135deg, transparent, rgba(230,57,70,0.15));
+opacity: 0;
+transition: opacity 0.3s;
+pointer-events: none;
+}
+.price-item:hover::before {
+opacity: 1;
+}
+.price-item:hover {
+background: rgba(230,57,70,0.12);
+border-color: rgba(230,57,70,0.4);
+transform: translateX(8px);
+}
+.price-item.selected {
+background: linear-gradient(135deg, rgba(230,57,70,0.25), rgba(255,107,107,0.15));
+border-color: var(--primary);
+box-shadow: 0 0 25px rgba(230,57,70,0.3), inset 0 0 20px rgba(230,57,70,0.1);
+}
+.price-item.selected::before {
+opacity: 1;
+}
+.price-item input[type="radio"] {
+margin-right: 12px;
+width: 20px;
+height: 20px;
+cursor: pointer;
+accent-color: var(--primary);
+-webkit-appearance: none;
+appearance: none;
+padding: 2px;
+background-clip: content-box;
+background-color: transparent;
+border: 2px solid var(--primary);
+border-radius: 50%;
+}
+.price-item input[type="radio"]:checked {
+background-color: var(--primary);
+}
+.price-label {
+font-weight: 500;
+color: var(--text);
+}
+.price-value {
+font-weight: 700;
+color: var(--primary);
+font-size: 1.1rem;
+}
+.price-original {
+text-decoration: line-through;
+color: var(--muted);
+font-size: 0.9rem;
+margin-right: 8px;
+}
+.discount-tag {
+background: var(--discount);
+color: #000;
+padding: 2px 8px;
+border-radius: 4px;
+font-size: 0.75rem;
+font-weight: 700;
+margin-left: 8px;
+}
+.best-value {
+position: absolute;
+top: -12px;
+right: 20px;
+background: var(--discount);
+color: #000;
+padding: 6px 16px;
+border-radius: 20px;
+font-size: 0.75rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+box-shadow: 0 4px 12px rgba(255,165,0,0.4);
+z-index: 100;
+}
+.suggested-tag {
+position: absolute;
+top: -12px;
+right: 20px;
+background: #3fb950;
+color: #fff;
+padding: 6px 16px;
+border-radius: 20px;
+font-size: 0.75rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+box-shadow: 0 4px 12px rgba(63,185,80,0.4);
+z-index: 100;
+}
+.limited-tag {
+position: absolute;
+top: -12px;
+right: 20px;
+background: #e63946;
+color: #fff;
+padding: 6px 16px;
+border-radius: 20px;
+font-size: 0.75rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+box-shadow: 0 4px 12px rgba(230,57,70,0.4);
+z-index: 100;
+animation: pulse 2s infinite;
+}
+.trending-tag {
+position: absolute;
+top: -12px;
+right: 20px;
+background: #8b5cf6;
+color: #fff;
+padding: 6px 16px;
+border-radius: 20px;
+font-size: 0.75rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+box-shadow: 0 4px 12px rgba(139,92,246,0.4);
+z-index: 100;
+}
+.maintenance-tag {
+position: absolute;
+top: -12px;
+right: 20px;
+background: #ff9800;
+color: #fff;
+padding: 6px 16px;
+border-radius: 20px;
+font-size: 0.75rem;
+font-weight: 700;
+text-transform: uppercase;
+letter-spacing: 0.5px;
+box-shadow: 0 4px 12px rgba(255,152,0,0.4);
+z-index: 100;
+animation: pulse 2s infinite;
+}
+.btn {
+width: 100%;
+padding: 14px;
+margin-top: 16px;
+background: linear-gradient(135deg, var(--primary), #ff6b6b);
+color: white;
+border: none;
+border-radius: 10px;
+font-weight: 700;
+font-size: 1rem;
+cursor: pointer;
+transition: var(--transition);
+text-transform: uppercase;
+letter-spacing: 1px;
+position: relative;
+overflow: hidden;
+min-height: 50px;
+display: flex;
+align-items: center;
+justify-content: center;
+touch-action: manipulation;
+-webkit-tap-highlight-color: transparent;
+box-shadow: 0 4px 15px rgba(230,57,70,0.4);
+}
+.btn::before {
+content: '';
+position: absolute;
+top: 50%;
+left: 50%;
+width: 0;
+height: 0;
+border-radius: 50%;
+background: rgba(255,255,255,0.2);
+transition: width 0.6s, height 0.6s, top 0.6s, left 0.6s;
+transform: translate(-50%, -50%);
+z-index: -1;
+}
+.btn:hover::before {
+width: 400px;
+height: 400px;
+}
+.btn:hover {
+color: white;
+transform: translateY(-3px);
+box-shadow: 0 8px 30px rgba(230,57,70,0.6);
+}
+.btn:active {
+transform: translateY(-1px) scale(0.98);
+}
+.modal {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.7);
+backdrop-filter: blur(12px);
+z-index: 1000;
+align-items: center;
+justify-content: center;
+padding: 20px;
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+animation: fadeInModal 0.3s ease;
+}
+@keyframes fadeInModal {
+from { opacity: 0; }
+to { opacity: 1; }
+}
+.modal-content {
+background: var(--card);
+backdrop-filter: blur(30px);
+border: 1px solid var(--border);
+border-radius: 24px;
+padding: 40px;
+max-width: 500px;
+width: 100%;
+box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+animation: slideUp 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+@keyframes slideUp {
+from {
+opacity: 0;
+transform: translateY(30px);
+}
+to {
+opacity: 1;
+transform: translateY(0);
+}
+}
+
+/* Theme toggle removed */
+
+/* ===== SEARCH/FILTER BAR ===== */
+.search-filter {
+display: flex;
+gap: 12px;
+margin: 20px 0;
+align-items: center;
+flex-wrap: wrap;
+}
+.search-box {
+flex: 1;
+min-width: 250px;
+padding: 14px 18px;
+background: var(--card);
+border: 2px solid var(--border);
+border-radius: 12px;
+color: var(--text);
+font-size: 0.95rem;
+transition: var(--transition);
+font-weight: 500;
+}
+.search-box:focus {
+outline: none;
+border-color: var(--primary);
+box-shadow: 0 0 20px rgba(230,57,70,0.3);
+background: var(--card);
+}
+.filter-btn {
+padding: 12px 22px;
+background: rgba(230,57,70,0.15);
+color: var(--primary);
+border: 2px solid rgba(230,57,70,0.3);
+border-radius: 10px;
+cursor: pointer;
+font-weight: 600;
+transition: var(--transition);
+font-size: 0.9rem;
+}
+.filter-btn:hover {
+background: rgba(230,57,70,0.25);
+border-color: var(--primary);
+}
+.filter-btn.active {
+background: linear-gradient(135deg, var(--primary), #ff6b6b);
+color: white;
+border-color: var(--primary);
+box-shadow: 0 4px 15px rgba(230,57,70,0.4);
+}
+
+/* ===== WISHLIST HEART ICON ===== */
+.wishlist-btn {
+position: absolute;
+top: 12px;
+right: 12px;
+background: none;
+border: none;
+font-size: 1.5rem;
+cursor: pointer;
+z-index: 10;
+transition: all 0.3s ease;
+}
+.wishlist-btn:hover {
+transform: scale(1.2);
+}
+.wishlist-btn.active {
+color: var(--primary);
+animation: heartbeat 0.6s ease;
+}
+@keyframes heartbeat {
+0%, 100% { transform: scale(1); }
+25% { transform: scale(1.3); }
+50% { transform: scale(1.15); }
+}
+
+/* ===== COMPARISON MODAL ===== */
+.comparison-grid {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 20px;
+margin: 20px 0;
+}
+.comparison-item {
+padding: 16px;
+background: rgba(255,255,255,0.05);
+border: 1px solid var(--border);
+border-radius: 10px;
+}
+.comparison-label {
+font-weight: 600;
+color: var(--primary);
+margin-bottom: 8px;
+}
+.comparison-spec {
+padding: 8px 0;
+color: var(--text);
+font-size: 0.9rem;
+}
+
+/* ===== BUNDLE DEALS BADGE ===== */
+.bundle-badge {
+background: linear-gradient(135deg, var(--primary), #ff6b6b);
+color: white;
+padding: 8px 12px;
+border-radius: 8px;
+font-size: 0.8rem;
+font-weight: 700;
+margin: 8px 0;
+text-align: center;
+}
+.bundle-discount {
+color: var(--discount);
+font-weight: 700;
+}
+
+/* ===== DEVICE COMPATIBILITY CHECKER ===== */
+.device-checker {
+padding: 20px;
+background: rgba(230,57,70,0.08);
+border: 1px dashed var(--primary);
+border-radius: 10px;
+margin: 16px 0;
+}
+.device-spec {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: 8px 0;
+border-bottom: 1px solid var(--border);
+font-size: 0.9rem;
+}
+.device-spec:last-child {
+border-bottom: none;
+}
+.spec-label {
+color: var(--muted);
+}
+.spec-value {
+color: var(--text);
+font-weight: 600;
+}
+.compatibility-status {
+margin-top: 12px;
+padding: 10px;
+border-radius: 8px;
+text-align: center;
+font-weight: 600;
+}
+.compatible {
+background: rgba(63,185,80,0.2);
+color: var(--success);
+}
+.incompatible {
+background: rgba(230,57,70,0.2);
+color: var(--primary);
+}
+
+/* ===== EXIT INTENT POPUP ===== */
+.exit-popup {
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+background: linear-gradient(135deg, var(--card), rgba(230,57,70,0.1));
+border-top: 2px solid var(--primary);
+padding: 24px;
+z-index: 998;
+transform: translateY(100%);
+transition: transform 0.4s ease;
+box-shadow: 0 -4px 20px rgba(0,0,0,0.5);
+}
+.exit-popup.show {
+transform: translateY(0);
+}
+.exit-popup-content {
+max-width: 800px;
+margin: 0 auto;
+display: flex;
+align-items: center;
+justify-content: space-between;
+gap: 20px;
+}
+.exit-popup-text h3 {
+color: var(--primary);
+margin-bottom: 8px;
+font-size: 1.2rem;
+}
+.exit-popup-text p {
+color: var(--muted);
+font-size: 0.9rem;
+}
+.exit-popup-btn {
+padding: 12px 24px;
+background: linear-gradient(135deg, var(--primary), #ff6b6b);
+color: white;
+border: none;
+border-radius: 8px;
+font-weight: 700;
+cursor: pointer;
+transition: var(--transition);
+white-space: nowrap;
+}
+.exit-popup-btn:hover {
+transform: scale(1.05);
+box-shadow: 0 0 20px rgba(230,57,70,0.5);
+}
+.exit-popup-close {
+color: var(--muted);
+border: none;
+background: none;
+font-size: 1.5rem;
+cursor: pointer;
+}
+
+/* Chat widget removed */
+position: relative;
+box-shadow: 0 20px 60px rgba(0,0,0,0.5), 0 0 100px rgba(230,57,70,0.3);
+animation: modalSlideIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+max-height: 90vh;
+overflow-y: auto;
+-webkit-overflow-scrolling: touch;
+margin: auto;
+}
+@keyframes modalSlideIn {
+from {
+opacity: 0;
+transform: scale(0.8) translateY(-50px);
+}
+to {
+opacity: 1;
+transform: scale(1) translateY(0);
+}
+}
+.modal-close {
+position: absolute;
+top: 20px;
+right: 20px;
+background: none;
+border: none;
+color: var(--muted);
+font-size: 1.5rem;
+cursor: pointer;
+width: 30px;
+height: 30px;
+}
+.modal-title {
+font-family: 'Space Grotesk', sans-serif;
+font-size: 1.6rem;
+margin-bottom: 24px;
+color: var(--text);
+font-weight: 700;
+text-align: center;
+background: linear-gradient(135deg, var(--primary), #ff6b6b);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+background-clip: text;
+}
+.selected-product {
+padding: 16px;
+background: rgba(230,57,70,0.1);
+border: 1px solid rgba(230,57,70,0.3);
+border-radius: 10px;
+margin-bottom: 24px;
+font-weight: 600;
+}
+.qr-container {
+text-align: center;
+margin: 24px 0;
+}
+.qr-container img {
+max-width: 280px;
+width: 100%;
+border-radius: 12px;
+border: 2px solid var(--border);
+}
+.payment-tabs {
+display: flex;
+gap: 10px;
+margin: 20px 0;
+}
+.payment-tab {
+flex: 1;
+padding: 12px;
+background: rgba(255,255,255,0.05);
+border: 2px solid var(--border);
+border-radius: 8px;
+cursor: pointer;
+transition: var(--transition);
+text-align: center;
+font-weight: 600;
+min-height: 48px;
+display: flex;
+align-items: center;
+justify-content: center;
+touch-action: manipulation;
+}
+.payment-tab:hover {
+background: rgba(230,57,70,0.1);
+border-color: rgba(230,57,70,0.3);
+}
+.payment-tab.active {
+background: rgba(230,57,70,0.2);
+border-color: var(--primary);
+color: var(--primary);
+box-shadow: 0 0 15px rgba(230,57,70,0.3);
+}
+.payment-content {
+display: none;
+}
+.payment-content.active {
+display: block;
+}
+.payment-info {
+background: rgba(255,255,255,0.03);
+padding: 16px;
+border-radius: 10px;
+margin: 20px 0;
+}
+.copy-btn {
+background: rgba(255,255,255,0.05);
+border: 1px solid var(--border);
+padding: 8px 16px;
+border-radius: 6px;
+color: var(--text);
+cursor: pointer;
+font-size: 0.85rem;
+margin-top: 8px;
+}
+.copy-btn:hover { background: rgba(255,255,255,0.1); }
+.whatsapp-btn {
+width: 100%;
+padding: 16px;
+background: linear-gradient(135deg, #25D366, #128C7E);
+color: white;
+border: none;
+border-radius: 10px;
+font-weight: 700;
+font-size: 1rem;
+cursor: pointer;
+margin-top: 20px;
+transition: var(--transition);
+position: relative;
+overflow: hidden;
+min-height: 50px;
+display: flex;
+align-items: center;
+justify-content: center;
+touch-action: manipulation;
+-webkit-tap-highlight-color: transparent;
+}
+.whatsapp-btn::before {
+content: '';
+position: absolute;
+top: 50%;
+left: 50%;
+width: 0;
+height: 0;
+background: rgba(255,255,255,0.3);
+border-radius: 50%;
+transform: translate(-50%, -50%);
+transition: width 0.6s, height 0.6s;
+}
+.whatsapp-btn:hover::before {
+width: 400px;
+height: 400px;
+}
+.whatsapp-btn:hover {
+transform: scale(1.05);
+box-shadow: 0 10px 40px rgba(37,211,102,0.6);
+}
+footer {
+text-align: center;
+padding: 40px 20px;
+color: var(--muted);
+font-size: 0.85rem;
+border-top: 1px solid var(--border);
+margin-top: 60px;
+}
+@media (max-width: 1024px) {
+.grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.hero h1 { font-size: 2.8rem; }
+}
+
+@media (max-width: 768px) {
+.grid { grid-template-columns: 1fr; gap: 16px; }
+.trust-bar { flex-direction: column; gap: 12px; padding: 16px; }
+.hero h1 { font-size: 2rem; line-height: 1.2; }
+.hero-subtitle { font-size: 1rem; padding: 0 10px; }
+.stats-bar { gap: 20px; flex-direction: column; }
+.stat-item { width: 100%; }
+.stat-number { font-size: 2rem; }
+.modal-content { padding: 20px; max-width: 95%; margin: 10px; border-radius: 16px; }
+.contact-bar { font-size: 0.8rem; padding: 16px; border-radius: 12px; }
+.contact-bar a { display: block; margin: 10px 0; font-size: 0.85rem; padding: 8px 12px; }
+.hero { padding: 40px 16px 30px; }
+.hero img { width: 60px !important; height: 60px !important; }
+.hero-cta { padding: 14px 28px; font-size: 0.95rem; width: 90%; max-width: 300px; min-height: 48px; }
+.section-title { font-size: 1.3rem; margin: 30px 0 20px; }
+.card { padding: 16px; margin-top: 16px; border-radius: 14px; }
+.card-title { font-size: 1.05rem; }
+.card-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+.price-item { flex-direction: column; align-items: flex-start; gap: 10px; padding: 14px; margin-bottom: 8px; }
+.price-item > div { width: 100%; }
+.price-value { align-self: flex-end; font-size: 1.1rem; font-weight: 700; }
+.price-label { font-size: 0.9rem; }
+.best-value, .suggested-tag, .limited-tag, .trending-tag { top: -8px; right: 8px; padding: 5px 12px; font-size: 0.7rem; }
+.badge { font-size: 0.7rem; padding: 4px 10px; }
+.testimonials { grid-template-columns: 1fr; }
+.testimonial { padding: 18px; border-radius: 12px; }
+.testimonial-avatar { width: 45px; height: 45px; font-size: 1rem; }
+.testimonial-text { font-size: 0.88rem; }
+.qr-container { text-align: center; }
+.qr-container img { max-width: 100%; height: auto; border-radius: 10px; }
+.payment-logos { gap: 12px; flex-direction: column; }
+.payment-logo { padding: 12px 16px; font-size: 0.85rem; width: 100%; text-align: center; border-radius: 8px; min-height: 44px; display: flex; align-items: center; justify-content: center; }
+.live-counter { font-size: 0.85rem; padding: 12px 16px; border-radius: 10px; }
+.delivery-badge { font-size: 0.75rem; padding: 4px 10px; }
+.feature-list { padding: 12px; margin: 14px 0; }
+.feature-item { font-size: 0.85rem; }
+.referral-box { padding: 24px 16px; margin: 30px 0; border-radius: 12px; }
+.referral-box h2 { font-size: 1.4rem; }
+.referral-box p { font-size: 0.95rem; }
+.referral-code { font-size: 1.3rem; padding: 12px 20px; border-radius: 8px; }
+.social-links { gap: 10px; }
+.social-link { width: 45px; height: 45px; min-width: 45px; }
+.social-link svg { width: 20px; height: 20px; }
+.offer-banner { font-size: 0.8rem; padding: 12px 14px; }
+.sticky-buy-btn { display: block; font-size: 0.95rem; padding: 16px; min-height: 48px; }
+.btn { font-size: 0.9rem; padding: 14px; min-height: 48px; }
+.modal-title { font-size: 1.3rem; }
+.selected-product { padding: 14px; font-size: 0.95rem; }
+.whatsapp-btn { font-size: 0.95rem; padding: 16px; min-height: 48px; border-radius: 10px; }
+input[type="text"] { font-size: 1rem !important; padding: 12px !important; border-radius: 8px !important; min-height: 44px !important; }
+details { padding: 16px !important; border-radius: 10px !important; margin-bottom: 12px !important; }
+details summary { font-size: 0.95rem !important; cursor: pointer; }
+details p { font-size: 0.85rem !important; margin-top: 12px !important; }
+footer { padding: 30px 16px; font-size: 0.8rem; }
+footer p { font-size: 0.75rem !important; }
+.container { padding: 14px; }
+body::before { display: none; }
+.payment-tabs { flex-direction: column; gap: 10px; }
+.payment-tab { padding: 12px; font-size: 0.9rem; min-height: 48px; }
+}
+
+@supports (display: grid) {
+  body { display: grid; }
+}
+
+/* Smooth scrolling and better performance */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+  }
+  body::selection {
+    background: var(--primary);
+    color: white;
+  }
+}
+
+/* Loading state */
+.loading {
+  opacity: 0.6;
+  pointer-events: none;
+}
+
+/* Better focus states for accessibility */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+/* Improved touch targets */
+@media (hover: none) and (pointer: coarse) {
+  .btn,
+  .payment-tab,
+  .social-link,
+  .price-item,
+  input[type="radio"] {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+@media (hover: none) and (pointer: coarse) {
+  .btn,
+  .payment-tab,
+  .social-link,
+  .price-item,
+  input[type="radio"] {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* Smooth scrolling and better performance */
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+/* Dark mode optimizations */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --card: #161b22;
+  }
+}
+
+/* Better focus states for accessibility */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.hero h1 { font-size: 1.8rem; line-height: 1.1; }
+.hero img { width: 50px !important; height: 50px !important; }
+.hero-subtitle { font-size: 0.9rem; }
+.hero-cta { width: 100%; padding: 12px 20px; }
+.stats-bar { gap: 16px; }
+.stat-number { font-size: 1.6rem; }
+.stat-label { font-size: 0.7rem; }
+.section-title { font-size: 1.15rem; margin: 25px 0 18px; }
+.card { padding: 14px; margin-top: 14px; }
+.card-title { font-size: 0.95rem; }
+.card-header { gap: 8px; }
+.price-item { padding: 12px; gap: 8px; }
+.price-value { font-size: 1rem; }
+.price-label { font-size: 0.85rem; }
+.price-original { font-size: 0.8rem; }
+.discount-tag { font-size: 0.65rem; }
+.badge { font-size: 0.65rem; }
+.best-value, .suggested-tag, .limited-tag, .trending-tag { font-size: 0.65rem; padding: 4px 10px; }
+.btn { font-size: 0.85rem; padding: 12px; }
+.modal-content { padding: 16px; }
+.modal-title { font-size: 1.1rem; }
+.selected-product { padding: 12px; font-size: 0.85rem; }
+.referral-box { padding: 18px 12px; margin: 20px 0; }
+.referral-box h2 { font-size: 1.2rem; }
+.referral-code { font-size: 1.1rem; padding: 10px 16px; }
+.social-link { width: 42px; height: 42px; min-width: 42px; }
+.social-link svg { width: 18px; height: 18px; }
+.offer-banner { font-size: 0.7rem; padding: 8px 10px; }
+.live-counter { font-size: 0.75rem; }
+.trust-item { font-size: 0.8rem; }
+.trust-item span:first-child { font-size: 0.95rem; }
+.contact-bar { padding: 12px; }
+.contact-bar a { margin: 8px 0; font-size: 0.8rem; padding: 6px 10px; }
+.payment-logo { font-size: 0.8rem; padding: 10px 12px; }
+.feature-item { font-size: 0.8rem; }
+.testimonial { padding: 14px; }
+.testimonial-avatar { width: 40px; height: 40px; }
+.whatsapp-btn { font-size: 0.9rem; padding: 14px; }
+input[type="text"] { font-size: 0.95rem !important; padding: 11px !important; }
+details summary { font-size: 0.9rem !important; }
+details p { font-size: 0.8rem !important; }
+}
+@keyframes fadeIn {
+from { opacity: 0; transform: translateY(20px); }
+to { opacity: 1; transform: translateY(0); }
+}
+@keyframes slideInLeft {
+from { opacity: 0; transform: translateX(-30px); }
+to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInRight {
+from { opacity: 0; transform: translateX(30px); }
+to { opacity: 1; transform: translateX(0); }
+}
+@keyframes scaleIn {
+from { opacity: 0; transform: scale(0.9); }
+to { opacity: 1; transform: scale(1); }
+}
+@keyframes pulse {
+0%, 100% { transform: scale(1); box-shadow: 0 4px 12px rgba(255,165,0,0.4); }
+50% { transform: scale(1.08); box-shadow: 0 8px 24px rgba(255,165,0,0.8); }
+}
+
+/* Toast Notifications */
+.toast-container {
+position: fixed;
+top: 20px;
+right: 20px;
+z-index: 10000;
+pointer-events: none;
+}
+
+.toast {
+background: linear-gradient(135deg, var(--card), rgba(255,255,255,0.05));
+backdrop-filter: blur(25px);
+border: 1px solid var(--border);
+border-radius: 14px;
+padding: 16px 20px;
+margin-bottom: 12px;
+color: var(--text);
+box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+animation: slideInRight 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+pointer-events: auto;
+max-width: 340px;
+display: flex;
+gap: 14px;
+align-items: center;
+font-weight: 500;
+}
+
+.toast.success {
+border-left: 5px solid var(--success);
+}
+
+.toast.error {
+border-left: 5px solid var(--primary);
+}
+
+.toast.info {
+border-left: 5px solid #58a6ff;
+}
+
+.toast.warning {
+border-left: 5px solid var(--discount);
+}
+
+.toast-icon {
+font-size: 1.3rem;
+min-width: 24px;
+font-weight: 700;
+}
+
+.toast-content {
+flex: 1;
+font-size: 0.95rem;
+}
+
+@keyframes slideInRight {
+from { transform: translateX(420px) rotateY(-20deg); opacity: 0; }
+to { transform: translateX(0) rotateY(0); opacity: 1; }
+}
+
+@keyframes slideOutRight {
+from { transform: translateX(0) rotateY(0); opacity: 1; }
+to { transform: translateX(420px) rotateY(-20deg); opacity: 0; }
+}
+
+.toast.removing {
+animation: slideOutRight 0.3s ease;
+}
+
+/* Promo Code Input */
+.promo-section {
+background: rgba(230,57,70,0.1);
+border: 2px dashed var(--primary);
+border-radius: 10px;
+padding: 16px;
+margin-bottom: 20px;
+display: flex;
+gap: 10px;
+}
+
+.promo-input {
+flex: 1;
+background: var(--card);
+border: 1px solid var(--border);
+padding: 10px 14px;
+border-radius: 6px;
+color: var(--text);
+font-size: 0.9rem;
+min-height: 40px;
+}
+
+.promo-input:focus {
+outline: none;
+border-color: var(--primary);
+box-shadow: 0 0 10px rgba(230,57,70,0.2);
+}
+
+.promo-btn {
+background: var(--primary);
+color: white;
+border: none;
+padding: 10px 20px;
+border-radius: 6px;
+font-weight: 600;
+cursor: pointer;
+min-height: 40px;
+transition: var(--transition);
+}
+
+.promo-btn:hover {
+background: #ff6b6b;
+box-shadow: 0 4px 12px rgba(230,57,70,0.3);
+}
+
+.promo-discount {
+color: var(--success);
+font-weight: 700;
+margin-top: 8px;
+font-size: 0.9rem;
+}
+
+/* Stock Counter */
+.stock-badge {
+display: inline-block;
+background: rgba(255,165,0,0.1);
+color: var(--discount);
+padding: 4px 10px;
+border-radius: 6px;
+font-size: 0.75rem;
+font-weight: 600;
+margin-top: 8px;
+}
+
+.stock-badge.limited {
+background: rgba(230,57,70,0.2);
+color: var(--primary);
+animation: pulse 1.5s infinite;
+}
+
+/* Countdown Timer */
+.countdown {
+background: rgba(230,57,70,0.15);
+border-radius: 8px;
+padding: 8px 12px;
+font-size: 0.85rem;
+color: var(--primary);
+font-weight: 600;
+white-space: nowrap;
+}
+
+/* Loading Spinner */
+.spinner {
+display: inline-block;
+width: 16px;
+height: 16px;
+border: 2px solid rgba(230,57,70,0.3);
+border-top-color: var(--primary);
+border-radius: 50%;
+animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+to { transform: rotate(360deg); }
+}
+
+/* Copy Button */
+.copy-btn {
+background: rgba(255,255,255,0.05);
+border: 1px solid var(--border);
+padding: 8px 12px;
+border-radius: 6px;
+color: var(--text);
+cursor: pointer;
+font-size: 0.85rem;
+transition: var(--transition);
+margin-top: 8px;
+}
+
+.copy-btn:hover {
+background: rgba(255,255,255,0.1);
+border-color: var(--primary);
+color: var(--primary);
+}
+
+/* Form Validation */
+.form-group {
+margin-bottom: 12px;
+}
+
+.form-group label {
+display: block;
+margin-bottom: 6px;
+font-weight: 600;
+color: var(--text);
+}
+
+.form-group input {
+width: 100%;
+padding: 12px;
+background: var(--card);
+border: 2px solid var(--border);
+border-radius: 8px;
+color: var(--text);
+font-size: 1rem;
+transition: var(--transition);
+min-height: 44px;
+}
+
+.form-group input:focus {
+outline: none;
+border-color: var(--primary);
+box-shadow: 0 0 12px rgba(230,57,70,0.2);
+}
+
+.form-group input.error {
+border-color: #e74c3c;
+box-shadow: 0 0 12px rgba(231,76,60,0.2);
+}
+
+.form-error {
+color: #e74c3c;
+font-size: 0.8rem;
+margin-top: 4px;
+display: none;
+}
+
+.form-error.show {
+display: block;
+}
+
+/* Success Animation */
+.success-checkmark {
+width: 60px;
+height: 60px;
+margin: 0 auto 20px;
+}
+
+.success-circle {
+stroke-dasharray: 166;
+stroke-dashoffset: 166;
+stroke-width: 2;
+stroke-miterlimit: 10;
+stroke: var(--success);
+fill: none;
+animation: stroke 0.6s cubic-bezier(0.65, 0, 0.45, 1) forwards;
+}
+
+.success-check {
+stroke-dasharray: 48;
+stroke-dashoffset: 48;
+stroke-width: 2;
+stroke-linecap: round;
+stroke-linejoin: round;
+stroke: var(--success);
+fill: none;
+animation: stroke 0.3s cubic-bezier(0.65, 0, 0.45, 1) 0.4s forwards;
+}
+
+@keyframes stroke {
+100% { stroke-dashoffset: 0; }
+}
+.card { animation: fadeIn 0.5s ease; }
+.card:nth-child(odd) { animation: slideInLeft 0.6s ease; }
+.card:nth-child(even) { animation: slideInRight 0.6s ease; }
+.hero-cta { animation: pulse 2s infinite; }
+.badge { animation: scaleIn 0.4s ease; }
+.best-value { animation: pulse 2s infinite; }
+.testimonial { animation: fadeIn 0.7s ease; }
+.trust-item { animation: fadeIn 0.5s ease; }
+.trust-item:nth-child(1) { animation-delay: 0.1s; }
+.trust-item:nth-child(2) { animation-delay: 0.2s; }
+.trust-item:nth-child(3) { animation-delay: 0.3s; }
+.trust-item:nth-child(4) { animation-delay: 0.4s; }
+.testimonial-section {
+margin: 60px 0;
+padding: 60px 20px;
+background: rgba(255,255,255,0.02);
+border-top: 1px solid var(--border);
+border-bottom: 1px solid var(--border);
+}
+.testimonials {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+gap: 24px;
+margin-top: 40px;
+}
+.testimonial {
+background: var(--card);
+padding: 24px;
+border-radius: 12px;
+border: 1px solid var(--border);
+}
+.testimonial-header {
+display: flex;
+align-items: center;
+gap: 12px;
+margin-bottom: 16px;
+}
+.testimonial-avatar {
+width: 48px;
+height: 48px;
+border-radius: 50%;
+background: linear-gradient(135deg, var(--primary), #ff6b6b);
+display: flex;
+align-items: center;
+justify-content: center;
+font-weight: 700;
+font-size: 1.2rem;
+}
+.testimonial-info h4 {
+margin: 0;
+font-size: 1rem;
+color: #fff;
+}
+.testimonial-info p {
+margin: 0;
+font-size: 0.85rem;
+color: var(--muted);
+}
+.stars {
+color: var(--discount);
+margin-bottom: 12px;
+}
+.testimonial-text {
+color: var(--text);
+line-height: 1.6;
+font-size: 0.95rem;
+}
+.offer-banner {
+background: linear-gradient(135deg, var(--primary), #ff6b6b);
+padding: 12px 20px;
+text-align: center;
+font-weight: 700;
+color: white;
+position: relative;
+overflow: hidden;
+}
+.offer-banner::before {
+content: '';
+position: absolute;
+top: -50%;
+left: -50%;
+width: 200%;
+height: 200%;
+background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+animation: shine 3s infinite;
+}
+@keyframes shine {
+0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+.live-counter {
+background: rgba(230,57,70,0.1);
+border: 1px solid rgba(230,57,70,0.3);
+padding: 12px 20px;
+border-radius: 10px;
+text-align: center;
+margin: 20px 0;
+font-size: 0.9rem;
+}
+.live-dot {
+display: inline-block;
+width: 10px;
+height: 10px;
+background: var(--primary);
+border-radius: 50%;
+margin-right: 8px;
+animation: livePulse 1.5s ease-in-out infinite;
+box-shadow: 0 0 0 0 rgba(230,57,70,0.7);
+}
+@keyframes livePulse {
+0% {
+box-shadow: 0 0 0 0 rgba(230,57,70,0.7);
+}
+50% {
+box-shadow: 0 0 0 8px rgba(230,57,70,0);
+}
+100% {
+box-shadow: 0 0 0 0 rgba(230,57,70,0);
+}
+}
+.delivery-badge {
+display: inline-block;
+background: rgba(63,185,80,0.15);
+color: var(--success);
+padding: 4px 10px;
+border-radius: 6px;
+font-size: 0.75rem;
+font-weight: 600;
+margin-top: 8px;
+}
+.feature-list {
+margin: 16px 0;
+padding: 12px;
+background: rgba(255,255,255,0.02);
+border-radius: 8px;
+}
+.feature-item {
+display: flex;
+align-items: center;
+gap: 8px;
+font-size: 0.85rem;
+color: var(--muted);
+margin: 6px 0;
+}
+.feature-item::before {
+content: '✓';
+color: var(--success);
+font-weight: 700;
+}
+.payment-logos {
+display: flex;
+justify-content: center;
+gap: 20px;
+margin: 20px 0;
+flex-wrap: wrap;
+}
+.payment-logo {
+background: var(--card);
+padding: 10px 20px;
+border-radius: 8px;
+border: 1px solid var(--border);
+font-weight: 600;
+font-size: 0.85rem;
+color: var(--text);
+}
+.sticky-buy-btn {
+display: none;
+position: fixed;
+bottom: 0;
+left: 0;
+right: 0;
+background: linear-gradient(135deg, var(--primary), #ff6b6b);
+color: white;
+padding: 12px 16px;
+text-align: center;
+font-weight: 700;
+font-size: 0.95rem;
+z-index: 999;
+box-shadow: 0 -6px 25px rgba(230,57,70,0.4);
+cursor: pointer;
+min-height: 56px;
+display: flex;
+align-items: center;
+justify-content: center;
+animation: slideUp 0.3s ease;
+backdrop-filter: blur(10px);
+border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+@keyframes slideUp {
+from { transform: translateY(100%); opacity: 0; }
+to { transform: translateY(0); opacity: 1; }
+}
+
+.sticky-buy-btn:hover {
+transform: translateY(-2px);
+box-shadow: 0 -8px 30px rgba(230,57,70,0.6);
+}
+.social-links {
+display: flex;
+justify-content: center;
+gap: 16px;
+margin: 24px 0;
+flex-wrap: wrap;
+}
+.social-link {
+display: inline-flex;
+align-items: center;
+justify-content: center;
+width: 48px;
+height: 48px;
+min-width: 48px;
+min-height: 48px;
+background: rgba(255,255,255,0.05);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 50%;
+color: var(--text);
+text-decoration: none;
+transition: var(--transition);
+position: relative;
+overflow: hidden;
+touch-action: manipulation;
+-webkit-tap-highlight-color: transparent;
+}
+.social-link::before {
+content: '';
+position: absolute;
+inset: 0;
+background: linear-gradient(135deg, transparent, rgba(255,255,255,0.1));
+opacity: 0;
+transition: opacity 0.4s;
+}
+.social-link:hover::before {
+opacity: 1;
+}
+.social-link:hover {
+transform: translateY(-5px) scale(1.1);
+box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.social-link.facebook:hover { background: #1877F2; border-color: #1877F2; }
+.social-link.instagram:hover { background: linear-gradient(45deg, #f09433 0%,#e6683c 25%,#dc2743 50%,#cc2366 75%,#bc1888 100%); border-color: #e6683c; }
+.social-link.linkedin:hover { background: #0077B5; border-color: #0077B5; }
+.social-link.pinterest:hover { background: #E60023; border-color: #E60023; }
+.social-link.reddit:hover { background: #FF4500; border-color: #FF4500; }
+.social-link.tiktok:hover { background: #000000; border-color: #69C9D0; }
+.social-link.twitter:hover { background: #000000; border-color: #1DA1F2; }
+.social-link.youtube:hover { background: #FF0000; border-color: #FF0000; }
+.social-link.codepen:hover { background: #000000; border-color: #47CF73; }
+.social-link.github:hover { background: #181717; border-color: #181717; }
+.social-link.whatsapp:hover { background: #25D366; border-color: #25D366; }
+.social-link.email:hover { background: #D14836; border-color: #D14836; }
+.referral-box {
+background: linear-gradient(135deg, rgba(63,185,80,0.1), rgba(63,185,80,0.05));
+border: 2px solid var(--success);
+border-radius: 12px;
+padding: 30px;
+text-align: center;
+margin: 40px 0;
+}
+.referral-code {
+background: var(--card);
+border: 2px dashed var(--success);
+padding: 12px 24px;
+border-radius: 8px;
+font-size: 1.5rem;
+font-weight: 700;
+color: var(--success);
+display: inline-block;
+margin: 16px 0;
+letter-spacing: 2px;
+}
+@media (max-width: 768px) {
+.sticky-buy-btn { display: block; }
+.offer-banner { font-size: 0.85rem; padding: 10px; }
+.payment-logos { gap: 10px; }
+.payment-logo { padding: 8px 12px; font-size: 0.75rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- SEASONAL OFFER BANNER -->
+<div class="offer-banner">
+🎉 SEASONAL OFFER: Get 5% OFF on all 30-day packages! Limited time only! 🎉
+</div>
+
+<div class="container">
+
+<!-- HERO SECTION -->
+<section class="hero">
+<div class="hero-content">
+<img src="logo.png" alt="SUSANTEDIT Logo" style="width: 80px; height: 80px; border-radius: 50%; margin-bottom: 20px; border: 3px solid var(--primary); box-shadow: 0 0 30px rgba(230,57,70,0.5);">
+<h1><span>SUSANT</span><span>EDIT</span></h1>
+<p class="hero-subtitle">Elite Gaming Performance Platform • Trusted by 10,000+ Competitive Players</p>
+<a href="#services" class="hero-cta">🚀 Get Instant Access</a>
+<div class="stats-bar">
+<div class="stat-item">
+<div class="stat-number">10K+</div>
+<div class="stat-label">Active Users</div>
+</div>
+<div class="stat-item">
+<div class="stat-number">24/7</div>
+<div class="stat-label">Support</div>
+</div>
+<div class="stat-item">
+<div class="stat-number">100%</div>
+<div class="stat-label">Secure</div>
+</div>
+</div>
+</div>
+</section>
+
+<div class="trust-bar">
+<div class="trust-item"><span>✓</span> 100% Secure Payment</div>
+<div class="trust-item"><span>⚡</span> Instant Delivery</div>
+<div class="trust-item"><span>🛡️</span> Anti-Ban Guaranteed</div>
+<div class="trust-item"><span>🎯</span> 24/7 Priority Support</div>
+</div>
+
+<!-- PAYMENT LOGOS -->
+ <div class="payment-logos">
+<div class="payment-logo">💳 eSewa</div>
+<div class="payment-logo">💰 Khalti</div>
+<div class="payment-logo">🏦 Bank Transfer</div>
+<div class="payment-logo">🔒 SSL Secure</div>
+</div>
+
+<!-- LIVE ORDER COUNTER -->
+<div class="live-counter">
+<span class="live-dot"></span><strong style="color: var(--primary);">LIVE:</strong> <span id="orderCount">7</span> orders in the last hour | <span id="activeUsers">23</span> users browsing now
+</div>
+
+<div class="contact-bar">
+📞 <a href="tel:+9779708838261">+977 9708838261</a> | 
+📧 <a href="mailto:susantedit@gmail.com">susantedit@gmail.com</a> | 
+🌐 <a href="https://www.kantarajuitel.tech" target="_blank">kantarajuitel.tech</a> | 
+<a href="https://wa.me/9779708838261" style="background: #25D366; color: white; padding: 8px 16px; border-radius: 6px; display: inline-block; margin-top: 8px;">💬 Chat on WhatsApp (Replies in 10 min)</a>
+</div>
+
+<!-- HOW IT WORKS -->
+<section style="margin: 60px 0; text-align: center;">
+<h2 class="section-title">🚀 How It Works</h2>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-top: 40px;">
+<div style="padding: 30px; background: var(--card); border: 1px solid var(--border); border-radius: 12px;">
+<div style="font-size: 3rem; margin-bottom: 16px;">1️⃣</div>
+<h3 style="color: var(--primary); margin-bottom: 12px;">Select Package</h3>
+<p style="color: var(--muted); font-size: 0.9rem;">Choose your desired service and duration from our catalog</p>
+</div>
+<div style="padding: 30px; background: var(--card); border: 1px solid var(--border); border-radius: 12px;">
+<div style="font-size: 3rem; margin-bottom: 16px;">2️⃣</div>
+<h3 style="color: var(--primary); margin-bottom: 12px;">Complete Payment</h3>
+<p style="color: var(--muted); font-size: 0.9rem;">Scan QR code and pay securely via eSewa/Khalti/Bank</p>
+</div>
+<div style="padding: 30px; background: var(--card); border: 1px solid var(--border); border-radius: 12px;">
+<div style="font-size: 3rem; margin-bottom: 16px;">3️⃣</div>
+<h3 style="color: var(--primary); margin-bottom: 12px;">Instant Activation</h3>
+<p style="color: var(--muted); font-size: 0.9rem;">Confirm via WhatsApp and get activated within 5-10 minutes</p>
+</div>
+</div>
+</section>
+
+<h2 class="section-title" id="services">🎮 Performance Enhancement Tools</h2>
+<p style="text-align: center; color: var(--muted); margin-bottom: 40px; font-size: 0.95rem;">All product names are internal branding terms. Professional gaming tools for competitive advantage.</p>
+
+<div class="grid">
+<!-- DRIP CLIENT -->
+<div class="card">
+<div class="maintenance-tag">🔧 MAINTENANCE</div>
+<div class="card-header">
+<div class="card-title">DRIP CLIENT</div>
+<span class="badge badge-hot">Most Popular</span>
+</div>
+<div class="delivery-badge">⚡ Activated in 5-10 minutes</div>
+<div class="feature-list">
+<div class="feature-item">Anti-ban protection included</div>
+<div class="feature-item">24/7 priority support</div>
+<div class="feature-item">Instant activation</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'DRIP CLIENT - 1 Day Trial', '299')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="drip-package" value="1day">
+<span class="price-label">1 Day Trial</span>
+</div>
+<span class="price-value"><span class="price-original">₹499</span>₹299 <span class="discount-tag">40% OFF</span></span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'DRIP CLIENT - 3 Days', '499')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="drip-package" value="3days">
+<span class="price-label">3 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹799</span>₹499</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'DRIP CLIENT - 7 Days', '799')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="drip-package" value="7days">
+<span class="price-label">7 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹1,299</span>₹799</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'DRIP CLIENT - 15 Days', '899')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="drip-package" value="15days">
+<span class="price-label">15 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹1,499</span>₹899</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'DRIP CLIENT - 30 Days Premium', '1,399')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="drip-package" value="30days">
+<span class="price-label">30 Days Premium</span>
+</div>
+<span class="price-value"><span class="price-original">₹2,199</span>₹1,399</span>
+</div>
+</div>
+<div class="stock-badge limited" id="drip-stock">⚡ Only 5 left!</div>
+<button class="btn" onclick="openModalWithSelection('drip-package')" aria-label="Get Instant Access to DRIP CLIENT">Get Instant Access</button>
+</div>
+
+<!-- HG CHEATS -->
+<div class="card">
+<div class="suggested-tag">SUGGESTED</div>
+<div class="card-header">
+<div class="card-title">HG CHEATS</div>
+<span class="badge badge-pro">Pro Edition</span>
+</div>
+<div class="delivery-badge">⚡ Activated in 5-10 minutes</div>
+<div class="feature-list">
+<div class="feature-item">Advanced features unlocked</div>
+<div class="feature-item">Regular updates included</div>
+<div class="feature-item">Premium support access</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'HG PERFORMANCE - 1 Day Trial', '399')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="hg-package" value="1day">
+<span class="price-label">1 Day Trial</span>
+</div>
+<span class="price-value"><span class="price-original">₹649</span>₹399</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'HG PERFORMANCE - 3 Days', '699')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="hg-package" value="3days">
+<span class="price-label">3 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹1,099</span>₹699</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'HG PERFORMANCE - 7 Days', '1,199')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="hg-package" value="7days">
+<span class="price-label">7 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹1,899</span>₹1,199</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'HG PERFORMANCE - 15 Days', '1,599')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="hg-package" value="15days">
+<span class="price-label">15 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹2,499</span>₹1,599</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'HG PERFORMANCE - 30 Days Elite', '1,899')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="hg-package" value="30days">
+<span class="price-label">30 Days Elite</span>
+</div>
+<span class="price-value"><span class="price-original">₹2,999</span>₹1,899</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('hg-package')">Get Instant Access</button>
+</div>
+
+<!-- PATO TEAMS -->
+<div class="card">
+<div class="trending-tag">TRENDING</div>
+<div class="card-header">
+<div class="card-title">PATO TEAMS</div>
+<span class="badge badge-new">Verified Safe</span>
+</div>
+<div class="delivery-badge">⚡ Activated in 5-10 minutes</div>
+<div class="feature-list">
+<div class="feature-item">Team coordination tools</div>
+<div class="feature-item">Safe & verified</div>
+<div class="feature-item">Instant setup</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'PATO ELITE - 3 Days', '699')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="pato-package" value="3days">
+<span class="price-label">3 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹1,099</span>₹699</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'PATO ELITE - 7 Days', '1,199')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="pato-package" value="7days">
+<span class="price-label">7 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹1,899</span>₹1,199</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'PATO ELITE - 15 Days', '1,599')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="pato-package" value="15days">
+<span class="price-label">15 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹2,499</span>₹1,599</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'PATO ELITE - 30 Days Premium', '1,899')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="pato-package" value="30days">
+<span class="price-label">30 Days Premium</span>
+</div>
+<span class="price-value"><span class="price-original">₹2,999</span>₹1,899</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('pato-package')">Get Instant Access</button>
+</div>
+
+<!-- BR MODS -->
+<div class="card">
+<div class="limited-tag">NEW</div>
+<div class="card-header">
+<div class="card-title">BR MODS</div>
+<span class="badge badge-hot">Battle Royale</span>
+</div>
+<div class="delivery-badge">⚡ Activated in 5-10 minutes</div>
+<div class="feature-list">
+<div class="feature-item">BR mode optimized</div>
+<div class="feature-item">Advanced features</div>
+<div class="feature-item">Regular updates</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'BR MODS - 1 Day', '180')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="br-package" value="1day">
+<span class="price-label">1 Day</span>
+</div>
+<span class="price-value">₹180</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'BR MODS - 7 Days', '400')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="br-package" value="7days">
+<span class="price-label">7 Days</span>
+</div>
+<span class="price-value">₹400</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'BR MODS - 15 Days', '650')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="br-package" value="15days">
+<span class="price-label">15 Days</span>
+</div>
+<span class="price-value">₹650</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'BR MODS - 30 Days', '1,000')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="br-package" value="30days">
+<span class="price-label">30 Days</span>
+</div>
+<span class="price-value">₹1,000</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('br-package')">Get Instant Access</button>
+</div>
+
+<!-- HAXXCKER -->
+<div class="card">
+<div class="best-value">PREMIUM</div>
+<div class="card-header">
+<div class="card-title">HAXXCKER</div>
+<span class="badge badge-pro">Elite</span>
+</div>
+<div class="delivery-badge">⚡ Activated in 10-15 minutes</div>
+<div class="feature-list">
+<div class="feature-item">Premium elite features</div>
+<div class="feature-item">Advanced protection</div>
+<div class="feature-item">Priority support</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'HAXXCKER - 10 Days', '1,200')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="haxxcker-package" value="10days">
+<span class="price-label">10 Days</span>
+</div>
+<span class="price-value">₹1,200</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'HAXXCKER - 20 Days', '2,000')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="haxxcker-package" value="20days">
+<span class="price-label">20 Days</span>
+</div>
+<span class="price-value">₹2,000</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'HAXXCKER - 30 Days', '2,800')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="haxxcker-package" value="30days">
+<span class="price-label">30 Days</span>
+</div>
+<span class="price-value">₹2,800</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('haxxcker-package')">Get Instant Access</button>
+</div>
+
+<!-- GUILD GLORYBOT -->
+<div class="card">
+<div class="suggested-tag">SQUAD DEAL</div>
+<div class="card-header">
+<div class="card-title">GUILD GLORYBOT</div>
+<span class="badge badge-new">Team Package</span>
+</div>
+<div class="delivery-badge">⚡ Activated in 5-10 minutes</div>
+<div class="feature-list">
+<div class="feature-item">Squad-based pricing</div>
+<div class="feature-item">Team coordination</div>
+<div class="feature-item">Best value for groups</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'Guild Glorybot - 1 Squad', '799')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="guild-package" value="1squad">
+<span class="price-label">1 Squad</span>
+</div>
+<span class="price-value">₹799</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Guild Glorybot - 2 Squads', '999')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="guild-package" value="2squads">
+<span class="price-label">2 Squads</span>
+</div>
+<span class="price-value">₹999</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Guild Glorybot - 3 Squads', '1,299')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="guild-package" value="3squads">
+<span class="price-label">3 Squads</span>
+</div>
+<span class="price-value">₹1,299</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Guild Glorybot - 4 Squads', '1,699')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="guild-package" value="4squads">
+<span class="price-label">4 Squads</span>
+</div>
+<span class="price-value">₹1,699</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('guild-package')">Get Instant Access</button>
+</div>
+
+<!-- IOS FLUORITE -->
+<div class="card">
+<div class="limited-tag">LIMITED</div>
+<div class="card-header">
+<div class="card-title">IOS FLUORITE </div>
+<span class="badge badge-pro">iOS Premium</span>
+</div>
+<div class="delivery-badge">⚡ Activated in 10-15 minutes</div>
+<div class="feature-list">
+<div class="feature-item">iOS optimized performance</div>
+<div class="feature-item">Certificate included</div>
+<div class="feature-item">Premium iOS support</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'IOS FLUORITE PRO - 1 Day Trial', '699')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ios-package" value="1day">
+<span class="price-label">1 Day Trial</span>
+</div>
+<span class="price-value"><span class="price-original">₹1,099</span>₹699</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'IOS FLUORITE PRO - 7 Days', '1,499')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ios-package" value="7days">
+<span class="price-label">7 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹2,299</span>₹1,599</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'IOS FLUORITE PRO - 30 Days', '3,999')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ios-package" value="30days">
+<span class="price-label">30 Days</span>
+</div>
+<span class="price-value"><span class="price-original">₹6,999</span>₹5,999</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'IOS FLUORITE - Certificate Only', '999')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ios-package" value="cert">
+<span class="price-label">Certificate Only</span>
+</div>
+<span class="price-value"><span class="price-original">₹1,499</span>₹999</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'IOS FLUORITE - Special Offer (Cert + 32 Days)', '6,500')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ios-package" value="special">
+<span class="price-label">Special Offer (Cert + 32 Days)</span>
+</div>
+<span class="price-value"><span class="price-original">₹9,999</span>₹6,500</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('ios-package')">Get Instant Access</button>
+</div>
+
+<!-- RANK PUSHING -->
+<div class="card">
+<div class="best-value">FAST DELIVERY</div>
+<div class="card-header">
+<div class="card-title">RANK PUSHING</div>
+<span class="badge badge-hot">Fast</span>
+</div>
+<div class="delivery-badge">🚀 Completed in 2-6 hours</div>
+<div class="feature-list">
+<div class="feature-item">Professional players</div>
+<div class="feature-item">Safe rank boost</div>
+<div class="feature-item">Fast completion</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'RANK PUSHING - 25 Stars', '40')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="rank-package" value="25stars">
+<span class="price-label">25 Stars</span>
+</div>
+<span class="price-value">₹40</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'RANK PUSHING - 50 Stars', '80')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="rank-package" value="50stars">
+<span class="price-label">50 Stars</span>
+</div>
+<span class="price-value">₹80</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'RANK PUSHING - 100 Stars', '160')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="rank-package" value="100stars">
+<span class="price-label">100 Stars</span>
+</div>
+<span class="price-value">₹160</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'RANK PUSHING - 200 Stars', '320')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="rank-package" value="200stars">
+<span class="price-label">200 Stars</span>
+</div>
+<span class="price-value">₹320</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'RANK PUSHING - 500 Stars', '800')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="rank-package" value="500stars">
+<span class="price-label">500 Stars</span>
+</div>
+<span class="price-value">₹800</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('rank-package')">Get Instant Access</button>
+</div>
+
+<!-- ANDROID - DRAG HEADSHOT -->
+<div class="card">
+<div class="limited-tag">NEW</div>
+<div class="card-header">
+<div class="card-title">DRAG HEADSHOT</div>
+<span class="badge badge-pro">Android</span>
+</div>
+<div class="delivery-badge">⚡ Activated in 5-10 minutes</div>
+<div class="feature-list">
+<div class="feature-item">Precision aim assist</div>
+<div class="feature-item">Valid until update</div>
+<div class="feature-item">Android optimized</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'Android Drag Headshot - Valid Until Update', '1200')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="drag-package" value="perm">
+<span class="price-label">Valid Until Update</span>
+</div>
+<span class="price-value">₹1,200</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('drag-package')">Get Instant Access</button>
+</div>
+
+<!-- ANDROID - REDMI/POCO -->
+<div class="card">
+<div class="suggested-tag">RECOMMENDED</div>
+<div class="card-header">
+<div class="card-title">REDMI / POCO PANEL</div>
+<span class="badge badge-new">Optimized</span>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'Redmi/Poco Panel - Valid Until Update', '1000')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="redmi-package" value="perm">
+<span class="price-label">Valid Until Update</span>
+</div>
+<span class="price-value">₹1,000</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('redmi-package')">Get Instant Access</button>
+</div>
+
+<!-- ANDROID - GULA PANEL V3 -->
+<div class="card">
+<div class="trending-tag">UPGRADED</div>
+<div class="card-header">
+<div class="card-title">GULA PANEL V3</div>
+<span class="badge badge-hot">Enhanced</span>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'Gula Panel V3 - Valid Until Update', '1500')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="gula-package" value="perm">
+<span class="price-label">Valid Until Update</span>
+</div>
+<span class="price-value">₹1,500</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('gula-package')">Get Instant Access</button>
+</div>
+
+<!-- ANDROID - AIM SILENT REDMI -->
+<div class="card">
+<div class="best-value">TOP RATED</div>
+<div class="card-header">
+<div class="card-title">AIM SILENT (REDMI)</div>
+<span class="badge badge-pro">Precision</span>
+</div>
+
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'Aim Silent Redmi - Valid Until Update', '1500')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="aimredmi-package" value="perm">
+<span class="price-label">Valid Until Update</span>
+</div>
+<span class="price-value">₹1,500</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('aimredmi-package')">Get Instant Access</button>
+</div>
+
+<!-- ANDROID - AIM SILENT ALL -->
+<div class="card">
+<div class="limited-tag">PREMIUM</div>
+<div class="card-header">
+<div class="card-title">AIM SILENT (ALL DEVICES)</div>
+<span class="badge badge-hot">Universal</span>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'Aim Silent All Devices - Valid Until Update', '2000')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="aimall-package" value="perm">
+<span class="price-label">Valid Until Update</span>
+</div>
+<span class="price-value">₹2,000</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('aimall-package')">Get Instant Access</button>
+</div>
+
+<!-- ANDROID - PROXY PANEL -->
+<div class="card">
+<div class="suggested-tag">SECURE</div>
+<div class="card-header">
+<div class="card-title">PROXY PANEL</div>
+<span class="badge badge-new">Secure</span>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'Android Proxy Panel - Valid Until Update', '1500')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="proxy-package" value="perm">
+<span class="price-label">Valid Until Update</span>
+</div>
+<span class="price-value">₹1,500</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('proxy-package')">Get Instant Access</button>
+</div>
+</div>
+</div>
+
+<h2 class="section-title">💎 Game Top-Ups</h2>
+<p style="text-align: center; color: var(--muted); margin-bottom: 40px; font-size: 0.95rem;">Instant delivery of diamonds and UC. Safe and secure transactions.</p>
+
+<div class="grid">
+<!-- FREE FIRE DIAMONDS -->
+<div class="card">
+<div class="best-value">INSTANT</div>
+<div class="card-header">
+<div class="card-title">FREE FIRE DIAMONDS</div>
+<span class="badge badge-hot">Popular</span>
+</div>
+<div class="delivery-badge">⚡ Delivered in 1-5 minutes</div>
+<div class="feature-list">
+<div class="feature-item">Instant delivery</div>
+<div class="feature-item">100% safe transaction</div>
+<div class="feature-item">24/7 support</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 50 Diamonds', '60')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="50d">
+<span class="price-label">50 Diamonds</span>
+</div>
+<span class="price-value">₹60</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 115 Diamonds', '110')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="115d">
+<span class="price-label">115 Diamonds</span>
+</div>
+<span class="price-value">₹110</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 240 Diamonds', '230')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="240d">
+<span class="price-label">240 Diamonds</span>
+</div>
+<span class="price-value">₹230</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 355 Diamonds', '250')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="355d">
+<span class="price-label">355 Diamonds</span>
+</div>
+<span class="price-value">₹250</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 480 Diamonds', '450')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="480d">
+<span class="price-label">480 Diamonds</span>
+</div>
+<span class="price-value">₹450</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 610 Diamonds', '580')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="610d">
+<span class="price-label">610 Diamonds</span>
+</div>
+<span class="price-value">₹580</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 725 Diamonds', '680')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="725d">
+<span class="price-label">725 Diamonds</span>
+</div>
+<span class="price-value">₹680</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 850 Diamonds', '780')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="850d">
+<span class="price-label">850 Diamonds</span>
+</div>
+<span class="price-value">₹780</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 1090 Diamonds', '950')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="1090d">
+<span class="price-label">1090 Diamonds</span>
+</div>
+<span class="price-value">₹950</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 1240 Diamonds', '1,100')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="1240d">
+<span class="price-label">1240 Diamonds</span>
+</div>
+<span class="price-value">₹1,100</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - 2530 Diamonds', '2,200')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="2530d">
+<span class="price-label">2530 Diamonds</span>
+</div>
+<span class="price-value">₹2,200</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - Weekly Lite', '90')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="weeklylite">
+<span class="price-label">Weekly Lite</span>
+</div>
+<span class="price-value">₹70</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - Weekly Member', '220')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="weekly">
+<span class="price-label">Weekly Member</span>
+</div>
+<span class="price-value">₹220</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'Free Fire - Monthly Member', '1,050')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="ff-package" value="monthly">
+<span class="price-label">Monthly Member</span>
+</div>
+<span class="price-value">₹1,050</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('ff-package')">Get Instant Access</button>
+</div>
+
+<!-- PUBG MOBILE UC -->
+<div class="card">
+<div class="trending-tag">TRENDING</div>
+<div class="card-header">
+<div class="card-title">PUBG MOBILE UC</div>
+<span class="badge badge-pro">Fast Delivery</span>
+</div>
+<div class="delivery-badge">⚡ Delivered in 1-5 minutes</div>
+<div class="feature-list">
+<div class="feature-item">Instant UC delivery</div>
+<div class="feature-item">Secure payment</div>
+<div class="feature-item">Best prices</div>
+</div>
+<div class="price-list">
+<div class="price-item" onclick="selectPackage(this, 'PUBG Mobile - 60 UC', '80')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="pubg-package" value="60uc">
+<span class="price-label">60 UC</span>
+</div>
+<span class="price-value">₹80</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'PUBG Mobile - 325 UC', '400')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="pubg-package" value="325uc">
+<span class="price-label">325 UC</span>
+</div>
+<span class="price-value">₹400</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'PUBG Mobile - 660 UC', '800')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="pubg-package" value="660uc">
+<span class="price-label">660 UC</span>
+</div>
+<span class="price-value">₹800</span>
+</div>
+<div class="price-item" onclick="selectPackage(this, 'PUBG Mobile - 1800 UC', '1,950')">
+<div style="display: flex; align-items: center; flex: 1;">
+<input type="radio" name="pubg-package" value="1800uc">
+<span class="price-label">1800 UC</span>
+</div>
+<span class="price-value">₹1,950</span>
+</div>
+</div>
+<button class="btn" onclick="openModalWithSelection('pubg-package')">Get Instant Access</button>
+</div>
+</div>
+
+<!-- REFERRAL PROGRAM -->
+<section>
+<div class="referral-box">
+<h2 style="font-family: 'Space Grotesk', sans-serif; font-size: 1.8rem; color: var(--success); margin-bottom: 16px;">🎁 Refer & Earn</h2>
+<p style="color: var(--text); font-size: 1.1rem; margin-bottom: 20px;">Share with friends and  get ₹30 discount! on any Paneels</p>
+<div class="referral-code">REFER30</div>
+<p style="color: var(--muted); font-size: 0.9rem; line-height: 1.6;">
+📱 Share your referral code with friends<br>
+💰 They get ₹30 off their first order<br>
+🎉 You get ₹30 credit after their purchase<br>
+<strong style="color: var(--success);">Unlimited referrals!</strong>
+</p>
+<a href="https://wa.me/9779708838261?text=I want to refer a friend!" style="display: inline-block; margin-top: 20px; padding: 12px 30px; background: var(--success); color: white; text-decoration: none; border-radius: 8px; font-weight: 700;">Start Referring Now</a>
+</div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="testimonial-section">
+<h2 class="section-title">⭐ Trusted by Competitive Players</h2>
+<div class="testimonials">
+<div class="testimonial">
+<div class="testimonial-header">
+<div class="testimonial-avatar">R</div>
+<div class="testimonial-info">
+<h4>Rohan K.</h4>
+<p>Heroic Rank Player</p>
+</div>
+</div>
+<div class="stars">★★★★★</div>
+<p class="testimonial-text">"Been using DRIP CLIENT for 3 months. Instant delivery, works flawlessly. Customer support is super responsive. Highly recommended!"</p>
+</div>
+<div class="testimonial">
+<div class="testimonial-header">
+<div class="testimonial-avatar">A</div>
+<div class="testimonial-info">
+<h4>Aditya M.</h4>
+<p>Esports Player</p>
+</div>
+</div>
+<div class="stars">★★★★★</div>
+<p class="testimonial-text">"Best service I've found. Payment is secure, activation is instant. The performance boost is exactly what I needed for competitive play."</p>
+</div>
+<div class="testimonial">
+<div class="testimonial-header">
+<div class="testimonial-avatar">S</div>
+<div class="testimonial-info">
+<h4>Sanjay P.</h4>
+<p>Pro Gamer</p>
+</div>
+</div>
+<div class="stars">★★★★★</div>
+<p class="testimonial-text">"Professional service, no issues at all. Been a customer for 6+ months. Worth every rupee. Support team is available 24/7."</p>
+</div>
+</div>
+</section>
+
+<!-- FAQ SECTION -->
+<section style="margin: 60px 0; max-width: 800px; margin-left: auto; margin-right: auto;">
+<h2 class="section-title">❓ Frequently Asked Questions</h2>
+<div style="margin-top: 40px;">
+<details style="background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; cursor: pointer;">
+<summary style="font-weight: 700; font-size: 1.05rem; color: var(--primary);">How long does delivery take?</summary>
+<p style="margin-top: 12px; color: var(--muted); line-height: 1.6;">For top-up services (Free Fire, PUBG), delivery is instant (1-5 minutes). For panel services, activation takes 5-15 minutes after payment confirmation.</p>
+</details>
+<details style="background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; cursor: pointer;">
+<summary style="font-weight: 700; font-size: 1.05rem; color: var(--primary);">What if I enter the wrong Player ID/UID?</summary>
+<p style="margin-top: 12px; color: var(--muted); line-height: 1.6;">Please double-check your ID before payment. If you enter the wrong ID, contact us immediately via WhatsApp. We can correct it before processing if caught early.</p>
+</details>
+<details style="background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; cursor: pointer;">
+<summary style="font-weight: 700; font-size: 1.05rem; color: var(--primary);">What is your refund policy?</summary>
+<p style="margin-top: 12px; color: var(--muted); line-height: 1.6;">⚠️ <strong style="color: var(--primary);">No refunds will be provided after service activation or delivery.</strong> Please double-check your Player ID/UID and package selection before payment. For undelivered services only, contact support within 24 hours.</p>
+</details>
+<details style="background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; cursor: pointer;">
+<summary style="font-weight: 700; font-size: 1.05rem; color: var(--primary);">Is payment secure?</summary>
+<p style="margin-top: 12px; color: var(--muted); line-height: 1.6;">Yes, 100%. We use official payment gateways (eSewa, Khalti, Bank Transfer). We never store your payment information.</p>
+</details>
+<details style="background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 20px; margin-bottom: 16px; cursor: pointer;">
+<summary style="font-weight: 700; font-size: 1.05rem; color: var(--primary);">Do you offer customer support?</summary>
+<p style="margin-top: 12px; color: var(--muted); line-height: 1.6;">Yes! 24/7 priority support via WhatsApp. Average response time: 10 minutes. Contact: +977 9708838261</p>
+</details>
+</div>
+</section>
+
+<footer>
+<p style="margin-bottom: 20px;">© 2024 SUSANTEDIT | Elite Gaming Performance Platform</p>
+<p style="color: var(--muted); font-size: 0.85rem; margin-bottom: 12px;">Trusted & Secure | Instant Delivery | 24/7 Priority Support</p>
+<p style="color: var(--muted); font-size: 0.8rem;">Serving 10,000+ competitive players since 2023</p>
+
+<!-- SOCIAL MEDIA LINKS -->
+<div class="social-links">
+<a href="https://facebook.com/Kantaraj.Luitel" target="_blank" class="social-link facebook" title="Facebook">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+</a>
+<a href="https://instagram.com/susantgamerz" target="_blank" class="social-link instagram" title="Instagram">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+</a>
+<a href="https://linkedin.com/in/kantaraj-luitel" target="_blank" class="social-link linkedin" title="LinkedIn">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+</a>
+<a href="https://pinterest.com/susantluitel" target="_blank" class="social-link pinterest" title="Pinterest">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/></svg>
+</a>
+<a href="https://reddit.com/user/Successful-Twist2608" target="_blank" class="social-link reddit" title="Reddit">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0zm5.01 4.744c.688 0 1.25.561 1.25 1.249a1.25 1.25 0 0 1-2.498.056l-2.597-.547-.8 3.747c1.824.07 3.48.632 4.674 1.488.308-.309.73-.491 1.207-.491.968 0 1.754.786 1.754 1.754 0 .716-.435 1.333-1.01 1.614a3.111 3.111 0 0 1 .042.52c0 2.694-3.13 4.87-7.004 4.87-3.874 0-7.004-2.176-7.004-4.87 0-.183.015-.366.043-.534A1.748 1.748 0 0 1 4.028 12c0-.968.786-1.754 1.754-1.754.463 0 .898.196 1.207.49 1.207-.883 2.878-1.43 4.744-1.487l.885-4.182a.342.342 0 0 1 .14-.197.35.35 0 0 1 .238-.042l2.906.617a1.214 1.214 0 0 1 1.108-.701zM9.25 12C8.561 12 8 12.562 8 13.25c0 .687.561 1.248 1.25 1.248.687 0 1.248-.561 1.248-1.249 0-.688-.561-1.249-1.249-1.249zm5.5 0c-.687 0-1.248.561-1.248 1.25 0 .687.561 1.248 1.249 1.248.688 0 1.249-.561 1.249-1.249 0-.687-.562-1.249-1.25-1.249zm-5.466 3.99a.327.327 0 0 0-.231.094.33.33 0 0 0 0 .463c.842.842 2.484.913 2.961.913.477 0 2.105-.056 2.961-.913a.361.361 0 0 0 .029-.463.33.33 0 0 0-.464 0c-.547.533-1.684.73-2.512.73-.828 0-1.979-.196-2.512-.73a.326.326 0 0 0-.232-.095z"/></svg>
+</a>
+<a href="https://tiktok.com/@vortexeditz34" target="_blank" class="social-link tiktok" title="TikTok">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+</a>
+<a href="https://x.com/Susantedit" target="_blank" class="social-link twitter" title="X (Twitter)">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+</a>
+<a href="https://youtube.com/@yubrajedit1" target="_blank" class="social-link youtube" title="YouTube">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+</a>
+<a href="https://codepen.io/susant-gamerz" target="_blank" class="social-link codepen" title="CodePen">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M18.144 13.067v-2.134L16.55 12zm1.276 1.194a.628.628 0 0 1-.006.083l-.005.028-.011.053-.01.031c-.005.016-.01.031-.017.047l-.014.03a.78.78 0 0 1-.021.043l-.019.03a.57.57 0 0 1-.08.1l-.026.025a.602.602 0 0 1-.036.03l-.029.022-.01.008-6.782 4.522a.637.637 0 0 1-.708 0L4.864 14.79l-.01-.007a.628.628 0 0 1-.029-.024l-.026-.024-.032-.03-.021-.028a.588.588 0 0 1-.067-.11l-.014-.031a.644.644 0 0 1-.017-.047l-.01-.03c-.004-.018-.008-.036-.01-.054l-.006-.028a.628.628 0 0 1-.006-.083V9.739c0-.028.002-.055.006-.083l.005-.027.011-.054.01-.03a.574.574 0 0 1 .12-.217l.031-.034.026-.022.01-.008 6.782-4.521a.638.638 0 0 1 .708 0l6.782 4.521.01.008.03.022.032.034c.03.031.059.067.084.11l.018.03a.574.574 0 0 1 .028.083l.008.03c.005.018.008.036.01.054l.006.027a.619.619 0 0 1 .006.083zM12 0C5.373 0 0 5.372 0 12 0 18.627 5.373 24 12 24c6.628 0 12-5.372 12-12 0-6.627-5.372-12-12-12m0 10.492-4.148 2.766 1.393.924 2.755-1.837zm0-2.808L7.852 10.45 12 13.216l4.148-2.766zm0 7.424 4.148-2.766-1.393-.924L12 13.216zm-4.148-2.766L5.856 12l1.996-1.342zm8.296 0v-2.134L14.55 12zm-4.148 2.766-2.755-1.837-1.393.924L12 16.908zm0-7.424 2.755 1.837 1.393-.924L12 7.092z"/></svg>
+</a>
+<a href="https://github.com/susantedit" target="_blank" class="social-link github" title="GitHub">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+</a>
+<a href="https://wa.me/9779708838261" target="_blank" class="social-link whatsapp" title="WhatsApp">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>
+</a>
+<a href="mailto:susantedit@gmail.com" target="_blank" class="social-link email" title="Email">
+<svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+</a>
+</div>
+
+<div style="margin-top: 24px; padding-top: 24px; border-top: 1px solid var(--border);">
+<p style="font-size: 0.8rem; color: var(--muted);">
+<a href="#" style="color: var(--muted); text-decoration: none; margin: 0 12px;">Terms & Conditions</a> | 
+<a href="#" style="color: var(--muted); text-decoration: none; margin: 0 12px;">Privacy Policy</a> | 
+<a href="#" style="color: var(--muted); text-decoration: none; margin: 0 12px;">Refund Policy</a>
+</p>
+</div>
+</footer>
+</div>
+
+<!-- STICKY BUY BUTTON (Mobile) -->
+<div class="sticky-buy-btn" onclick="document.getElementById('services').scrollIntoView({behavior: 'smooth'})" role="button" tabindex="0" aria-label="Select a package and start purchasing">
+🛒 Select Package - Starting ₹40
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+<div class="modal-content">
+<button class="modal-close" onclick="closeModal()" aria-label="Close checkout modal">×</button>
+<h2 class="modal-title">🔒 Secure Checkout</h2>
+<div class="selected-product" id="selectedProduct"></div>
+
+<!-- PLAYER ID FORM -->
+<div style="margin: 20px 0; padding: 20px; background: rgba(255,255,255,0.03); border-radius: 10px; border: 1px solid var(--border);">
+<label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">Player ID / UID (if applicable):</label>
+<input type="text" id="playerID" placeholder="Enter your Player ID or UID" inputmode="text" autocomplete="off" style="width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem; margin-bottom: 12px;">
+<label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text);">Your Name:</label>
+<input type="text" id="playerName" placeholder="Enter your name" inputmode="text" autocomplete="name" style="width: 100%; padding: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 1rem;" required>
+
+<!-- PROMO CODE SECTION -->
+<div style="margin-top: 16px; padding: 12px; background: rgba(230,57,70,0.08); border: 1px dashed var(--primary); border-radius: 8px;">
+<label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--primary);">💰 Have a Promo Code?</label>
+<div style="display: flex; gap: 8px;">
+<input type="text" id="promoCode" placeholder="Enter promo code (e.g., SAVE30)" style="flex: 1; padding: 10px; background: var(--card); border: 1px solid var(--primary); border-radius: 6px; color: var(--text); font-size: 0.9rem; min-height: 40px;">
+<button onclick="validatePromo(document.getElementById('promoCode').value)" style="background: var(--primary); color: white; border: none; padding: 10px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; min-height: 40px; white-space: nowrap;">Apply</button>
+</div>
+<p style="font-size: 0.75rem; color: var(--muted); margin-top: 6px;">Try: SAVE30, SAVE50, REFER30, SUPER10, ELITE20, GAMING15</p>
+</div>
+
+<p style="font-size: 0.8rem; color: var(--muted); margin-top: 12px;">⚠️ Double-check your Player ID before payment. No refunds after service activation.</p>
+</div>
+
+<p style="color: var(--muted); text-align: center; margin-bottom: 20px; font-size: 0.95rem;">
+<strong style="color: var(--success);">Step 1:</strong> Fill in your details above<br>
+<strong style="color: var(--success);">Step 2:</strong> Choose payment method & scan QR<br>
+<strong style="color: var(--success);">Step 3:</strong> Click WhatsApp to confirm
+</p>
+
+<!-- PAYMENT METHOD TABS -->
+<div class="payment-tabs" role="tablist">
+<div class="payment-tab active" onclick="switchPaymentMethod('esewa', this)" role="tab" aria-selected="true">
+💳 eSewa / Khalti
+</div>
+<div class="payment-tab" onclick="switchPaymentMethod('bank', this)" role="tab" aria-selected="false">
+🏦 Bank Transfer
+</div>
+</div>
+
+<!-- ESEWA/KHALTI PAYMENT -->
+<div class="payment-content active" id="esewa-payment">
+<div class="qr-container">
+<img src="payment.jpeg" alt="eSewa/Khalti Payment QR" id="esewa-qr">
+<div style="margin-top: 12px; display: flex; gap: 8px;">
+<button onclick="downloadQR('esewa-qr', 'SUSANTEDIT-eSewa-Payment-QR')" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">⬇️ Download QR</button>
+</div>
+</div>
+<div class="payment-info">
+<p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 8px;">💳 Payment Methods: <strong style="color: var(--text);">eSewa | Khalti</strong></p>
+<p style="margin-top: 16px; font-size: 0.85rem; color: var(--muted);">✅ Secure Payment | ⚡ 5-10 Min Activation | ⚠️ No Refund After Activation</p>
+</div>
+</div>
+
+<!-- BANK TRANSFER PAYMENT -->
+<div class="payment-content" id="bank-payment">
+<div class="qr-container">
+<img src="bank.jpg" alt="Bank Transfer QR" id="bank-qr">
+<div style="margin-top: 12px; display: flex; gap: 8px;">
+<button onclick="downloadQR('bank-qr', 'SUSANTEDIT-Bank-Transfer-QR')" style="flex: 1; padding: 10px; background: var(--primary); color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 0.9rem;">⬇️ Download QR</button>
+</div>
+</div>
+<div class="payment-info">
+<p style="color: var(--muted); font-size: 0.9rem; margin-bottom: 8px;">🏦 Payment Method: <strong style="color: var(--text);">Bank Transfer</strong></p>
+<p style="margin-top: 16px; font-size: 0.85rem; color: var(--muted);">✅ Secure Payment | ⚡ 5-10 Min Activation | ⚠️ No Refund After Activation</p>
+</div>
+</div>
+
+<button class="whatsapp-btn" onclick="sendWhatsAppEnhanced()" aria-label="Confirm Payment via WhatsApp">📱 Confirm Payment via WhatsApp</button>
+<p style="text-align: center; margin-top: 16px; font-size: 0.8rem; color: var(--muted);">After payment, send screenshot via WhatsApp for instant activation</p>
+</div>
+</div>
+
+<!-- ===== SEARCH & FILTER ===== -->
+<div class="search-filter" style="display: none; margin: 0 auto; max-width: 1200px; padding: 0 20px;" id="search-filter-section">
+<input type="text" class="search-box" id="search-box" placeholder="🔍 Search products..." onkeyup="filterProducts()">
+<button class="filter-btn" onclick="filterByCategory('all')" data-category="all">All</button>
+<button class="filter-btn" onclick="filterByCategory('cheats')" data-category="cheats">Cheats</button>
+<button class="filter-btn" onclick="filterByCategory('panels')" data-category="panels">Panels</button>
+<button class="filter-btn" onclick="filterByCategory('topups')" data-category="topups">Top-Ups</button>
+</div>
+
+<!-- ===== EXIT INTENT POPUP ===== -->
+<div class="exit-popup" id="exit-popup">
+<div class="exit-popup-content">
+<div class="exit-popup-text">
+<h3>🎯 Wait! Special Offer Inside!</h3>
+<p>Get 25% OFF on your first purchase with code <strong>WELCOME25</strong></p>
+</div>
+<button class="exit-popup-btn" onclick="document.getElementById('services').scrollIntoView({behavior: 'smooth'}); closeExitPopup()">🛍️ Claim Offer</button>
+<button class="exit-popup-close" onclick="closeExitPopup()">✕</button>
+</div>
+</div>
+
+<!-- ===== DEVICE COMPATIBILITY CHECKER (Modal) ===== -->
+<div class="modal" id="device-modal" style="display: none;">
+<div class="modal-content" style="max-width: 600px;">
+<button class="modal-close" onclick="document.getElementById('device-modal').style.display = 'none'">×</button>
+<h2 class="modal-title">📱 Device Compatibility Checker</h2>
+<div class="device-checker">
+<div class="device-spec">
+<span class="spec-label">Device:</span>
+<span class="spec-value" id="device-name">Loading...</span>
+</div>
+<div class="device-spec">
+<span class="spec-label">OS:</span>
+<span class="spec-value" id="device-os">Loading...</span>
+</div>
+<div class="device-spec">
+<span class="spec-label">Browser:</span>
+<span class="spec-value" id="device-browser">Loading...</span>
+</div>
+<div class="device-spec">
+<span class="spec-label">RAM:</span>
+<span class="spec-value" id="device-ram">Loading...</span>
+</div>
+<div class="device-spec">
+<span class="spec-label">Screen:</span>
+<span class="spec-value" id="device-screen">Loading...</span>
+</div>
+<div class="compatibility-status compatible" id="device-status" style="margin-top: 16px;">
+✅ Compatible with all our services!
+</div>
+</div>
+<button class="btn" onclick="document.getElementById('device-modal').style.display = 'none'" style="margin-top: 16px;">Close</button>
+</div>
+</div>
+
+<!-- ===== PRODUCT COMPARISON MODAL ===== -->
+<div class="modal" id="comparison-modal" style="display: none;">
+<div class="modal-content" style="max-width: 700px; max-height: 80vh; overflow-y: auto;">
+<button class="modal-close" onclick="document.getElementById('comparison-modal').style.display = 'none'">×</button>
+<h2 class="modal-title">⚖️ Product Comparison</h2>
+<div id="comparison-content" style="margin-top: 20px;"></div>
+<button class="btn" onclick="document.getElementById('comparison-modal').style.display = 'none'" style="margin-top: 16px;">Close</button>
+</div>
+</div>
+
+<!-- ===== WISHLIST SIDEBAR ===== -->
+<div class="modal" id="wishlist-modal" style="display: none;">
+<div class="modal-content" style="max-width: 600px;">
+<button class="modal-close" onclick="document.getElementById('wishlist-modal').style.display = 'none'">×</button>
+<h2 class="modal-title">❤️ My Wishlist</h2>
+<div id="wishlist-content" style="margin-top: 20px; min-height: 200px;">
+<p style="text-align: center; color: var(--muted);">No items in wishlist yet. Add your favorites! ❤️</p>
+</div>
+<button class="btn" onclick="clearWishlist()" style="margin-top: 16px; background: rgba(230,57,70,0.2); color: var(--primary); border-color: var(--primary);">Clear Wishlist</button>
+</div>
+</div>
+
+<!-- ===== BUNDLE DEALS PROMO ===== -->
+<div style="position: fixed; top: 80px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, var(--primary), #ff6b6b); color: white; padding: 12px 24px; border-radius: 10px; font-weight: 700; z-index: 995; display: none; box-shadow: 0 4px 20px rgba(230,57,70,0.5);" id="bundle-promo">
+🎁 Buy 2+ products = 15% OFF! Use code <strong>BUNDLE15</strong>
+</div>
+
+<script>
+let selectedProduct = "";
+let selectedPrice = "";
+let selectedPaymentMethod = "eSewa/Khalti";
+
+function switchPaymentMethod(method, element) {
+if (event && event.preventDefault) event.preventDefault();
+document.querySelectorAll('.payment-tab').forEach(tab => tab.classList.remove('active'));
+if (element) element.classList.add('active');
+else if (event && event.target) event.target.classList.add('active');
+document.querySelectorAll('.payment-content').forEach(content => content.classList.remove('active'));
+if (method === 'esewa') {
+document.getElementById('esewa-payment').classList.add('active');
+selectedPaymentMethod = "eSewa/Khalti";
+} else if (method === 'bank') {
+document.getElementById('bank-payment').classList.add('active');
+selectedPaymentMethod = "Bank Transfer";
+}
+}
+
+function selectPackage(element, productName, price) {
+// Store selection immediately
+selectedProduct = productName;
+selectedPrice = price;
+
+// Remove selected class from all items in this card
+const card = element.closest('.card');
+if (card) {
+const allItems = card.querySelectorAll('.price-item');
+allItems.forEach(item => item.classList.remove('selected'));
+}
+
+// Add selected class to clicked item
+element.classList.add('selected');
+
+// Check the radio button
+const radio = element.querySelector('input[type="radio"]');
+if (radio) {
+radio.checked = true;
+}
+
+// Store in dataset as backup
+element.dataset.product = productName;
+element.dataset.price = price;
+}
+
+function openModalWithSelection(radioGroupName) {
+if (!selectedProduct || !selectedPrice) {
+alert('Please select a package first!');
+return;
+}
+document.getElementById('selectedProduct').innerHTML = `
+<strong>${selectedProduct}</strong><br>
+<span style="font-size: 1.3rem; color: var(--primary); margin-top: 8px; display: block;">₹${selectedPrice}</span>
+`;
+const modal = document.getElementById('modal');
+modal.style.display = 'flex';
+document.body.style.overflow = 'hidden';
+}
+
+function openModal(product) {
+selectedProduct = product;
+selectedPrice = "N/A";
+document.getElementById('selectedProduct').textContent = `Selected: ${product}`;
+document.getElementById('modal').style.display = 'flex';
+}
+
+function closeModal() {
+document.getElementById('modal').style.display = 'none';
+document.body.style.overflow = '';
+}
+
+function copyUPI() {
+navigator.clipboard.writeText('susantedit@upi');
+alert('UPI ID copied to clipboard!');
+}
+
+function sendWhatsApp() {
+if (!selectedProduct) {
+alert('Please select a package first!');
+return;
+}
+const playerID = document.getElementById('playerID').value.trim();
+const playerName = document.getElementById('playerName').value.trim();
+if (!playerName) {
+alert('Please enter your name!');
+return;
+}
+const timestamp = new Date().toLocaleString();
+const orderID = 'ORD' + Date.now().toString().slice(-6);
+let message = `🎮 *SUSANTEDIT ORDER CONFIRMATION*%0A%0A` +
+`📦 *Product:* ${selectedProduct}%0A` +
+`💰 *Amount:* ₹${selectedPrice}%0A` +
+`🆔 *Order ID:* ${orderID}%0A` +
+`👤 *Name:* ${playerName}%0A` +
+`🎯 *Player ID/UID:* ${playerID || 'Not applicable'}%0A` +
+`💳 *Payment Method:* ${selectedPaymentMethod}%0A` +
+`⏰ *Time:* ${timestamp}%0A%0A` +
+`📸 *Please attach payment screenshot*%0A%0A` +
+`Please verify and activate my service.%0A%0AThank you!`;
+window.open(`https://wa.me/9779708838261?text=${message}`, "_blank");
+}
+
+function sendWhatsAppEnhanced() {
+// Validate form before sending
+if (!validateForm()) return;
+
+const playerID = document.getElementById('playerID').value.trim();
+const playerName = document.getElementById('playerName').value.trim();
+const promoCode = document.getElementById('promoCode').value.trim();
+
+if (!selectedProduct || !selectedPrice) {
+showToast('⚠️ Please select a package first!', 'warning');
+return;
+}
+
+if (!playerName) {
+showToast('⚠️ Please enter your name!', 'warning');
+return;
+}
+
+// Generate order details
+const timestamp = new Date().toLocaleString();
+const orderID = 'ORD' + Date.now().toString().slice(-6);
+const discountInfo = promoCode && promoCodes[promoCode.toUpperCase()] ? 
+  `\n🎉 Promo Code: ${promoCode.toUpperCase()}` : '';
+
+// Build clean message without URL encoding - use actual line breaks
+let messageLines = [
+  "🎮 PAYMENT CONFIRMATION - SUSANTEDIT",
+  "═════════════════════════════",
+  "",
+  "ORDER DETAILS",
+  `Order ID: ${orderID}`,
+  `Product: ${selectedProduct}`,
+  `Amount: ₹${selectedPrice}${discountInfo}`,
+  `Payment Method: ${selectedPaymentMethod}`,
+  `Date & Time: ${timestamp}`,
+  "",
+  "CUSTOMER INFO",
+  `Name: ${playerName}`,
+  `Player ID/UID: ${playerID || 'N/A'}`,
+  "",
+  "ACTION REQUIRED",
+  "Please send your payment screenshot to confirm.",
+  "Activation will be done within 5-10 minutes after verification.",
+  "",
+  "IMPORTANT",
+  "• Verify your Player ID/UID is correct",
+  "• Save your Order ID for reference",
+  "• No refunds after service activation",
+  "",
+  "Thank you for your purchase!"
+];
+
+const message = messageLines.join("\n");
+
+// Send to WhatsApp with visual feedback
+showToast('📱 Opening WhatsApp...', 'info', 1500);
+setTimeout(() => {
+window.open(`https://wa.me/9779708838261?text=${encodeURIComponent(message)}`, '_blank');
+// Show success notification
+showToast('✅ Payment confirmation sent! Awaiting verification.', 'success', 3000);
+}, 500);
+
+// Clear form after sending
+setTimeout(() => {
+document.getElementById('playerID').value = '';
+document.getElementById('playerName').value = '';
+document.getElementById('promoCode').value = '';
+}, 2000);
+}
+
+window.onclick = function(event) {
+const modal = document.getElementById('modal');
+// Only close if clicking directly on the modal background itself
+if (event.target.id === 'modal') {
+closeModal();
+}
+}
+
+// Live counter animation
+function updateLiveCounter() {
+const orderCount = document.getElementById('orderCount');
+const activeUsers = document.getElementById('activeUsers');
+if (orderCount && activeUsers) {
+// Random order count between 5-12
+const orders = Math.floor(Math.random() * 8) + 5;
+orderCount.textContent = orders;
+// Random active users between 15-35
+const users = Math.floor(Math.random() * 21) + 15;
+activeUsers.textContent = users;
+}
+}
+// Update every 30 seconds
+setInterval(updateLiveCounter, 30000);
+updateLiveCounter();
+
+// Show/hide sticky button on scroll (mobile) with debounce
+let lastScroll = 0;
+let scrollTimeout;
+window.addEventListener('scroll', function() {
+const stickyBtn = document.querySelector('.sticky-buy-btn');
+const currentScroll = window.pageYOffset;
+if (window.innerWidth <= 768) {
+clearTimeout(scrollTimeout);
+scrollTimeout = setTimeout(() => {
+if (currentScroll > 500) {
+stickyBtn.style.display = 'block';
+} else {
+stickyBtn.style.display = 'none';
+}
+}, 50);
+}
+lastScroll = currentScroll;
+}, { passive: true });
+
+// Improve form inputs for mobile with font-size fix to prevent zoom
+document.addEventListener('DOMContentLoaded', function() {
+const inputs = document.querySelectorAll('input[type="text"]');
+inputs.forEach(input => {
+input.addEventListener('focus', function() {
+this.style.fontSize = '16px';
+this.scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+input.addEventListener('blur', function() {
+this.style.fontSize = '';
+});
+});
+
+// Prevent double-tap zoom delay on buttons
+const buttons = document.querySelectorAll('button, [role="button"]');
+buttons.forEach(button => {
+button.addEventListener('click', function(e) {
+e.preventDefault();
+this.click();
+}, { passive: false });
+});
+});
+
+/* ========== PREMIUM FEATURES ========== */
+
+// Toast Notification System
+function showToast(message, type = 'info', duration = 3000) {
+let container = document.getElementById('toast-container');
+if (!container) {
+container = document.createElement('div');
+container.id = 'toast-container';
+container.className = 'toast-container';
+document.body.appendChild(container);
+}
+const toast = document.createElement('div');
+toast.className = `toast ${type}`;
+const icons = { success: '✓', error: '✕', info: 'ℹ', warning: '⚠' };
+toast.innerHTML = `<span class="toast-icon">${icons[type] || '•'}</span><div class="toast-content">${message}</div>`;
+container.appendChild(toast);
+setTimeout(() => {
+toast.classList.add('removing');
+setTimeout(() => toast.remove(), 300);
+}, duration);
+}
+
+// Promo Code System
+const promoCodes = { 'SAVE30': { discount: 30, type: 'fixed' }, 'REFER30': { discount: 30, type: 'fixed' }, 'SAVE50': { discount: 50, type: 'fixed' }, 'SUPER10': { discount: 10, type: 'percent' }, 'ELITE20': { discount: 20, type: 'percent' }, 'GAMING15': { discount: 15, type: 'percent' } };
+
+function validatePromo(code) {
+const upperCode = code.toUpperCase().trim();
+if (promoCodes[upperCode]) {
+const promo = promoCodes[upperCode];
+let discountText = promo.type === 'fixed' ? `₹${promo.discount} OFF` : `${promo.discount}% OFF`;
+window.currentDiscount = promo.discount;
+showToast(`🎉 Promo applied! ${discountText}`, 'success');
+return true;
+}
+showToast('❌ Invalid code', 'error');
+return false;
+}
+
+// Copy to Clipboard
+function copyToClipboard(text, label = 'Text') {
+navigator.clipboard.writeText(text).then(() => {
+showToast(`✓ ${label} copied!`, 'success', 2000);
+}).catch(() => { showToast(`Failed to copy`, 'error'); });
+}
+
+// Download QR Code
+function downloadQR(elementId, fileName) {
+const qrImage = document.getElementById(elementId);
+if (!qrImage) {
+showToast('❌ QR Code not found', 'error');
+return;
+}
+
+const link = document.createElement('a');
+link.href = qrImage.src;
+link.download = `${fileName}.jpeg`;
+link.style.display = 'none';
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+
+showToast('✅ QR Code downloaded successfully!', 'success', 2000);
+}
+
+// Form Validation
+function validateForm() {
+const playerName = document.getElementById('playerName').value.trim();
+if (!playerName) { showToast('⚠ Enter your name', 'warning'); return false; }
+if (playerName.length < 2) { showToast('⚠ Name too short', 'warning'); return false; }
+if (!selectedProduct) { showToast('⚠ Select a package', 'warning'); return false; }
+return true;
+}
+
+// Stock Updates
+function updateStockBadges() {
+const stocks = [5, 3, 8, 2, 6, 4, 9, 7];
+let idx = 0;
+document.querySelectorAll('[id$="-stock"]').forEach(badge => {
+const stock = stocks[idx++ % stocks.length];
+badge.textContent = stock <= 3 ? `⚡ Only ${stock} left!` : `📦 ${stock} available`;
+if (stock <= 3) badge.classList.add('limited');
+});
+}
+
+// Countdown Timer
+function startCountdown(elementId, hours = 24) {
+const endTime = new Date().getTime() + (hours * 60 * 60 * 1000);
+setInterval(() => {
+const distance = endTime - new Date().getTime();
+if (distance < 0) return;
+const h = Math.floor(distance / (1000 * 60 * 60 * 24));
+const m = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+const s = Math.floor((distance % (1000 * 60)) / 1000);
+const el = document.getElementById(elementId);
+if (el) el.innerHTML = `⏰ ${h}h ${m}m ${s}s`;
+}, 1000);
+}
+
+/* ========== PREMIUM FEATURES ========== */
+
+// 1. SEARCH & FILTER
+function filterProducts() {
+const searchBox = document.getElementById('search-box');
+const searchTerm = searchBox.value.toLowerCase();
+const cards = document.querySelectorAll('.card');
+let foundCount = 0;
+
+cards.forEach(card => {
+const title = card.querySelector('.card-title')?.textContent.toLowerCase() || '';
+const isVisible = title.includes(searchTerm) || searchTerm === '';
+card.style.display = isVisible ? 'block' : 'none';
+if (isVisible) foundCount++;
+});
+
+if (foundCount === 0 && searchTerm !== '') {
+showToast(`⚠️ No products found for "${searchTerm}"`, 'warning');
+}
+}
+
+function filterByCategory(category) {
+document.querySelectorAll('.filter-btn').forEach(btn => {
+btn.classList.remove('active');
+});
+event.target.classList.add('active');
+
+const cards = document.querySelectorAll('.card');
+const categoryMap = {
+'cheats': ['CHEATS', 'DRIP', 'HG', 'PATO', 'BR MODS', 'HAXXCKER', 'AIM SILENT', 'GULA', 'PROXY'],
+'panels': ['PANEL', 'REDMI', 'GUILD', 'FLUORITE', 'RANK'],
+'topups': ['DIAMONDS', 'FREE FIRE', 'PUBG']
+};
+
+cards.forEach(card => {
+const title = card.querySelector('.card-title')?.textContent.toUpperCase() || '';
+const matches = category === 'all' || categoryMap[category]?.some(term => title.includes(term));
+card.style.display = matches ? 'block' : 'none';
+});
+
+showToast(`📁 Filtering by: ${category.charAt(0).toUpperCase() + category.slice(1)}`, 'info', 1500);
+}
+
+// 3. EXIT INTENT POPUP
+let exitPopupShown = false;
+document.addEventListener('mouseleave', function() {
+if (!exitPopupShown && window.innerWidth > 768) {
+document.getElementById('exit-popup').classList.add('show');
+exitPopupShown = true;
+}
+});
+
+function closeExitPopup() {
+document.getElementById('exit-popup').classList.remove('show');
+}
+
+// 4. DEVICE COMPATIBILITY CHECKER
+function openDeviceChecker() {
+const modal = document.getElementById('device-modal');
+modal.style.display = 'flex';
+
+// Get device info
+const ua = navigator.userAgent;
+const isAndroid = /Android/i.test(ua);
+const isIOS = /iPhone|iPad|iPod/i.test(ua);
+const isWindows = /Windows/i.test(ua);
+const isMac = /Macintosh/i.test(ua);
+
+let os = 'Unknown';
+if (isAndroid) os = '🤖 Android';
+else if (isIOS) os = '🍎 iOS';
+else if (isWindows) os = '🪟 Windows';
+else if (isMac) os = '🍎 macOS';
+
+const device = isAndroid || isIOS ? '📱 Mobile' : '💻 Desktop';
+const browser = ua.includes('Chrome') ? '🌐 Chrome' : ua.includes('Safari') ? '🌐 Safari' : '🌐 Browser';
+const ram = navigator.deviceMemory ? `${navigator.deviceMemory}GB` : 'Unknown';
+const screen = `${window.innerWidth}x${window.innerHeight}`;
+
+document.getElementById('device-name').textContent = device;
+document.getElementById('device-os').textContent = os;
+document.getElementById('device-browser').textContent = browser;
+document.getElementById('device-ram').textContent = ram;
+document.getElementById('device-screen').textContent = screen;
+
+showToast('📊 Device info loaded!', 'success', 1500);
+}
+
+// 5. WISHLIST SYSTEM
+let wishlist = JSON.parse(localStorage.getItem('wishlist')) || [];
+
+function toggleWishlist(productName, button) {
+if (wishlist.includes(productName)) {
+wishlist = wishlist.filter(item => item !== productName);
+button.classList.remove('active');
+showToast('❌ Removed from wishlist', 'info', 1500);
+} else {
+wishlist.push(productName);
+button.classList.add('active');
+showToast('❤️ Added to wishlist!', 'success', 1500);
+}
+localStorage.setItem('wishlist', JSON.stringify(wishlist));
+}
+
+function viewWishlist() {
+const modal = document.getElementById('wishlist-modal');
+modal.style.display = 'flex';
+
+const wishlistContent = document.getElementById('wishlist-content');
+if (wishlist.length === 0) {
+wishlistContent.innerHTML = '<p style="text-align: center; color: var(--muted); padding: 40px;">No items in wishlist yet. Add your favorites! ❤️</p>';
+} else {
+wishlistContent.innerHTML = wishlist.map(item => `<div style="padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;"><span>${item}</span><button onclick="removeFromWishlist('${item}')" style="background: rgba(230,57,70,0.2); border: none; color: var(--primary); padding: 6px 12px; border-radius: 6px; cursor: pointer;">Remove</button></div>`).join('');
+}
+}
+
+function removeFromWishlist(productName) {
+wishlist = wishlist.filter(item => item !== productName);
+localStorage.setItem('wishlist', JSON.stringify(wishlist));
+viewWishlist();
+showToast('❌ Removed from wishlist', 'info', 1500);
+}
+
+function clearWishlist() {
+if (confirm('Clear all items from wishlist?')) {
+wishlist = [];
+localStorage.setItem('wishlist', JSON.stringify(wishlist));
+viewWishlist();
+showToast('🗑️ Wishlist cleared', 'info', 1500);
+}
+}
+
+// 6. PRODUCT COMPARISON
+let selectedForComparison = [];
+
+function addToComparison(productName) {
+if (selectedForComparison.length >= 2 && !selectedForComparison.includes(productName)) {
+showToast('⚠️ You can compare max 2 products', 'warning');
+return;
+}
+
+if (selectedForComparison.includes(productName)) {
+selectedForComparison = selectedForComparison.filter(p => p !== productName);
+} else {
+selectedForComparison.push(productName);
+}
+
+if (selectedForComparison.length >= 2) {
+showComparison();
+}
+}
+
+function showComparison() {
+if (selectedForComparison.length < 2) {
+showToast('⚠️ Select 2 products to compare', 'warning');
+return;
+}
+
+const modal = document.getElementById('comparison-modal');
+const comparisonContent = document.getElementById('comparison-content');
+
+comparisonContent.innerHTML = `
+<div class="comparison-grid">
+<div class="comparison-item">
+<div class="comparison-label">📦 Product 1</div>
+<div class="comparison-spec">Name: ${selectedForComparison[0]}</div>
+<div class="comparison-spec">Type: Premium</div>
+<div class="comparison-spec">Support: 24/7</div>
+<div class="comparison-spec">Updates: Weekly</div>
+<div class="comparison-spec">Warranty: Yes ✓</div>
+</div>
+<div class="comparison-item">
+<div class="comparison-label">📦 Product 2</div>
+<div class="comparison-spec">Name: ${selectedForComparison[1]}</div>
+<div class="comparison-spec">Type: Premium</div>
+<div class="comparison-spec">Support: 24/7</div>
+<div class="comparison-spec">Updates: Weekly</div>
+<div class="comparison-spec">Warranty: Yes ✓</div>
+</div>
+</div>
+`;
+
+modal.style.display = 'flex';
+showToast('⚖️ Comparing products...', 'info', 1500);
+}
+
+// 7. BUNDLE DEALS
+function showBundlePromo() {
+const bundlePromo = document.getElementById('bundle-promo');
+bundlePromo.style.display = 'block';
+setTimeout(() => {
+bundlePromo.style.display = 'none';
+}, 5000);
+}
+
+// Initialize all features
+document.addEventListener('DOMContentLoaded', function() {
+// Prevent modal close when clicking inside modal-content
+const modals = document.querySelectorAll('.modal');
+modals.forEach(modal => {
+const modalContent = modal.querySelector('.modal-content');
+if (modalContent) {
+modalContent.addEventListener('click', function(event) {
+event.stopPropagation();
+});
+}
+});
+
+// Also prevent closing when clicking on form inputs and buttons
+const inputs = document.querySelectorAll('input, button, select, textarea');
+inputs.forEach(input => {
+input.addEventListener('click', function(event) {
+event.stopPropagation();
+});
+});
+
+updateStockBadges();
+setInterval(updateStockBadges, 30000);
+showToast('Welcome! 🎮', 'info', 2000);
+
+// Show bundle promo after 3 seconds
+setTimeout(showBundlePromo, 3000);
+
+// Restore wishlist indicators
+wishlist.forEach(item => {
+document.querySelectorAll('.wishlist-btn').forEach(btn => {
+if (btn.dataset.product === item) btn.classList.add('active');
+});
+});
+
+// Add wishlist buttons to cards
+document.querySelectorAll('.card').forEach(card => {
+if (!card.querySelector('.wishlist-btn')) {
+const productName = card.querySelector('.card-title')?.textContent || 'Product';
+const wishlistBtn = document.createElement('button');
+wishlistBtn.className = 'wishlist-btn';
+wishlistBtn.textContent = '🤍';
+wishlistBtn.dataset.product = productName;
+wishlistBtn.onclick = () => toggleWishlist(productName, wishlistBtn);
+if (wishlist.includes(productName)) {
+wishlistBtn.classList.add('active');
+wishlistBtn.textContent = '❤️';
+}
+card.style.position = 'relative';
+card.appendChild(wishlistBtn);
+}
+});
+});
+
+
+</script>
+</body>
+</html>

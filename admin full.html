@@ -1,0 +1,202 @@
+
+    </div>
+
+    <div id="p5" class="price-list">
+
+      <div class="price-item" onclick="selectPrice(this,'Prime mod 1 day')">1 DAY = Rs 130</div>
+
+      <div class="price-item" onclick="selectPrice(this,'Prime mod 3 day')">3 DAY = Rs 280</div>
+      
+        <div class="price-item" onclick="selectPrice(this,'Prime mod 7 day')">7 DAY = Rs 550</div>
+
+      <div class="price-item" onclick="selectPrice(this,'Prime mod 10 day')">10 DAY = Rs 750</div>
+
+
+
+      <button class="buy-btn" onclick="openPopup()">Buy Now</button>
+      
+      
+  
+      </div>
+      
+       <!-- PRODUCT 6 -->
+
+    <div class="product" onclick="toggleList('p6')">
+
+      <img src="https://i.postimg.cc/65Fdfcgp/Screenshot-20260425-150006.jpg">
+
+      <div class="product-name">BR MOD ROOT</div>
+
+    </div>
+
+    <div id="p6" class="price-list">
+
+      <div class="price-item" onclick="selectPrice(this,'BR MOD APK ROOT 1 DAY')">1 DAY = Rs 180</div>
+
+   
+        <div class="price-item" onclick="selectPrice(this,'BR MOD APK ROOT 7 DAY')">7 DAY = Rs 550</div>
+
+      <div class="price-item" onclick="selectPrice(this,'BR MOD APK ROOT 15 DAY')">15 DAY = Rs 850</div>
+
+        <div class="price-item" onclick="selectPrice(this,'BR MOD APK ROOT 30 DAY')">30 DAY = Rs 1250</div>
+
+
+      <button class="buy-btn" onclick="openPopup()">Buy Now</button>
+      
+      
+  
+      </div>
+       <!-- PRODUCT 7 -->
+
+    <div class="product" onclick="toggleList('p7')">
+
+      <img src="https://i.postimg.cc/FzT43GxM/Screenshot-20260425-150832.jpg">
+
+      <div class="product-name">HAXX-CKER PRO ROOT APK</div>
+
+    </div>
+
+    <div id="p7" class="price-list">
+
+      <div class="price-item" onclick="selectPrice(this,'HAXX-CKER PRO APK ROOT 1 DAY')">10 DAY = Rs xxx ( OUT OF STOCK )</div>
+
+      <div class="price-item" onclick="selectPrice(this,'HAXX-CKER PRO APK ROOT 1 DAY')">20 DAY = Rs xxx ( OUT OF STOCK )</div>
+      
+        <div class="price-item" onclick="selectPrice(this,'HAXX-CKER PRO APK ROOT 1 DAY')">30 DAY = Rs xxx ( OUT OF STOCK )</div>
+
+     
+
+
+      <button class="buy-btn" onclick="openPopup()">Buy Now</button>
+
+
+    </div>
+
+  </div>
+
+</div>
+
+
+  <!-- WARNING -->
+<div id="warningPopup">
+<div class="popup-box">
+ ⚠️ Payment Time: 8AM - 10PM ⚠️ 
+<br><br>
+<button onclick="openForm()" class="done-btn">Next</button>
+</div>
+</div>
+
+<!-- FORM -->
+<div id="formPopup">
+<div class="popup-box">
+
+<input id="trx" placeholder="AMOUNT">
+<input id="name" placeholder="YOUR Name">
+<input id="wa" placeholder="WhatsApp">
+<input id="tt" placeholder="TikTok">
+
+<button onclick="showQR()" class="done-btn">Continue</button>
+
+</div>
+</div>
+
+<!-- QR -->
+<div class="popup" id="popup">
+<div class="popup-box">
+
+<div>Scan & Pay</div>
+<img class="qr" src="https://i.postimg.cc/zXm07q9C/Screenshot-20260425-142906.jpg">
+
+<button id="payBtn" class="done-btn" onclick="paymentDone()">Wait 10s</button>
+
+</div>
+</div>
+
+<script>
+
+let selectedPrice="";
+
+/* LOADING */
+let p=0;
+let load=setInterval(()=>{
+p++;
+bar.style.width=p+"%";
+percent.innerText=p+"%";
+
+if(p>=100){
+clearInterval(load);
+loadingPopup.style.display="none";
+document.querySelector(".overlay").style.display="block";
+}
+},30);
+
+/* TOGGLE */
+function toggleList(id){
+document.querySelectorAll('.price-list').forEach(el=>el.style.display="none");
+document.getElementById(id).style.display="block";
+}
+
+/* SELECT */
+function selectPrice(el,price){
+document.querySelectorAll('.price-item').forEach(i=>i.classList.remove('active'));
+el.classList.add('active');
+selectedPrice=price;
+el.parentElement.querySelector('.buy-btn').style.display="block";
+}
+
+
+/* POPUPS */
+function openPopup(){
+warningPopup.style.display="flex";
+}
+
+function openForm(){
+warningPopup.style.display="none";
+formPopup.style.display="flex";
+}
+
+function showQR() {
+    formPopup.style.display = "none";
+    popup.style.display = "flex";
+    
+    let sec = 10;
+    let btn = document.getElementById("payBtn");
+    timerComplete = false; // reset flag
+
+    let t = setInterval(() => {
+        btn.innerText = "Wait " + sec + "s";
+        sec--;
+
+        if (sec <= 0) {
+            clearInterval(t);
+            btn.style.display = "block";
+            btn.innerText = "Payment Done";
+            timerComplete = true; // allow button click
+        }
+    }, 1000);
+}
+  
+  
+  let timerComplete = false;
+  
+  function paymentDone() {
+    if (!timerComplete) {
+        alert("Please wait until the timer completes!");
+        return;
+    }
+
+    let msg =
+        "🔥 ORDER 🔥\n" +
+        "Product: " + selectedPrice + "\n" +
+        "👤Name: " + document.getElementById("name").value + "\n" +
+        "💰NRP: " + document.getElementById("trx").value + "\n" +
+        "🤝WhatsApp: " + document.getElementById("wa").value + "\n" +
+        "🔥TikTok: " + document.getElementById("tt").value;
+
+    window.location.href = "https://wa.me/9779827260865?text=" + encodeURIComponent(msg);
+}
+
+</script>
+
+</body>
+</html>

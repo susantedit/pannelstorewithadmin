@@ -1,0 +1,62 @@
+import mongoose from 'mongoose';
+
+const userSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    passwordHash: { type: String, select: false, default: '' },
+    role: { type: String, enum: ['user', 'admin'], default: 'user' },
+    emailVerified: { type: Boolean, default: false },
+    emailVerificationTokenHash: { type: String, select: false },
+    emailVerificationExpiresAt: { type: Date },
+    passwordResetTokenHash: { type: String, select: false },
+    passwordResetExpiresAt: { type: Date },
+    loginAttempts: { type: Number, default: 0 },
+    lockUntil: { type: Date },
+    lastLoginAt: { type: Date },
+    firebaseUid: { type: String, default: '' },
+
+    // Referral & wallet
+    referralCode:  { type: String, default: '', unique: true, sparse: true },
+    couponBalance: { type: Number, default: 0 },
+    walletBalance: { type: Number, default: 0 },
+    referralCount: { type: Number, default: 0 },
+    referredBy:    { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+    partnerBadge:  { type: Boolean, default: false },
+
+    // Gamification — XP & Rank
+    xp:            { type: Number, default: 0 },
+    totalSpend:    { type: Number, default: 0 }, // Rs spent total (for rank)
+
+    // Daily streak
+    streakCount:   { type: Number, default: 0 },
+    lastCheckIn:   { type: Date, default: null },
+    streakRewardClaimed: { type: Boolean, default: false }, // for 7-day reward
+
+    // Last order (for quick reorder)
+    lastOrderProduct:  { type: String, default: '' },
+    lastOrderPackage:  { type: String, default: '' },
+    lastOrderPrice:    { type: String, default: '' },
+
+    // Reactivation & birthday
+    lastBirthdayCredit:  { type: Date, default: null },
+    reactivationSentAt:  { type: Date, default: null },
+
+    // VIP Subscription — Rs 199/month, hides ads
+    vipExpiresAt:        { type: Date, default: null },
+
+    // Profile fields — auto-fill purchase form
+    profile: {
+      uid:         { type: String, default: '' },
+      gameId:      { type: String, default: '' },
+      tiktok:      { type: String, default: '' },
+      whatsapp:    { type: String, default: '' },
+      displayName: { type: String, default: '' },
+      avatarUrl:   { type: String, default: '' },
+      birthday:    { type: String, default: '' } // MM-DD format
+    }
+  },
+  { timestamps: true }
+);
+
+export default mongoose.model('User', userSchema);
