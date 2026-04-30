@@ -399,6 +399,9 @@ export default function LandingPage() {
         </aside>
       </section>
 
+      {/* ── AD — below hero ── */}
+      <AdBanner slot="landing-top" />
+
       {/* ── USER TYPE SELECTION ── */}
       {!user && (
         <section>

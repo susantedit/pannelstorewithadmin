@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/shared/Button';
+import AdBanner from '../../components/ads/AdBanner';
 
 export default function LoginPage() {
   const navigate = useNavigate();
@@ -62,6 +63,11 @@ export default function LoginPage() {
           <br />
           Admin access is assigned by the platform owner.
         </p>
+
+        {/* Ad below login form */}
+        <div style={{ marginTop: '24px' }}>
+          <AdBanner slot="sidebar" />
+        </div>
       </div>
     </div>
   );

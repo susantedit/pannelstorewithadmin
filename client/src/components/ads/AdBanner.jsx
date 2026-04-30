@@ -139,10 +139,13 @@ function AdsterraAtUnit({ zone }) {
 }
 
 export default function AdBanner({ slot = 'dashboard-mid' }) {
-  const { user } = useAuth();
+  // Safe auth check — ads show to non-logged-in users too
+  let isVip = false;
+  try {
+    const { user } = useAuth();
+    isVip = !!(user?.vipExpiresAt && new Date(user.vipExpiresAt) > new Date());
+  } catch {}
 
-  // VIP users see no ads
-  const isVip = user?.vipExpiresAt && new Date(user.vipExpiresAt) > new Date();
   if (isVip) return null;
 
   const adsterraScript = ADSTERRA_SCRIPTS[slot] || '';
