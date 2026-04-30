@@ -33,7 +33,16 @@ const ADSENSE_SLOTS = {
 const ADSENSE_CLIENT  = import.meta.env.VITE_ADSENSE_CLIENT  || '';
 const ADSTERRA_KEY    = import.meta.env.VITE_ADSTERRA_KEY    || '';
 
-// Adsterra script URLs per slot (set these in your Adsterra dashboard)
+// Adsterra atOptions format — key + dimensions per slot
+// These are hardcoded from your Adsterra dashboard zones
+const ADSTERRA_ZONES = {
+  'dashboard-mid':  { key: import.meta.env.VITE_ADSTERRA_KEY_728  || 'f8f63db1607698ab4392e358b5f18242', width: 728, height: 90  },
+  'landing-top':    { key: import.meta.env.VITE_ADSTERRA_KEY_728  || 'f8f63db1607698ab4392e358b5f18242', width: 728, height: 90  },
+  'sidebar':        { key: import.meta.env.VITE_ADSTERRA_KEY_300  || '182d58801eedbe8f5f8bfea2e9234a5f', width: 300, height: 250 },
+  'after-purchase': { key: import.meta.env.VITE_ADSTERRA_KEY_300  || '182d58801eedbe8f5f8bfea2e9234a5f', width: 300, height: 250 },
+};
+
+// Adsterra script URLs per slot (invoke.js format — optional override)
 const ADSTERRA_SCRIPTS = {
   'dashboard-mid':  import.meta.env.VITE_ADSTERRA_SCRIPT_DASHBOARD  || '',
   'landing-top':    import.meta.env.VITE_ADSTERRA_SCRIPT_LANDING    || '',
@@ -73,7 +82,6 @@ function AdsterraUnit({ scriptSrc }) {
 
   useEffect(() => {
     if (!scriptSrc || !containerRef.current) return;
-    // Remove any previous script
     containerRef.current.innerHTML = '';
     const script = document.createElement('script');
     script.src = scriptSrc;
@@ -88,6 +96,48 @@ function AdsterraUnit({ scriptSrc }) {
   return <div ref={containerRef} style={{ minHeight: '90px', overflow: 'hidden', borderRadius: '10px' }} />;
 }
 
+// atOptions format — used when you have key + dimensions (no invoke.js needed)
+function AdsterraAtUnit({ zone }) {
+  const containerRef = useRef(null);
+
+  useEffect(() => {
+    if (!zone?.key || !containerRef.current) return;
+    containerRef.current.innerHTML = '';
+
+    // Set atOptions on window
+    window.atOptions = {
+      key: zone.key,
+      format: 'iframe',
+      height: zone.height,
+      width: zone.width,
+      params: {}
+    };
+
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = `//www.topcreativeformat.com/${zone.key}/invoke.js`;
+    script.async = true;
+    script.setAttribute('data-cfasync', 'false');
+    containerRef.current.appendChild(script);
+
+    return () => {
+      if (containerRef.current) containerRef.current.innerHTML = '';
+      delete window.atOptions;
+    };
+  }, [zone?.key]);
+
+  return (
+    <div ref={containerRef} style={{
+      minHeight: `${zone?.height || 90}px`,
+      width: '100%',
+      overflow: 'hidden',
+      borderRadius: '10px',
+      display: 'flex',
+      justifyContent: 'center'
+    }} />
+  );
+}
+
 export default function AdBanner({ slot = 'dashboard-mid' }) {
   const { user } = useAuth();
 
@@ -98,8 +148,14 @@ export default function AdBanner({ slot = 'dashboard-mid' }) {
   const adsterraScript = ADSTERRA_SCRIPTS[slot] || '';
 
   // Adsterra first — accepts gaming/cheat content, AdSense does not
-  if (ADSTERRA_KEY && adsterraScript) {
+  // Prefer invoke.js script if set, otherwise use atOptions format (hardcoded keys)
+  if (adsterraScript) {
     return <AdsterraUnit scriptSrc={adsterraScript} />;
+  }
+
+  const zone = ADSTERRA_ZONES[slot];
+  if (zone?.key) {
+    return <AdsterraAtUnit zone={zone} />;
   }
 
   // AdSense fallback (only use if your site has no cheat content)
