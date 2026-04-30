@@ -60,6 +60,17 @@ function signSession(user) {
   );
 }
 
+// Cookie options — cross-origin safe for Vercel (client) + Render (server)
+function cookieOptions() {
+  const isProd = process.env.NODE_ENV === 'production';
+  return {
+    httpOnly: true,
+    secure: isProd,                    // HTTPS only in production
+    sameSite: isProd ? 'none' : 'lax', // 'none' required for cross-origin cookies
+    maxAge: 1000 * 60 * 60 * 24 * 7   // 7 days
+  };
+}
+
 function buildMailer() {
   const host = process.env.SMTP_HOST;
   const user = process.env.SMTP_USER;
@@ -270,12 +281,7 @@ export async function login(req, res) {
       { subject: user.id, expiresIn: '7d' }
     );
 
-    res.cookie('sessionToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      maxAge: 1000 * 60 * 60 * 24 * 7
-    });
+    res.cookie('sessionToken', token, cookieOptions());
 
     return res.json({ ok: true, user: sanitizeUser(user) });
   }
@@ -312,12 +318,7 @@ export async function login(req, res) {
   await ensureUserReferralCoupon(user);
 
   const token = signSession(user);
-  res.cookie('sessionToken', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-    maxAge: 1000 * 60 * 60 * 24 * 7
-  });
+  res.cookie('sessionToken', token, cookieOptions());
 
   return res.json({ ok: true, user: sanitizeUser(user) });
 }
@@ -463,12 +464,7 @@ export async function firebaseSession(req, res) {
       { subject: user.id, expiresIn: '7d' }
     );
 
-    res.cookie('sessionToken', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-      maxAge: 1000 * 60 * 60 * 24 * 7
-    });
+    res.cookie('sessionToken', token, cookieOptions());
 
     return res.json({ ok: true, user: sanitizeUser(user) });
   }
@@ -498,12 +494,8 @@ export async function firebaseSession(req, res) {
   await ensureUserReferralCoupon(user);
 
   const token = signSession(user);
-  res.cookie('sessionToken', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: process.env.NODE_ENV === 'production' ? 'strict' : 'lax',
-    maxAge: 1000 * 60 * 60 * 24 * 7
-  });
+  res.cookie('sessionToken', token, cookieOptions());
 
   return res.json({ ok: true, user: sanitizeUser(user) });
 }
+
