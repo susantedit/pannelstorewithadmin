@@ -294,7 +294,7 @@ export default function VipModal({ open, onClose }) {
             <button
               onClick={handleClose}
               style={{
-                marginTop: '16px', padding: '12px 24px', borderRadius: '8px', border: 'none',
+                marginTop: '16px', padding: '12px 24px', borderRadius: '8px',
                 background: 'rgba(74,222,128,0.15)', border: '1px solid rgba(74,222,128,0.3)',
                 color: '#4ade80', cursor: 'pointer', fontWeight: 700, fontSize: '0.85rem'
               }}

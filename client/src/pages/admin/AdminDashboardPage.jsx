@@ -111,7 +111,7 @@ function VipManager() {
                     onClick={() => handleGrant(u._id, 1)}
                     disabled={grantingId === u._id}
                     style={{
-                      padding: '6px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer',
+                      padding: '6px 12px', borderRadius: '6px', cursor: 'pointer',
                       background: 'rgba(251,191,36,0.15)', border: '1px solid rgba(251,191,36,0.3)',
                       color: '#fbbf24', fontSize: '0.75rem', fontWeight: 700,
                       opacity: grantingId === u._id ? 0.5 : 1
@@ -123,7 +123,7 @@ function VipManager() {
                     onClick={() => handleGrant(u._id, 3)}
                     disabled={grantingId === u._id}
                     style={{
-                      padding: '6px 12px', borderRadius: '6px', border: 'none', cursor: 'pointer',
+                      padding: '6px 12px', borderRadius: '6px', cursor: 'pointer',
                       background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.2)',
                       color: '#fbbf24', fontSize: '0.75rem', fontWeight: 700,
                       opacity: grantingId === u._id ? 0.5 : 1
