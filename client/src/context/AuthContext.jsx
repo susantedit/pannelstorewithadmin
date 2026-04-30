@@ -10,37 +10,40 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // Wait for Firebase to initialize, then try to restore backend session
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    let cancelled = false;
+
+    const tryAuth = async (firebaseUser) => {
+      if (cancelled) return;
       try {
-        // First try existing backend cookie
         const res = await api.me();
         if (res?.user) {
-          setUser(res.user);
-          setLoading(false);
+          if (!cancelled) { setUser(res.user); setLoading(false); }
           return;
         }
 
-        // Cookie missing/expired — if Firebase has a user, get fresh token
+        // No valid cookie — re-auth via Firebase token
         if (firebaseUser) {
-          const idToken = await firebaseUser.getIdToken(true);
-          const res2 = await api.firebaseSession(idToken, firebaseUser.displayName || '');
-          if (res2?.ok && res2?.user) {
-            setUser(res2.user);
-            setLoading(false);
-            return;
-          }
+          try {
+            const idToken = await firebaseUser.getIdToken(true);
+            const res2 = await api.firebaseSession(idToken, firebaseUser.displayName || '');
+            if (res2?.ok && res2?.user) {
+              if (!cancelled) { setUser(res2.user); setLoading(false); }
+              return;
+            }
+          } catch {}
         }
 
-        setUser(null);
+        if (!cancelled) { setUser(null); setLoading(false); }
       } catch {
-        setUser(null);
-      } finally {
-        setLoading(false);
+        if (!cancelled) { setUser(null); setLoading(false); }
       }
+    };
+
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      tryAuth(firebaseUser);
     });
 
-    return () => unsubscribe();
+    return () => { cancelled = true; unsubscribe(); };
   }, []);
 
   /** Google sign-in → exchange Firebase ID token for backend session cookie */
