@@ -56,7 +56,7 @@ function signSession(user) {
   return jwt.sign(
     { role: user.role, emailVerified: user.emailVerified },
     secret,
-    { subject: user._id?.toString() || user.id, expiresIn: '7d' }
+    { subject: user._id?.toString() || user.id, expiresIn: '30d' }
   );
 }
 
@@ -65,9 +65,9 @@ function cookieOptions() {
   const isProd = process.env.NODE_ENV === 'production';
   return {
     httpOnly: true,
-    secure: isProd,                    // HTTPS only in production
-    sameSite: isProd ? 'none' : 'lax', // 'none' required for cross-origin cookies
-    maxAge: 1000 * 60 * 60 * 24 * 7   // 7 days
+    secure: isProd,
+    sameSite: isProd ? 'none' : 'lax',
+    maxAge: 1000 * 60 * 60 * 24 * 30   // 30 days
   };
 }
 
@@ -278,7 +278,7 @@ export async function login(req, res) {
     const token = jwt.sign(
       { role: user.role, emailVerified: user.emailVerified },
       process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET not configured'); })(),
-      { subject: user.id, expiresIn: '7d' }
+      { subject: user.id, expiresIn: '30d' }
     );
 
     res.cookie('sessionToken', token, cookieOptions());
@@ -461,7 +461,7 @@ export async function firebaseSession(req, res) {
     const token = jwt.sign(
       { role: user.role, emailVerified: true },
       process.env.JWT_SECRET || (() => { throw new Error('JWT_SECRET not configured'); })(),
-      { subject: user.id, expiresIn: '7d' }
+      { subject: user.id, expiresIn: '30d' }
     );
 
     res.cookie('sessionToken', token, cookieOptions());
@@ -498,4 +498,5 @@ export async function firebaseSession(req, res) {
 
   return res.json({ ok: true, user: sanitizeUser(user) });
 }
+
 

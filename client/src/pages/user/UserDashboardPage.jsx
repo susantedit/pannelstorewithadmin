@@ -297,9 +297,15 @@ export default function UserDashboardPage() {
   // Load squad data when squad tab opens
   useEffect(() => {
     if (activeTab !== 'squad') return;
-    api.getReferralCode().then(res => { if (res?.code) setReferralCode(res.code); }).catch(() => {});
-    api.getReferralStats().then(res => { if (res?.ok) setReferralStats({ walletBalance: res.walletBalance, referralCount: res.referralCount, partnerBadge: res.partnerBadge }); }).catch(() => {});
-    api.getReferralLeaderboard().then(res => { if (res?.leaders) setLeaderboard(res.leaders); }).catch(() => {});
+    const loadSquad = () => {
+      api.getReferralCode().then(res => { if (res?.code) setReferralCode(res.code); }).catch(() => {});
+      api.getReferralStats().then(res => { if (res?.ok) setReferralStats({ walletBalance: res.walletBalance, referralCount: res.referralCount, partnerBadge: res.partnerBadge }); }).catch(() => {});
+      api.getReferralLeaderboard().then(res => { if (res?.leaders) setLeaderboard(res.leaders); }).catch(() => {});
+    };
+    loadSquad();
+    // Retry after 3s in case server was cold-starting
+    const retry = setTimeout(loadSquad, 3000);
+    return () => clearTimeout(retry);
   }, [activeTab]);
 
   const handleApplyCode = async () => {
