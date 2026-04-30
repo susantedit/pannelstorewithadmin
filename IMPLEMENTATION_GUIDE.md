@@ -100,8 +100,8 @@ node server/scripts/makeAdmin.js susantedit@gmail.com
 
 **Method 3 — MongoDB directly:**
 ```bash
-mongosh "mongodb+srv://pannel:pannels22121@pannel.qx1glog.mongodb.net/susantedit"
-db.users.updateOne({email:"susantedit@gmail.com"},{$set:{role:"admin"}})
+mongosh "$MONGO_URI"
+db.users.updateOne({email:"your@gmail.com"},{$set:{role:"admin"}})
 ```
 
 ## Current Issues Fixed

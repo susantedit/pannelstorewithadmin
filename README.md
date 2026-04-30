@@ -265,51 +265,26 @@ susantedit/
 
 ### 1. Clone and install
 ```bash
-git clone https://github.com/yourusername/susantedit.git
+git clone https://github.com/susantedit/pannelstorewithadmin
 cd susantedit
 npm run install:all
 ```
 
 ### 2. Server environment (`server/.env`)
-```env
-PORT=3000
-MONGO_URI=mongodb+srv://user:pass@cluster.mongodb.net/susantedit
-JWT_SECRET=generate-64-char-random-string-at-randomkeygen.com
-NODE_ENV=development
-CLIENT_URL=http://localhost:5173
-FIREBASE_PROJECT_ID=your-firebase-project-id
-ADMIN_EMAIL=your@gmail.com
 
-# Optional — AI chat works without this (uses local Q&A)
-GEMINI_API_KEY=AIzaSy...
-
-# Optional — email verification (auto-bypassed in dev)
-SMTP_HOST=smtp.gmail.com
-SMTP_PORT=587
-SMTP_USER=your@gmail.com
-SMTP_PASS=your-app-password
-```
+Copy `server/.env.example` to `server/.env` and fill in your values. See `.env.example` for all required keys:
+- MongoDB Atlas connection string
+- JWT secret (generate a strong 64-char random string)
+- Firebase project ID
+- Admin email
+- Optional: Gemini API key, SMTP settings for email
 
 ### 3. Client environment (`client/.env`)
-```env
-VITE_API_URL=                              # empty = Vite proxy in dev
-VITE_FIREBASE_API_KEY=...
-VITE_FIREBASE_AUTH_DOMAIN=...
-VITE_FIREBASE_PROJECT_ID=...
-VITE_FIREBASE_STORAGE_BUCKET=...
-VITE_FIREBASE_MESSAGING_SENDER_ID=...
-VITE_FIREBASE_APP_ID=...
 
-# Ads — get from publishers.adsterra.com after site approval
-VITE_ADSTERRA_KEY=your_key
-VITE_ADSTERRA_SCRIPT_DASHBOARD=//pl....invoke.js
-VITE_ADSTERRA_SCRIPT_LANDING=//pl....invoke.js
-
-# Payment details shown to users
-VITE_ESEWA_NUMBER=9708838261
-VITE_BANK_NAME=NIC Asia Bank
-VITE_BANK_ACCOUNT=your_account_number
-```
+Copy `client/.env.example` to `client/.env` and fill in your values. See `.env.example` for all required keys:
+- Firebase config (API key, auth domain, project ID, etc.)
+- Adsterra publisher key and zone script URLs
+- Payment details (eSewa number, bank name, account number)
 
 ### 4. Run
 ```bash
