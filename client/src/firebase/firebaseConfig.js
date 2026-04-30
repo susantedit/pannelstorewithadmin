@@ -66,4 +66,22 @@ export async function firebaseSignOut() {
   await signOut(auth);
 }
 
+/**
+ * Silent session refresh — if Firebase still has a logged-in user,
+ * get a fresh ID token and exchange it for a new backend session cookie.
+ * Returns true if successful, false if no Firebase user.
+ */
+export async function refreshFirebaseSession() {
+  const currentUser = auth.currentUser;
+  if (!currentUser) return false;
+  try {
+    const idToken = await currentUser.getIdToken(true); // force refresh
+    const { api } = await import('../services/api.js');
+    const res = await api.firebaseSession(idToken, currentUser.displayName || '');
+    return !!(res?.ok && res?.user);
+  } catch {
+    return false;
+  }
+}
+
 export { auth, app };

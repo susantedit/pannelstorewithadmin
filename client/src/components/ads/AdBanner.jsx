@@ -36,10 +36,11 @@ const ADSTERRA_KEY    = import.meta.env.VITE_ADSTERRA_KEY    || '';
 // Adsterra atOptions format — key + dimensions per slot
 // These are hardcoded from your Adsterra dashboard zones
 const ADSTERRA_ZONES = {
-  'dashboard-mid':  { key: import.meta.env.VITE_ADSTERRA_KEY_728  || 'f8f63db1607698ab4392e358b5f18242', width: 728, height: 90  },
-  'landing-top':    { key: import.meta.env.VITE_ADSTERRA_KEY_728  || 'f8f63db1607698ab4392e358b5f18242', width: 728, height: 90  },
-  'sidebar':        { key: import.meta.env.VITE_ADSTERRA_KEY_300  || '182d58801eedbe8f5f8bfea2e9234a5f', width: 300, height: 250 },
-  'after-purchase': { key: import.meta.env.VITE_ADSTERRA_KEY_300  || '182d58801eedbe8f5f8bfea2e9234a5f', width: 300, height: 250 },
+  'dashboard-mid':  { key: import.meta.env.VITE_ADSTERRA_KEY_728  || 'f8f63db1607698ab4392e358b5f18242', width: 728, height: 90,  host: 'www.topcreativeformat.com' },
+  'landing-top':    { key: import.meta.env.VITE_ADSTERRA_KEY_728  || 'f8f63db1607698ab4392e358b5f18242', width: 728, height: 90,  host: 'www.topcreativeformat.com' },
+  'sidebar':        { key: import.meta.env.VITE_ADSTERRA_KEY_300  || '182d58801eedbe8f5f8bfea2e9234a5f', width: 300, height: 250, host: 'www.topcreativeformat.com' },
+  'after-purchase': { key: import.meta.env.VITE_ADSTERRA_KEY_300  || '182d58801eedbe8f5f8bfea2e9234a5f', width: 300, height: 250, host: 'www.topcreativeformat.com' },
+  'mobile-bottom':  { key: 'a980f1552ae8eadfc2afa5d33787f81e', width: 320, height: 50, host: 'www.highperformanceformat.com' },
 };
 
 // Adsterra script URLs per slot (invoke.js format — optional override)
@@ -104,7 +105,6 @@ function AdsterraAtUnit({ zone }) {
     if (!zone?.key || !containerRef.current) return;
     containerRef.current.innerHTML = '';
 
-    // Set atOptions on window
     window.atOptions = {
       key: zone.key,
       format: 'iframe',
@@ -115,7 +115,7 @@ function AdsterraAtUnit({ zone }) {
 
     const script = document.createElement('script');
     script.type = 'text/javascript';
-    script.src = `//www.topcreativeformat.com/${zone.key}/invoke.js`;
+    script.src = `//${zone.host || 'www.topcreativeformat.com'}/${zone.key}/invoke.js`;
     script.async = true;
     script.setAttribute('data-cfasync', 'false');
     containerRef.current.appendChild(script);
@@ -138,7 +138,30 @@ function AdsterraAtUnit({ zone }) {
   );
 }
 
-export default function AdBanner({ slot = 'dashboard-mid' }) {
+// VIP upsell strip shown above every ad
+function VipUpsell({ onVip }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '5px 10px', marginBottom: '4px',
+      background: 'rgba(251,191,36,0.06)', borderRadius: '6px',
+      fontSize: '0.68rem', color: 'rgba(255,255,255,0.35)'
+    }}>
+      <span>📢 Advertisement</span>
+      <button
+        onClick={onVip}
+        style={{
+          background: 'none', border: 'none', cursor: 'pointer',
+          color: '#fbbf24', fontSize: '0.68rem', fontWeight: 700, padding: 0
+        }}
+      >
+        ⭐ Go VIP Rs 199/mo — Remove all ads
+      </button>
+    </div>
+  );
+}
+
+export default function AdBanner({ slot = 'dashboard-mid', onVipClick }) {
   // Safe auth check — ads show to non-logged-in users too
   let isVip = false;
   try {
@@ -150,41 +173,37 @@ export default function AdBanner({ slot = 'dashboard-mid' }) {
 
   const adsterraScript = ADSTERRA_SCRIPTS[slot] || '';
 
-  // Adsterra first — accepts gaming/cheat content, AdSense does not
-  // Prefer invoke.js script if set, otherwise use atOptions format (hardcoded keys)
-  if (adsterraScript) {
-    return <AdsterraUnit scriptSrc={adsterraScript} />;
-  }
+  const renderAd = () => {
+    if (adsterraScript) return <AdsterraUnit scriptSrc={adsterraScript} />;
+    const zone = ADSTERRA_ZONES[slot];
+    if (zone?.key) return <AdsterraAtUnit zone={zone} />;
+    if (ADSENSE_CLIENT) {
+      const config = ADSENSE_SLOTS[slot] || ADSENSE_SLOTS['dashboard-mid'];
+      return <AdSenseUnit slot={config.slot} format={config.format} />;
+    }
+    if (import.meta.env.DEV) {
+      return (
+        <div style={{
+          padding: '10px 16px', background: 'rgba(255,255,255,0.02)',
+          border: '1px dashed rgba(255,255,255,0.06)', borderRadius: '10px',
+          textAlign: 'center', fontSize: '0.68rem', color: '#2a2a2a',
+          letterSpacing: '1px', userSelect: 'none', minHeight: '90px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          AD [{slot}]
+        </div>
+      );
+    }
+    return null;
+  };
 
-  const zone = ADSTERRA_ZONES[slot];
-  if (zone?.key) {
-    return <AdsterraAtUnit zone={zone} />;
-  }
+  const ad = renderAd();
+  if (!ad) return null;
 
-  // AdSense fallback (only use if your site has no cheat content)
-  if (ADSENSE_CLIENT) {
-    const config = ADSENSE_SLOTS[slot] || ADSENSE_SLOTS['dashboard-mid'];
-    return <AdSenseUnit slot={config.slot} format={config.format} />;
-  }
-
-  // Dev placeholder — invisible to real users, visible only in dev
-  if (import.meta.env.DEV) {
-    return (
-      <div style={{
-        padding: '10px 16px',
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px dashed rgba(255,255,255,0.06)',
-        borderRadius: '10px',
-        textAlign: 'center',
-        fontSize: '0.68rem',
-        color: '#2a2a2a',
-        letterSpacing: '1px',
-        userSelect: 'none'
-      }}>
-        AD SPACE [{slot}] — Add VITE_ADSENSE_CLIENT or VITE_ADSTERRA_KEY to .env
-      </div>
-    );
-  }
-
-  return null;
+  return (
+    <div>
+      <VipUpsell onVip={onVipClick || (() => {})} />
+      {ad}
+    </div>
+  );
 }

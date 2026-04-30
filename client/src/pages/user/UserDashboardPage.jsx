@@ -1057,7 +1057,17 @@ export default function UserDashboardPage() {
       })()}
 
       {/* ── AD SLOT — between products and squad ── */}
-      <AdBanner slot="dashboard-mid" />
+      <AdBanner slot="dashboard-mid" onVipClick={() => setVipModalOpen(true)} />
+
+      {/* ── MOBILE BANNER — fixed bottom (320×50) ── */}
+      <div style={{
+        position: 'fixed', bottom: 0, left: 0, right: 0,
+        zIndex: 9990, display: 'flex', justifyContent: 'center',
+        background: 'rgba(7,7,16,0.95)', borderTop: '1px solid rgba(255,255,255,0.06)',
+        padding: '4px 0'
+      }}>
+        <AdBanner slot="mobile-bottom" onVipClick={() => setVipModalOpen(true)} />
+      </div>
 
       </>)}
 

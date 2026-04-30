@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../services/api';
-import { signInWithGoogle, firebaseSignOut } from '../firebase/firebaseConfig';
+import { signInWithGoogle, firebaseSignOut, getFirebaseCurrentUser, refreshFirebaseSession } from '../firebase/firebaseConfig';
 
 const AuthContext = createContext(null);
 
@@ -8,11 +8,41 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore session from httpOnly cookie on app load
+  // Restore session — if cookie is stale/missing, try silent Firebase refresh
   useEffect(() => {
     api.me()
-      .then(res => setUser(res?.user || null))
-      .catch(() => setUser(null))
+      .then(async res => {
+        if (res?.user) {
+          setUser(res.user);
+          return;
+        }
+        // Cookie missing or expired — try silent refresh via Firebase
+        try {
+          const refreshed = await refreshFirebaseSession();
+          if (refreshed) {
+            const res2 = await api.me();
+            setUser(res2?.user || null);
+          } else {
+            setUser(null);
+          }
+        } catch {
+          setUser(null);
+        }
+      })
+      .catch(async () => {
+        // 401 — try silent Firebase refresh
+        try {
+          const refreshed = await refreshFirebaseSession();
+          if (refreshed) {
+            const res2 = await api.me();
+            setUser(res2?.user || null);
+          } else {
+            setUser(null);
+          }
+        } catch {
+          setUser(null);
+        }
+      })
       .finally(() => setLoading(false));
   }, []);
 

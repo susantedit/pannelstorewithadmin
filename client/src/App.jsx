@@ -36,10 +36,42 @@ function RequireAdmin({ children }) {
 function KeepAlive() {
   useEffect(() => {
     const ping = () => api.ping().catch(() => {});
-    ping(); // immediate on mount
-    const id = setInterval(ping, 3 * 60 * 1000); // every 3 minutes
+    ping();
+    const id = setInterval(ping, 3 * 60 * 1000);
     return () => clearInterval(id);
   }, []);
+  return null;
+}
+
+// Injects Popunder + Social Bar scripts globally (highest earning ad formats)
+// VIP users are excluded via CSS class on body
+function GlobalAds() {
+  const { user } = useAuth();
+  const isVip = !!(user?.vipExpiresAt && new Date(user.vipExpiresAt) > new Date());
+  const isAdmin = user?.role === 'admin';
+
+  useEffect(() => {
+    if (isVip || isAdmin) return; // no ads for VIP or admin
+
+    const scripts = [];
+
+    // Popunder — opens behind tab on first click, highest CPM
+    const popunder = document.createElement('script');
+    popunder.src = 'https://pl29301227.profitablecpmratenetwork.com/38/c5/f9/38c5f97f6096a1865333cf5f487fe64d.js';
+    popunder.async = true;
+    document.head.appendChild(popunder);
+    scripts.push(popunder);
+
+    // Social Bar — sticky bottom bar, always visible
+    const socialBar = document.createElement('script');
+    socialBar.src = 'https://pl29301229.profitablecpmratenetwork.com/e6/99/4a/e6994aa11b27b2ae60f5604696a3dc39.js';
+    socialBar.async = true;
+    document.head.appendChild(socialBar);
+    scripts.push(socialBar);
+
+    return () => scripts.forEach(s => { try { document.head.removeChild(s); } catch {} });
+  }, [isVip, isAdmin]);
+
   return null;
 }
 
@@ -48,6 +80,7 @@ export default function App() {
     <AuthProvider>
       <Router future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
         <KeepAlive />
+        <GlobalAds />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<LoginPage />} />
