@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { api } from '../services/api';
-import { signInWithGoogle, firebaseSignOut, getFirebaseCurrentUser, refreshFirebaseSession } from '../firebase/firebaseConfig';
+import { signInWithGoogle, firebaseSignOut, auth } from '../firebase/firebaseConfig';
+import { onAuthStateChanged } from 'firebase/auth';
 
 const AuthContext = createContext(null);
 
@@ -8,42 +9,38 @@ export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Restore session — if cookie is stale/missing, try silent Firebase refresh
   useEffect(() => {
-    api.me()
-      .then(async res => {
+    // Wait for Firebase to initialize, then try to restore backend session
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      try {
+        // First try existing backend cookie
+        const res = await api.me();
         if (res?.user) {
           setUser(res.user);
+          setLoading(false);
           return;
         }
-        // Cookie missing or expired — try silent refresh via Firebase
-        try {
-          const refreshed = await refreshFirebaseSession();
-          if (refreshed) {
-            const res2 = await api.me();
-            setUser(res2?.user || null);
-          } else {
-            setUser(null);
+
+        // Cookie missing/expired — if Firebase has a user, get fresh token
+        if (firebaseUser) {
+          const idToken = await firebaseUser.getIdToken(true);
+          const res2 = await api.firebaseSession(idToken, firebaseUser.displayName || '');
+          if (res2?.ok && res2?.user) {
+            setUser(res2.user);
+            setLoading(false);
+            return;
           }
-        } catch {
-          setUser(null);
         }
-      })
-      .catch(async () => {
-        // 401 — try silent Firebase refresh
-        try {
-          const refreshed = await refreshFirebaseSession();
-          if (refreshed) {
-            const res2 = await api.me();
-            setUser(res2?.user || null);
-          } else {
-            setUser(null);
-          }
-        } catch {
-          setUser(null);
-        }
-      })
-      .finally(() => setLoading(false));
+
+        setUser(null);
+      } catch {
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
   /** Google sign-in → exchange Firebase ID token for backend session cookie */
