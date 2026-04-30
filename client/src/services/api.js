@@ -81,6 +81,7 @@ export const api = {
   // Gamification
   getGamificationProfile: () => request('/api/gamification/profile'),
   dailyCheckIn: () => request('/api/gamification/checkin', { method: 'POST' }),
+  dailySpin: () => request('/api/gamification/spin', { method: 'POST' }),
   birthdayCheck: () => request('/api/gamification/birthday-check', { method: 'POST' }),
   // Admin reactivation
   reactivateUsers: (days) => request('/api/admin/reactivate', { method: 'POST', body: JSON.stringify({ days }) }),

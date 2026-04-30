@@ -38,6 +38,9 @@ const userSchema = new mongoose.Schema(
     lastOrderPackage:  { type: String, default: '' },
     lastOrderPrice:    { type: String, default: '' },
 
+    // Daily spin wheel
+    lastSpinAt:        { type: Date, default: null },
+
     // Reactivation & birthday
     lastBirthdayCredit:  { type: Date, default: null },
     reactivationSentAt:  { type: Date, default: null },

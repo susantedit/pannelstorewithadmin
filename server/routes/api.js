@@ -518,6 +518,60 @@ router.post('/gamification/checkin', requireAuth, async (req, res) => {
   }
 });
 
+// ── Daily Spin Wheel ──────────────────────────────────────────────────────
+// Enforces once per day server-side. Returns prize and records spin time.
+router.post('/gamification/spin', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.auth.userId);
+    if (!user) return res.status(404).json({ ok: false, message: 'User not found' });
+
+    const now = new Date();
+    const lastSpin = user.lastSpinAt ? new Date(user.lastSpinAt) : null;
+
+    // Check if already spun today (reset at midnight local — use UTC day boundary)
+    if (lastSpin) {
+      const hoursSince = (now - lastSpin) / 3600000;
+      if (hoursSince < 20) {
+        const nextSpin = new Date(lastSpin.getTime() + 20 * 3600000);
+        const hoursLeft = Math.ceil((nextSpin - now) / 3600000);
+        return res.status(429).json({
+          ok: false,
+          message: `Already spun today! Come back in ${hoursLeft} hour${hoursLeft !== 1 ? 's' : ''}.`,
+          nextSpinAt: nextSpin
+        });
+      }
+    }
+
+    // Weighted prize selection (matches frontend odds)
+    const rand = Math.random();
+    let prize;
+    if (rand < 1e-43) {
+      prize = { label: '🏆 JACKPOT', value: 50, type: 'wallet' };
+    } else if (rand < 0.60) {
+      prize = { label: 'Try Again', value: 0, type: 'none' };
+    } else if (rand < 0.90) {
+      prize = { label: '20 XP', value: 20, type: 'xp' };
+    } else if (rand < 0.995) {
+      prize = { label: '5 XP', value: 5, type: 'xp' };
+    } else {
+      prize = { label: 'Rs 50 Wallet', value: 50, type: 'wallet' };
+    }
+
+    // Apply reward
+    user.lastSpinAt = now;
+    if (prize.type === 'wallet') {
+      user.walletBalance = (user.walletBalance || 0) + prize.value;
+    } else if (prize.type === 'xp') {
+      user.xp = (user.xp || 0) + prize.value;
+    }
+    await user.save();
+
+    res.json({ ok: true, prize, walletBalance: user.walletBalance, xp: user.xp });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
+});
+
 // ── Birthday wallet credit ────────────────────────────────────────────────
 router.post('/gamification/birthday-check', requireAuth, async (req, res) => {
   try {

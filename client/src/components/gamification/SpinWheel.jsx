@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
 import { Notif } from '../../utils/notify';
 import { playLevelUp, playCashRegister, startSpinTick } from '../../utils/sounds';
+import { api } from '../../services/api';
 
 // ── Probabilities ──────────────────────────────────────────────────────────
 // Try Again:      60%   — most spins
@@ -44,38 +45,55 @@ export default function SpinWheel({ onClose, onReward }) {
   const [spinning, setSpinning] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [result, setResult] = useState(null);
-  const [spinsLeft] = useState(1); // 1 free spin per day
+  const [error, setError] = useState('');
   const spinRef = useRef(0);
 
-  const handleSpin = () => {
+  const handleSpin = async () => {
     if (spinning || result) return;
+    setError('');
+
+    // Check with backend first — enforces once per day
     setSpinning(true);
+    let serverPrize;
+    try {
+      const res = await api.dailySpin();
+      if (!res?.ok) {
+        setSpinning(false);
+        setError(res?.message || 'Already spun today! Come back tomorrow.');
+        return;
+      }
+      serverPrize = res.prize;
+    } catch {
+      setSpinning(false);
+      setError('Connection error. Try again.');
+      return;
+    }
 
-    const prize = pickPrize();
-    const prizeIndex = PRIZES.indexOf(prize);
+    // Find matching prize index for animation
+    const prizeIndex = PRIZES.findIndex(p => p.label === serverPrize.label);
+    const safeIndex = prizeIndex >= 0 ? prizeIndex : 0;
 
-    const targetSegment = prizeIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
+    const targetSegment = safeIndex * SEGMENT_ANGLE + SEGMENT_ANGLE / 2;
     const extraSpins = 5 + Math.floor(Math.random() * 3);
     const targetRotation = spinRef.current + (extraSpins * 360) + (360 - targetSegment);
 
     spinRef.current = targetRotation;
     setRotation(targetRotation);
 
-    // Start tick sound — slows down over 4s
+    // Start tick sound
     startSpinTick();
 
     setTimeout(() => {
       setSpinning(false);
-      setResult(prize);
-      if (prize.type !== 'none') {
+      setResult(serverPrize);
+      if (serverPrize.type !== 'none') {
         playLevelUp();
         Notif.showNotification(
-          `🎰 You won ${prize.label}!`,
-          prize.type === 'wallet' ? `Rs ${prize.value} added to your wallet!` : `+${prize.value} XP added!`,
-          'key',
-          0
+          `🎰 You won ${serverPrize.label}!`,
+          serverPrize.type === 'wallet' ? `Rs ${serverPrize.value} added to your wallet!` : `+${serverPrize.value} XP added!`,
+          'key', 0
         );
-        onReward?.(prize);
+        onReward?.(serverPrize);
       } else {
         Notif.showToast('Better luck next time! 😅', 'info', 3000);
       }
@@ -179,6 +197,18 @@ export default function SpinWheel({ onClose, onReward }) {
             <text x="140" y="144" textAnchor="middle" fontSize="16" fill="var(--primary)">🎰</text>
           </svg>
         </div>
+
+        {/* Result */}
+        {error && (
+          <div style={{
+            padding: '14px 20px', marginBottom: '16px',
+            background: 'rgba(230,57,70,0.1)', border: '1px solid rgba(230,57,70,0.3)',
+            borderRadius: '14px', textAlign: 'center',
+            fontFamily: "'Orbitron',sans-serif", fontSize: '0.82rem', color: '#ff6b6b', fontWeight: 700
+          }}>
+            ⏰ {error}
+          </div>
+        )}
 
         {/* Result */}
         {result && (
