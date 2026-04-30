@@ -51,23 +51,24 @@ function GlobalAds() {
   const isAdmin = user?.role === 'admin';
 
   useEffect(() => {
-    if (isVip || isAdmin) return; // no ads for VIP or admin
+    if (isVip || isAdmin) return;
 
     const scripts = [];
+    const popunderSrc = import.meta.env.VITE_AD_POPUNDER_SRC;
+    const socialBarSrc = import.meta.env.VITE_AD_SOCIALBAR_SRC;
 
-    // Popunder — opens behind tab on first click, highest CPM
-    const popunder = document.createElement('script');
-    popunder.src = 'https://pl29301227.profitablecpmratenetwork.com/38/c5/f9/38c5f97f6096a1865333cf5f487fe64d.js';
-    popunder.async = true;
-    document.head.appendChild(popunder);
-    scripts.push(popunder);
-
-    // Social Bar — sticky bottom bar, always visible
-    const socialBar = document.createElement('script');
-    socialBar.src = 'https://pl29301229.profitablecpmratenetwork.com/e6/99/4a/e6994aa11b27b2ae60f5604696a3dc39.js';
-    socialBar.async = true;
-    document.head.appendChild(socialBar);
-    scripts.push(socialBar);
+    if (popunderSrc) {
+      const s = document.createElement('script');
+      s.src = popunderSrc; s.async = true;
+      document.head.appendChild(s);
+      scripts.push(s);
+    }
+    if (socialBarSrc) {
+      const s = document.createElement('script');
+      s.src = socialBarSrc; s.async = true;
+      document.head.appendChild(s);
+      scripts.push(s);
+    }
 
     return () => scripts.forEach(s => { try { document.head.removeChild(s); } catch {} });
   }, [isVip, isAdmin]);

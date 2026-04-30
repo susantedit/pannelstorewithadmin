@@ -36,11 +36,11 @@ const ADSTERRA_KEY    = import.meta.env.VITE_ADSTERRA_KEY    || '';
 // Adsterra atOptions format — key + dimensions per slot
 // These are hardcoded from your Adsterra dashboard zones
 const ADSTERRA_ZONES = {
-  'dashboard-mid':  { key: import.meta.env.VITE_ADSTERRA_KEY_728  || 'f8f63db1607698ab4392e358b5f18242', width: 728, height: 90,  host: 'www.topcreativeformat.com' },
-  'landing-top':    { key: import.meta.env.VITE_ADSTERRA_KEY_728  || 'f8f63db1607698ab4392e358b5f18242', width: 728, height: 90,  host: 'www.topcreativeformat.com' },
-  'sidebar':        { key: import.meta.env.VITE_ADSTERRA_KEY_300  || '182d58801eedbe8f5f8bfea2e9234a5f', width: 300, height: 250, host: 'www.topcreativeformat.com' },
-  'after-purchase': { key: import.meta.env.VITE_ADSTERRA_KEY_300  || '182d58801eedbe8f5f8bfea2e9234a5f', width: 300, height: 250, host: 'www.topcreativeformat.com' },
-  'mobile-bottom':  { key: 'a980f1552ae8eadfc2afa5d33787f81e', width: 320, height: 50, host: 'www.highperformanceformat.com' },
+  'dashboard-mid':  { key: import.meta.env.VITE_ADSTERRA_KEY_728  || '', width: 728, height: 90,  host: import.meta.env.VITE_ADSTERRA_HOST_728  || 'www.topcreativeformat.com' },
+  'landing-top':    { key: import.meta.env.VITE_ADSTERRA_KEY_728  || '', width: 728, height: 90,  host: import.meta.env.VITE_ADSTERRA_HOST_728  || 'www.topcreativeformat.com' },
+  'sidebar':        { key: import.meta.env.VITE_ADSTERRA_KEY_300  || '', width: 300, height: 250, host: import.meta.env.VITE_ADSTERRA_HOST_300  || 'www.topcreativeformat.com' },
+  'after-purchase': { key: import.meta.env.VITE_ADSTERRA_KEY_300  || '', width: 300, height: 250, host: import.meta.env.VITE_ADSTERRA_HOST_300  || 'www.topcreativeformat.com' },
+  'mobile-bottom':  { key: import.meta.env.VITE_ADSTERRA_KEY_320  || '', width: 320, height: 50,  host: import.meta.env.VITE_ADSTERRA_HOST_320  || 'www.highperformanceformat.com' },
 };
 
 // Adsterra script URLs per slot (invoke.js format — optional override)
