@@ -271,11 +271,15 @@ export default function UserDashboardPage() {
     loadNotificationCount();
   }, []);
 
+  const prevUnreadCountRef = useRef(0);
+
   const loadNotificationCount = async () => {
     try {
       const res = await api.getNotifications({ unread: true, limit: 1 });
       if (res?.ok) {
-        setUnreadNotificationCount(res.unreadCount || 0);
+        const count = res.unreadCount || 0;
+        prevUnreadCountRef.current = count; // seed so first poll doesn't false-fire
+        setUnreadNotificationCount(count);
       }
     } catch (error) {
       console.error('Failed to load notification count:', error);
@@ -284,13 +288,38 @@ export default function UserDashboardPage() {
 
   useEffect(() => {
     loadData();
-    // Poll every 30s for status updates
+    // Poll every 30s for status updates AND new notifications
     pollRef.current = setInterval(async () => {
       try {
+        // ── Check for new notifications ──────────────────────────────
+        const notifRes = await api.getNotifications({ unread: true, limit: 5 });
+        if (notifRes?.ok) {
+          const newCount = notifRes.unreadCount || 0;
+          const prevCount = prevUnreadCountRef.current;
+          if (newCount > prevCount) {
+            // New notification(s) arrived
+            const diff = newCount - prevCount;
+            // Show the latest notification as a toast
+            const latest = notifRes.notifications?.[0];
+            if (latest) {
+              Notif.showNotification(latest.title, latest.message, latest.type || 'info', 6000);
+              playNotif();
+              sendBrowserNotification(latest.title, latest.message, { tag: `notif-${latest._id}` });
+            } else {
+              Notif.showNotification('🔔 New Notification', `You have ${diff} new notification${diff > 1 ? 's' : ''}`, 'info', 5000);
+              playNotif();
+            }
+          }
+          prevUnreadCountRef.current = newCount;
+          setUnreadNotificationCount(newCount);
+        }
+      } catch {}
+
+      try {
+        // ── Check for request status changes ─────────────────────────
         const res = await api.getRequests();
         if (!res?.requests) return;
         const updated = res.requests;
-        // Check for status changes
         updated.forEach(r => {
           const id = r.id || r._id;
           const prev = prevStatusRef.current[id];
@@ -304,8 +333,6 @@ export default function UserDashboardPage() {
               Notif.requestRejected(r.product);
               sendBrowserNotification('Request Rejected', `Your ${r.product} request was rejected.`, { tag: `reject-${id}` });
             }
-            // Refresh notification count when status changes
-            loadNotificationCount();
           }
           prevStatusRef.current[id] = curr;
         });
