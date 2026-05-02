@@ -6,6 +6,7 @@ import { listCoupons, createCoupon, updateCoupon, deleteCoupon } from '../contro
 import { login, logout, me, register, verifyEmail, forgotPassword, resetPassword, firebaseSession } from '../controllers/authController.js';
 import { requireAuth, requireAdmin, requireVerifiedEmail } from '../middleware/auth.js';
 import { getUserNotifications, markNotificationsRead, markAllNotificationsRead, sendCustomNotification, getNotificationStats } from '../controllers/notificationController.js';
+import { queueScheduledNotification } from '../lib/scheduler.js';
 import User from '../models/User.js';
 import AppSettings from '../models/AppSettings.js';
 
@@ -201,6 +202,34 @@ router.patch('/notifications/read', requireAuth, markNotificationsRead);
 router.patch('/notifications/read-all', requireAuth, markAllNotificationsRead);
 router.post('/admin/notifications/send', requireAuth, requireAdmin, sendCustomNotification);
 router.get('/admin/notifications/stats', requireAuth, requireAdmin, getNotificationStats);
+
+// ── Scheduled notification (admin sets a future send time) ───────────────────
+router.post('/admin/notifications/schedule', requireAuth, requireAdmin, (req, res) => {
+  try {
+    const { title, message, type = 'info', sendAt, targetType = 'all', targetUserId } = req.body || {};
+    if (!title?.trim() || !message?.trim()) {
+      return res.status(400).json({ ok: false, message: 'title and message required' });
+    }
+    if (!sendAt) {
+      return res.status(400).json({ ok: false, message: 'sendAt (ISO date string) required' });
+    }
+    const sendDate = new Date(sendAt);
+    if (isNaN(sendDate.getTime()) || sendDate <= new Date()) {
+      return res.status(400).json({ ok: false, message: 'sendAt must be a valid future date' });
+    }
+    queueScheduledNotification({
+      title: title.trim(),
+      message: message.trim(),
+      type,
+      sendAt: sendDate,
+      targetType,
+      targetUserId: targetType === 'specific' ? targetUserId : undefined,
+    });
+    res.json({ ok: true, message: `Notification scheduled for ${sendDate.toISOString()}` });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
+});
 
 // ── Referral System ───────────────────────────────────────────────────────
 router.get('/referral/my-code', requireAuth, async (req, res) => {

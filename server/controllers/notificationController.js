@@ -204,32 +204,30 @@ export async function getNotificationStats(req, res) {
 
 // Notification helpers for system events
 export const NotificationHelpers = {
-  // XP gained notification
   async xpGained(userId, xpAmount, reason = 'Activity completed') {
     return createNotification(
       userId,
-      '🎯 XP Gained!',
-      `You earned ${xpAmount} XP! ${reason}`,
+      'XP Gained',
+      `You earned ${xpAmount} XP. ${reason}`,
       'xp',
       { relatedType: 'xp', metadata: { xpAmount, reason } }
     );
   },
 
-  // Request status change notification
   async requestStatusChanged(userId, requestId, status, productName) {
     const statusMessages = {
       'Accepted': {
-        title: '🔑 Request Approved!',
-        message: `Your ${productName} request has been approved! Your key is ready.`,
+        title: 'Request Approved',
+        message: `Your ${productName} request has been approved. Your key is ready to copy.`,
         type: 'success'
       },
       'Rejected': {
-        title: '❌ Request Rejected',
+        title: 'Request Rejected',
         message: `Your ${productName} request was rejected. Contact support for details.`,
         type: 'error'
       },
       'Pending payment': {
-        title: '⏳ Payment Verification',
+        title: 'Payment Verification',
         message: `Your ${productName} request is pending payment verification.`,
         type: 'warning'
       }
@@ -237,7 +235,7 @@ export const NotificationHelpers = {
 
     const config = statusMessages[status] || {
       title: 'Request Updated',
-      message: `Your ${productName} request status: ${status}`,
+      message: `Your ${productName} request status changed to: ${status}`,
       type: 'info'
     };
 
@@ -250,12 +248,11 @@ export const NotificationHelpers = {
     );
   },
 
-  // Welcome notification for new users
   async welcomeUser(userId, userName) {
     return createNotification(
       userId,
-      '🎉 Welcome to SUSANTEDIT!',
-      `Hi ${userName}! Welcome to the best gaming service in Nepal. Start by browsing our products and earning XP!`,
+      'Welcome to SUSANTEDIT',
+      `Hi ${userName}! Welcome to the best gaming service in Nepal. Browse products and start earning XP.`,
       'success',
       { relatedType: 'system' }
     );

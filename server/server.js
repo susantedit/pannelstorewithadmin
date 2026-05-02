@@ -9,6 +9,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import connectDb from './config/db.js';
 import apiRoutes from './routes/api.js';
+import { startScheduler } from './lib/scheduler.js';
 
 dotenv.config();
 
@@ -84,9 +85,11 @@ app.use((error, _req, res, _next) => {
 connectDb()
   .then(() => {
     console.log('MongoDB connected.');
+    startScheduler(); // start auto notifications after DB is ready
   })
   .catch((error) => {
     console.warn('Mongo connection failed, running without database.', error.message);
+    startScheduler(); // still start scheduler (will skip DB ops gracefully)
   });
 
 app.listen(port, () => {
