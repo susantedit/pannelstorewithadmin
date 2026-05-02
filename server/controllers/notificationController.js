@@ -1,7 +1,8 @@
 import Notification from '../models/Notification.js';
 import User from '../models/User.js';
+import { sendPushToUser, broadcastPush } from '../lib/fcm.js';
 
-// Create notification helper
+// Create notification helper — saves to DB AND sends FCM push
 export async function createNotification(userId, title, message, type = 'info', options = {}) {
   try {
     const notification = await Notification.create({
@@ -15,6 +16,14 @@ export async function createNotification(userId, title, message, type = 'info', 
       relatedId: options.relatedId || null,
       metadata: options.metadata || {}
     });
+
+    // Fire FCM push (non-blocking — don't await so it doesn't slow down the response)
+    sendPushToUser(userId, { title, body: message }, {
+      type,
+      url: '/dashboard',
+      notificationId: String(notification._id)
+    }).catch(() => {});
+
     return notification;
   } catch (error) {
     console.error('Failed to create notification:', error);
@@ -151,6 +160,11 @@ export async function sendCustomNotification(req, res) {
     );
 
     const successCount = notifications.filter(n => n !== null).length;
+
+    // Also broadcast FCM push to all target users at once (more efficient)
+    if (targetType === 'all') {
+      broadcastPush({ title: title.trim(), body: message.trim() }, { type, url: '/dashboard' }).catch(() => {});
+    }
 
     res.json({
       ok: true,

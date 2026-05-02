@@ -19,6 +19,7 @@ import VipModal from '../../components/ads/VipModal';
 import QrDisplay from '../../components/shared/QrDisplay';
 import NotificationPanel from '../../components/notifications/NotificationPanel';
 import { playCashRegister, playKeyDelivered, playNotif, isSoundEnabled, setSoundEnabled, startBgSound, stopBgSound, isBgSoundPlaying, playUiClick } from '../../utils/sounds';
+import { setupPushNotifications } from '../../utils/pushNotifications';
 import { motion } from 'framer-motion';
 
 // ── LootBox sub-component ─────────────────────────────────────────────────
@@ -246,6 +247,11 @@ export default function UserDashboardPage() {
   // Ask for notification permission on mount
   useEffect(() => {
     requestNotificationPermission();
+    // Setup FCM real push notifications (OS-level, shows in phone notification shade)
+    setupPushNotifications((payload) => {
+      // Foreground message received — refresh notification count
+      loadNotificationCount();
+    });
     // Auto-resume bg sound if user had it on
     if (bgOn) {
       const t = setTimeout(() => startBgSound(), 500);

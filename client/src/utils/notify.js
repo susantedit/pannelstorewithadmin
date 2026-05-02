@@ -1,57 +1,23 @@
 /**
- * Professional notification system
- * — In-app popups (title + body + icon + progress bar)
+ * Zomato/Swiggy-style notification system
+ * — Rich cards: logo + colored bar + title + message + time + action
+ * — Stacked top-right, slide in from right, auto-dismiss with progress bar
  * — Browser push notifications
- * — Stacked, animated, dismissible
  */
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Config
+// Type configs
 // ─────────────────────────────────────────────────────────────────────────────
 
 const TYPES = {
-  success: {
-    color:  '#4ade80',
-    bg:     'rgba(74,222,128,0.08)',
-    border: 'rgba(74,222,128,0.25)',
-    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4ade80" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`
-  },
-  error: {
-    color:  '#ff6b6b',
-    bg:     'rgba(230,57,70,0.08)',
-    border: 'rgba(230,57,70,0.3)',
-    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ff6b6b" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`
-  },
-  warning: {
-    color:  '#f59e0b',
-    bg:     'rgba(245,158,11,0.08)',
-    border: 'rgba(245,158,11,0.25)',
-    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`
-  },
-  info: {
-    color:  '#60a5fa',
-    bg:     'rgba(96,165,250,0.08)',
-    border: 'rgba(96,165,250,0.25)',
-    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`
-  },
-  key: {
-    color:  '#fbbf24',
-    bg:     'rgba(251,191,36,0.08)',
-    border: 'rgba(251,191,36,0.3)',
-    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 11-7.778 7.778 5.5 5.5 0 017.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>`
-  },
-  submitted: {
-    color:  '#a78bfa',
-    bg:     'rgba(167,139,250,0.08)',
-    border: 'rgba(167,139,250,0.25)',
-    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>`
-  },
-  rejected: {
-    color:  '#f87171',
-    bg:     'rgba(248,113,113,0.08)',
-    border: 'rgba(248,113,113,0.25)',
-    icon: `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>`
-  }
+  success: { color: '#4ade80', bg: 'rgba(74,222,128,0.12)', border: 'rgba(74,222,128,0.3)', emoji: '✅' },
+  error:   { color: '#ff6b6b', bg: 'rgba(230,57,70,0.12)',  border: 'rgba(230,57,70,0.35)',  emoji: '❌' },
+  warning: { color: '#f59e0b', bg: 'rgba(245,158,11,0.12)', border: 'rgba(245,158,11,0.3)',  emoji: '⚠️' },
+  info:    { color: '#60a5fa', bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.3)',  emoji: '💬' },
+  key:     { color: '#fbbf24', bg: 'rgba(251,191,36,0.12)', border: 'rgba(251,191,36,0.35)', emoji: '🔑' },
+  submitted:{ color: '#a78bfa',bg: 'rgba(167,139,250,0.12)',border: 'rgba(167,139,250,0.3)', emoji: '📤' },
+  rejected: { color: '#f87171',bg: 'rgba(248,113,113,0.12)',border: 'rgba(248,113,113,0.3)', emoji: '🚫' },
+  xp:      { color: '#c084fc', bg: 'rgba(192,132,252,0.12)',border: 'rgba(192,132,252,0.3)', emoji: '🎯' },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -67,15 +33,15 @@ function getContainer() {
   _container.id = 'notif-root';
   _container.style.cssText = [
     'position:fixed',
-    'top:20px',
-    'right:20px',
+    'top:16px',
+    'right:16px',
     'z-index:99999',
     'display:flex',
     'flex-direction:column',
     'gap:10px',
     'pointer-events:none',
     'width:360px',
-    'max-width:calc(100vw - 32px)'
+    'max-width:calc(100vw - 24px)',
   ].join(';');
   document.body.appendChild(_container);
   return _container;
@@ -87,114 +53,164 @@ function injectStyles() {
   const s = document.createElement('style');
   s.id = 'notif-styles';
   s.textContent = `
-    @keyframes notifIn {
-      from { opacity:0; transform:translateX(110%) scale(0.92); }
-      to   { opacity:1; transform:translateX(0)   scale(1);    }
+    @keyframes notifSlideIn {
+      from { opacity:0; transform:translateX(calc(100% + 20px)); }
+      to   { opacity:1; transform:translateX(0); }
     }
-    @keyframes notifOut {
-      from { opacity:1; transform:translateX(0)    scale(1);    max-height:200px; margin-bottom:0; }
-      to   { opacity:0; transform:translateX(110%) scale(0.92); max-height:0;     margin-bottom:-10px; }
+    @keyframes notifSlideOut {
+      from { opacity:1; transform:translateX(0); max-height:120px; margin-bottom:0; }
+      to   { opacity:0; transform:translateX(calc(100% + 20px)); max-height:0; margin-bottom:-10px; }
     }
     @keyframes notifProgress {
       from { width:100%; }
-      to   { width:0%;   }
+      to   { width:0%; }
     }
     .notif-card {
       pointer-events:auto;
-      background:#161616;
+      background:#1a1a1a;
       border-radius:14px;
       overflow:hidden;
-      box-shadow:0 8px 40px rgba(0,0,0,0.7), 0 2px 8px rgba(0,0,0,0.4);
-      animation:notifIn 0.4s cubic-bezier(0.175,0.885,0.32,1.275) forwards;
+      box-shadow:0 4px 24px rgba(0,0,0,0.6), 0 1px 4px rgba(0,0,0,0.4);
+      animation:notifSlideIn 0.38s cubic-bezier(0.22,1,0.36,1) forwards;
       font-family:'Rajdhani',Inter,system-ui,sans-serif;
       position:relative;
-      cursor:default;
+      border:1px solid rgba(255,255,255,0.08);
     }
     .notif-card.removing {
-      animation:notifOut 0.35s ease forwards;
+      animation:notifSlideOut 0.3s ease forwards;
     }
-    .notif-inner {
-      display:flex;
-      align-items:flex-start;
-      gap:12px;
-      padding:14px 16px 16px;
+    .notif-left-bar {
+      position:absolute;
+      left:0; top:0; bottom:0;
+      width:4px;
+      border-radius:14px 0 0 14px;
     }
-    .notif-icon-wrap {
-      width:36px;
-      height:36px;
-      border-radius:10px;
+    .notif-header {
       display:flex;
       align-items:center;
-      justify-content:center;
+      gap:8px;
+      padding:10px 12px 6px 16px;
+    }
+    .notif-app-logo {
+      width:20px;
+      height:20px;
+      border-radius:5px;
+      object-fit:contain;
       flex-shrink:0;
-      margin-top:1px;
     }
-    .notif-body { flex:1; min-width:0; }
-    .notif-title {
-      font-size:0.92rem;
+    .notif-app-name {
+      font-size:0.7rem;
       font-weight:700;
-      color:#fff;
-      margin:0 0 3px;
-      letter-spacing:0.2px;
-      line-height:1.3;
+      letter-spacing:1.5px;
+      text-transform:uppercase;
+      color:#666;
+      flex:1;
     }
-    .notif-message {
-      font-size:0.85rem;
-      color:#aaa;
-      margin:0;
-      line-height:1.5;
-      word-break:break-word;
+    .notif-time {
+      font-size:0.68rem;
+      color:#555;
     }
-    .notif-close {
+    .notif-close-btn {
       background:none;
       border:none;
       color:#555;
       cursor:pointer;
-      font-size:1.1rem;
+      font-size:0.9rem;
       line-height:1;
       padding:2px 4px;
       border-radius:4px;
-      flex-shrink:0;
       transition:color 0.15s;
-      margin-top:-2px;
+      flex-shrink:0;
     }
-    .notif-close:hover { color:#fff; }
+    .notif-close-btn:hover { color:#ccc; }
+    .notif-body {
+      display:flex;
+      align-items:flex-start;
+      gap:10px;
+      padding:0 12px 10px 16px;
+    }
+    .notif-emoji {
+      font-size:1.5rem;
+      line-height:1;
+      flex-shrink:0;
+      margin-top:1px;
+    }
+    .notif-text { flex:1; min-width:0; }
+    .notif-title {
+      font-size:0.9rem;
+      font-weight:700;
+      color:#fff;
+      margin:0 0 3px;
+      line-height:1.3;
+    }
+    .notif-message {
+      font-size:0.82rem;
+      color:#999;
+      margin:0;
+      line-height:1.5;
+      word-break:break-word;
+    }
+    .notif-action {
+      display:inline-block;
+      margin-top:8px;
+      padding:4px 12px;
+      border-radius:6px;
+      font-size:0.75rem;
+      font-weight:700;
+      letter-spacing:0.5px;
+      cursor:pointer;
+      border:none;
+      transition:opacity 0.15s;
+    }
+    .notif-action:hover { opacity:0.85; }
     .notif-progress {
       height:3px;
-      border-radius:0 0 14px 14px;
       animation:notifProgress linear forwards;
-    }
-    .notif-border-top {
-      height:3px;
-      border-radius:14px 14px 0 0;
     }
   `;
   document.head.appendChild(s);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Core showToast
+// Core: showNotification
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function showToast(message, type = 'info', duration = 4500) {
+let _notifCount = 0;
+
+export function showNotification(title, message, type = 'info', duration = 5500, options = {}) {
   injectStyles();
   const container = getContainer();
   const cfg = TYPES[type] || TYPES.info;
 
+  // Cap at 5 stacked notifications
+  const existing = container.querySelectorAll('.notif-card:not(.removing)');
+  if (existing.length >= 5) existing[0].querySelector('.notif-close-btn')?.click();
+
+  const now = new Date();
+  const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+
   const card = document.createElement('div');
   card.className = 'notif-card';
-  card.style.border = `1px solid ${cfg.border}`;
+
+  const actionHtml = options.actionLabel
+    ? `<button class="notif-action" style="background:${cfg.color};color:#000;">${options.actionLabel}</button>`
+    : '';
 
   card.innerHTML = `
-    <div class="notif-border-top" style="background:${cfg.color};opacity:0.6"></div>
-    <div class="notif-inner">
-      <div class="notif-icon-wrap" style="background:${cfg.bg};border:1px solid ${cfg.border}">
-        ${cfg.icon}
+    <div class="notif-left-bar" style="background:${cfg.color};"></div>
+    <div class="notif-header">
+      <img class="notif-app-logo" src="/logo.png" alt="logo" onerror="this.style.display='none'" />
+      <span class="notif-app-name">SUSANTEDIT</span>
+      <span class="notif-time">${timeStr}</span>
+      <button class="notif-close-btn" aria-label="Dismiss">✕</button>
+    </div>
+    <div class="notif-body">
+      <span class="notif-emoji">${cfg.emoji}</span>
+      <div class="notif-text">
+        <p class="notif-title">${title}</p>
+        ${message ? `<p class="notif-message">${message}</p>` : ''}
+        ${actionHtml}
       </div>
-      <div class="notif-body">
-        <p class="notif-message">${message}</p>
-      </div>
-      <button class="notif-close" aria-label="Dismiss">✕</button>
     </div>
     ${duration > 0 ? `<div class="notif-progress" style="background:${cfg.color};animation-duration:${duration}ms"></div>` : ''}
   `;
@@ -202,53 +218,29 @@ export function showToast(message, type = 'info', duration = 4500) {
   const remove = () => {
     if (card.classList.contains('removing')) return;
     card.classList.add('removing');
-    setTimeout(() => card.remove(), 360);
+    setTimeout(() => card.remove(), 320);
   };
 
-  card.querySelector('.notif-close').addEventListener('click', remove);
+  card.querySelector('.notif-close-btn').addEventListener('click', remove);
+
+  if (options.actionLabel && options.onAction) {
+    card.querySelector('.notif-action')?.addEventListener('click', () => {
+      options.onAction();
+      remove();
+    });
+  }
+
   container.appendChild(card);
   if (duration > 0) setTimeout(remove, duration);
   return remove;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// showNotification — title + body (richer)
+// Simple toast (no title, just message)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export function showNotification(title, message, type = 'info', duration = 5500) {
-  injectStyles();
-  const container = getContainer();
-  const cfg = TYPES[type] || TYPES.info;
-
-  const card = document.createElement('div');
-  card.className = 'notif-card';
-  card.style.border = `1px solid ${cfg.border}`;
-
-  card.innerHTML = `
-    <div class="notif-border-top" style="background:${cfg.color};opacity:0.7"></div>
-    <div class="notif-inner">
-      <div class="notif-icon-wrap" style="background:${cfg.bg};border:1px solid ${cfg.border}">
-        ${cfg.icon}
-      </div>
-      <div class="notif-body">
-        <p class="notif-title">${title}</p>
-        ${message ? `<p class="notif-message">${message}</p>` : ''}
-      </div>
-      <button class="notif-close" aria-label="Dismiss">✕</button>
-    </div>
-    ${duration > 0 ? `<div class="notif-progress" style="background:${cfg.color};animation-duration:${duration}ms"></div>` : ''}
-  `;
-
-  const remove = () => {
-    if (card.classList.contains('removing')) return;
-    card.classList.add('removing');
-    setTimeout(() => card.remove(), 360);
-  };
-
-  card.querySelector('.notif-close').addEventListener('click', remove);
-  container.appendChild(card);
-  if (duration > 0) setTimeout(remove, duration);
-  return remove;
+export function showToast(message, type = 'info', duration = 3500) {
+  return showNotification(message, '', type, duration);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -275,78 +267,85 @@ export function sendBrowserNotification(title, body, options = {}) {
   return n;
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Combined helper — in-app + browser push
-// ─────────────────────────────────────────────────────────────────────────────
-
 export function notify(title, body, type = 'info', options = {}) {
-  showNotification(title, body, type, options.duration || 5500);
+  showNotification(title, body, type, options.duration || 5500, options);
   sendBrowserNotification(title, body, options);
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Pre-built notification presets
+// Pre-built presets
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const Notif = {
   requestSubmitted: (productName) =>
     showNotification(
-      'Request Submitted',
-      `Your order for <strong style="color:#fff">${productName}</strong> is under review. You'll be notified when it's approved.`,
-      'submitted',
-      6000
+      '📤 Order Placed!',
+      `Your order for <strong style="color:#fff">${productName}</strong> is under review. We'll notify you once it's approved.`,
+      'submitted', 6000
     ),
 
-  keyDelivered: (productName, key) =>
+  keyDelivered: (productName) =>
     showNotification(
       '🔑 Key Delivered!',
-      `Your <strong style="color:#fff">${productName}</strong> key is ready. Check your requests panel to copy it.`,
-      'key',
-      0 // stays until dismissed
+      `Your <strong style="color:#fff">${productName}</strong> key is ready. Tap to open your requests and copy it.`,
+      'key', 0
     ),
 
   requestRejected: (productName) =>
     showNotification(
-      'Request Rejected',
-      `Your order for <strong style="color:#fff">${productName}</strong> was rejected. Contact support if you believe this is an error.`,
-      'rejected',
-      8000
+      '🚫 Order Rejected',
+      `Your order for <strong style="color:#fff">${productName}</strong> was rejected. Contact support if this is a mistake.`,
+      'rejected', 8000
     ),
 
   profileSaved: () =>
-    showNotification('Profile Saved', 'Your details will auto-fill the purchase form next time.', 'success', 3500),
+    showNotification('✅ Profile Saved', 'Your details will auto-fill next time you order.', 'success', 3500),
 
   copied: () =>
-    showToast('Copied to clipboard', 'success', 2000),
+    showToast('📋 Copied to clipboard', 'success', 2000),
 
   adminApproved: (userName, product) =>
     showNotification(
-      'Request Approved',
-      `<strong style="color:#fff">${userName}</strong>'s order for ${product} has been approved and key delivered.`,
-      'success',
-      4000
+      '✅ Request Approved',
+      `<strong style="color:#fff">${userName}</strong>'s order for ${product} approved and key delivered.`,
+      'success', 4000
     ),
 
   adminRejected: (userName) =>
-    showNotification('Request Rejected', `${userName}'s request has been rejected.`, 'warning', 4000),
+    showNotification('🚫 Request Rejected', `${userName}'s request has been rejected.`, 'warning', 4000),
 
   adminRevoked: () =>
-    showNotification('Approval Revoked', 'Request reset to Awaiting Review. Key has been cleared.', 'warning', 4000),
+    showNotification('↩️ Approval Revoked', 'Request reset to Awaiting Review. Key cleared.', 'warning', 4000),
 
   settingsSaved: () =>
-    showNotification('Settings Saved', 'All changes have been applied to the app.', 'success', 3000),
+    showNotification('✅ Settings Saved', 'All changes have been applied.', 'success', 3000),
 
   error: (msg) =>
-    showNotification('Something went wrong', msg || 'An unexpected error occurred. Please try again.', 'error', 6000),
+    showNotification('❌ Something went wrong', msg || 'An unexpected error occurred. Please try again.', 'error', 6000),
 
   statusChanged: (status) => {
     const map = {
-      'Accepted':       { title: 'Request Accepted',   type: 'success'  },
-      'Rejected':       { title: 'Request Rejected',   type: 'rejected' },
-      'Awaiting review':{ title: 'Under Review',        type: 'info'     },
-      'Pending payment':{ title: 'Pending Payment',     type: 'warning'  },
+      'Accepted':        { title: '✅ Request Accepted',  type: 'success'   },
+      'Rejected':        { title: '🚫 Request Rejected',  type: 'rejected'  },
+      'Awaiting review': { title: '🔍 Under Review',       type: 'info'      },
+      'Pending payment': { title: '⏳ Pending Payment',    type: 'warning'   },
     };
     const cfg = map[status] || { title: `Status: ${status}`, type: 'info' };
     return showNotification(cfg.title, `Order status updated to "${status}"`, cfg.type, 4500);
-  }
+  },
+
+  // Common contextual toasts (Zomato/Swiggy style)
+  orderOnWay: (product) =>
+    showNotification('🚀 Order Processing', `Your ${product} order is being processed by our team!`, 'info', 5000),
+
+  xpGained: (amount) =>
+    showNotification('🎯 XP Gained!', `You earned <strong style="color:#c084fc">+${amount} XP</strong>. Keep going!`, 'xp', 4000),
+
+  walletCredit: (amount) =>
+    showNotification('💰 Wallet Credited', `Rs ${amount} has been added to your wallet balance.`, 'success', 5000),
+
+  streakBonus: (days) =>
+    showNotification('🔥 Streak Bonus!', `${days}-day streak! Keep checking in daily for bigger rewards.`, 'warning', 5000),
+
+  showNotification, // expose raw for custom use
 };

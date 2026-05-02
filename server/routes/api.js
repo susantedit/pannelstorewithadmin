@@ -865,4 +865,40 @@ router.get('/gifts/sent', requireAuth, async (req, res) => {
   }
 });
 
+// ── FCM Push Token Registration ───────────────────────────────────────────────
+router.post('/push/register', requireAuth, async (req, res) => {
+  try {
+    const token = String(req.body?.token || '').trim();
+    if (!token) return res.status(400).json({ ok: false, message: 'token required' });
+
+    await User.findByIdAndUpdate(req.auth.userId, {
+      $addToSet: { fcmTokens: token }
+    });
+
+    // Keep only last 5 tokens (5 devices max)
+    const user = await User.findById(req.auth.userId).select('fcmTokens');
+    if (user?.fcmTokens?.length > 5) {
+      await User.findByIdAndUpdate(req.auth.userId, {
+        fcmTokens: user.fcmTokens.slice(-5)
+      });
+    }
+
+    res.json({ ok: true, message: 'Push token registered' });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
+});
+
+router.delete('/push/unregister', requireAuth, async (req, res) => {
+  try {
+    const token = String(req.body?.token || '').trim();
+    if (token) {
+      await User.findByIdAndUpdate(req.auth.userId, { $pull: { fcmTokens: token } });
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
+});
+
 export default router;

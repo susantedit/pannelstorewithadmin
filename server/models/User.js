@@ -48,6 +48,9 @@ const userSchema = new mongoose.Schema(
     // VIP Subscription — Rs 199/month, hides ads
     vipExpiresAt:        { type: Date, default: null },
 
+    // FCM push notification tokens (one per device)
+    fcmTokens: { type: [String], default: [] },
+
     // Profile fields — auto-fill purchase form
     profile: {
       uid:         { type: String, default: '' },
