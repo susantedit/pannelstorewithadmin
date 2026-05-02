@@ -1,55 +1,77 @@
 // Firebase Cloud Messaging Service Worker
-// This file MUST be at /firebase-messaging-sw.js (root of public)
-// It handles background push notifications when the app is closed/minimized
+// IMPORTANT: Firebase config is hardcoded here because the SW
+// cannot reliably receive postMessage before a push arrives.
+// These are PUBLIC keys — safe to expose in frontend code.
 
 importScripts('https://www.gstatic.com/firebasejs/10.13.1/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.13.1/firebase-messaging-compat.js');
 
-// These values are safe to expose — they're public Firebase config
-// They get replaced at build time via the SW registration in pushNotifications.js
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'FIREBASE_CONFIG') {
-    firebase.initializeApp(event.data.config);
-    const messaging = firebase.messaging();
+// ── Hardcoded Firebase config (same as client/.env VITE_FIREBASE_*) ──────────
+// Update these if you change your Firebase project
+const firebaseConfig = {
+  apiKey:            "AIzaSyCRuN5KnvDVrlo5znWwL3UWpGc4nZzJlk8",
+  authDomain:        "vortex-universal-downloder.firebaseapp.com",
+  projectId:         "vortex-universal-downloder",
+  storageBucket:     "vortex-universal-downloder.firebasestorage.app",
+  messagingSenderId: "499149047761",
+  appId:             "1:499149047761:web:747b5e85ace2216f9782f0",
+};
 
-    // Handle background messages (app closed or in background)
-    messaging.onBackgroundMessage((payload) => {
-      const { title, body, icon, image, data } = payload.notification || {};
-      const notifTitle = title || 'SUSANTEDIT';
-      const notifOptions = {
-        body: body || '',
-        icon: icon || '/logo.png',
-        badge: '/logo.png',
-        image: image,
-        data: data || payload.data || {},
-        vibrate: [200, 100, 200],
-        requireInteraction: true,
-        actions: [
-          { action: 'open', title: '👁 View' },
-          { action: 'dismiss', title: 'Dismiss' }
-        ]
-      };
-      self.registration.showNotification(notifTitle, notifOptions);
-    });
-  }
+// Initialize Firebase in the SW (only once)
+if (!firebase.apps.length) {
+  firebase.initializeApp(firebaseConfig);
+}
+
+const messaging = firebase.messaging();
+
+// ── Background message handler ────────────────────────────────────────────────
+// Fires when app is closed or in background
+messaging.onBackgroundMessage((payload) => {
+  console.log('[SW] Background message received:', payload);
+
+  const notification = payload.notification || {};
+  const data         = payload.data         || {};
+
+  const title = notification.title || 'SUSANTEDIT';
+  const body  = notification.body  || '';
+  const icon  = notification.icon  || '/logo.png';
+  const url   = data.url           || '/dashboard';
+
+  self.registration.showNotification(title, {
+    body,
+    icon,
+    badge:             '/logo.png',
+    vibrate:           [200, 100, 200, 100, 200],
+    requireInteraction: false,
+    data:              { url, ...data },
+    actions: [
+      { action: 'open',    title: 'View' },
+      { action: 'dismiss', title: 'Dismiss' },
+    ],
+  });
 });
 
-// Handle notification click — open the app
+// ── Notification click → open app ─────────────────────────────────────────────
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   if (event.action === 'dismiss') return;
 
-  const urlToOpen = event.notification.data?.url || '/dashboard';
+  const url = event.notification.data?.url || '/dashboard';
+  const fullUrl = self.location.origin + url;
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // If app is already open, focus it
+      // Focus existing tab if open
       for (const client of clientList) {
-        if (client.url.includes(self.location.origin) && 'focus' in client) {
-          return client.focus();
+        if ('focus' in client) {
+          client.focus();
+          // Navigate to the deep link
+          client.postMessage({ type: 'NAVIGATE', url });
+          return;
         }
       }
-      // Otherwise open a new window
-      if (clients.openWindow) return clients.openWindow(urlToOpen);
+      // Open new tab
+      if (clients.openWindow) return clients.openWindow(fullUrl);
     })
   );
 });
