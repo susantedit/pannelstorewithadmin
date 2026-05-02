@@ -11,6 +11,7 @@ import { Table } from '../../components/shared/Table';
 import { formatDate, getStatusColor } from '../../utils/helpers';
 import { showToast, Notif } from '../../utils/notify';
 import { SupportFab } from '../../components/shared/SupportFab';
+import NotificationSender from '../../components/admin/NotificationSender';
 
 // ── VIP Manager sub-component ─────────────────────────────────────────────
 function VipManager() {
@@ -148,6 +149,7 @@ const TABS = [
   { id: 'products',   icon: 'fa-gamepad',        label: 'Products'  },
   { id: 'users',      icon: 'fa-users',          label: 'Users'     },
   { id: 'coupons',    icon: 'fa-ticket-alt',     label: 'Coupons'   },
+  { id: 'notifications', icon: 'fa-bell',        label: 'Notifications' },
   { id: 'analytics',  icon: 'fa-chart-bar',      label: 'Analytics' },
   { id: 'settings',   icon: 'fa-cog',            label: 'Settings'  },
 ];
@@ -1036,6 +1038,17 @@ export default function AdminDashboardPage() {
                   </div>
                 </div>
               </>)}
+            </div>
+          )}
+
+          {/* ── NOTIFICATIONS ── */}
+          {activeTab === 'notifications' && (
+            <div style={{ animation: 'fadeIn 0.3s ease' }}>
+              <div className="section-header">
+                <h1>📢 Notifications</h1>
+                <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Send custom notifications to users</span>
+              </div>
+              <NotificationSender />
             </div>
           )}
 

@@ -107,4 +107,13 @@ export const api = {
   // Gifts
   sendGift: (payload) => request('/api/gifts/send', { method: 'POST', body: JSON.stringify(payload) }),
   getSentGifts: () => request('/api/gifts/sent'),
+  
+  // Notifications
+  getNotifications: (params = {}) => request(`/api/notifications?${new URLSearchParams(params)}`),
+  markNotificationsRead: (notificationIds) => request('/api/notifications/read', { method: 'PATCH', body: JSON.stringify({ notificationIds }) }),
+  markAllNotificationsRead: () => request('/api/notifications/read-all', { method: 'PATCH' }),
+  
+  // Admin notifications
+  sendCustomNotification: (payload) => request('/api/admin/notifications/send', { method: 'POST', body: JSON.stringify(payload) }),
+  getNotificationStats: () => request('/api/admin/notifications/stats'),
 };

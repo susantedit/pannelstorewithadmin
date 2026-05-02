@@ -771,7 +771,7 @@ const QA = [
   {
     match: q => (q.includes('how') && (q.includes('order') || q.includes('buy') || q.includes('purchase'))) || q.includes('steps') || q.includes('process'),
     reply: {
-      text: `**How to Order** 🛒\n\n1. Sign in with Google on the website\n2. Go to **Store** tab → select product\n3. Choose your package duration\n4. Fill in: Name, TikTok handle, WhatsApp number\n5. Select payment method (eSewa or Bank Transfer)\n6. Scan the QR code and pay\n7. Add your **name as payment remark**\n8. Enter the transaction/reference number\n9. Admin reviews and delivers key (up to 40 min)\n\n💡 Payment window: **8AM – 10PM** daily`,
+      text: `**How to Order** 🛒\n\n1. Sign in with Google on the website\n2. Go to **Store** tab → select product\n3. Choose your package duration\n4. Fill in: Name, TikTok handle, WhatsApp number\n5. Select payment method (eSewa or Bank Transfer)\n6. Scan the QR code and pay\n7. Add your **name as payment remark**\n8. Enter the transaction/reference number\n9. Admin reviews and delivers key (up to 40 min)\n\n💡 Payment window: **2 hours from when you place your order**`,
       chips: ['Payment methods', 'Delivery time', 'Is it safe?', 'Diamond prices']
     }
   },
@@ -779,7 +779,7 @@ const QA = [
   {
     match: q => q.includes('payment') || q.includes('pay') || q.includes('esewa') || q.includes('bank') || q.includes('khalti'),
     reply: {
-      text: `**Payment Methods** 💳\n\nWe accept:\n- 📱 **eSewa** — scan QR in eSewa app\n- 🏦 **NMB Bank Transfer** — scan QR in bank app\n\n**Important:** Add your name as payment remark before paying.\n\nAfter paying, enter the transaction/reference number in the app.\n\n⏰ Payment window: **8AM – 10PM** daily`,
+      text: `**Payment Methods** 💳\n\nWe accept:\n- 📱 **eSewa** — scan QR in eSewa app\n- 🏦 **NMB Bank Transfer** — scan QR in bank app\n\n**Important:** Add your name as payment remark before paying.\n\nAfter paying, enter the transaction/reference number in the app.\n\n⏰ Payment window: **2 hours from order placement** — complete payment before it expires`,
       chips: ['How to order?', 'Delivery time', 'Is it safe?', 'Diamond prices']
     }
   },

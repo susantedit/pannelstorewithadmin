@@ -5,6 +5,7 @@ import { listProducts, createProduct, updateProduct, deleteProduct } from '../co
 import { listCoupons, createCoupon, updateCoupon, deleteCoupon } from '../controllers/couponController.js';
 import { login, logout, me, register, verifyEmail, forgotPassword, resetPassword, firebaseSession } from '../controllers/authController.js';
 import { requireAuth, requireAdmin, requireVerifiedEmail } from '../middleware/auth.js';
+import { getUserNotifications, markNotificationsRead, markAllNotificationsRead, sendCustomNotification, getNotificationStats } from '../controllers/notificationController.js';
 import User from '../models/User.js';
 import AppSettings from '../models/AppSettings.js';
 
@@ -193,6 +194,13 @@ router.get('/coupons', requireAuth, requireAdmin, listCoupons);
 router.post('/coupons', requireAuth, requireAdmin, createCoupon);
 router.patch('/coupons/:id', requireAuth, requireAdmin, updateCoupon);
 router.delete('/coupons/:id', requireAuth, requireAdmin, deleteCoupon);
+
+// ── Notifications ─────────────────────────────────────────────────────────
+router.get('/notifications', requireAuth, getUserNotifications);
+router.patch('/notifications/read', requireAuth, markNotificationsRead);
+router.patch('/notifications/read-all', requireAuth, markAllNotificationsRead);
+router.post('/admin/notifications/send', requireAuth, requireAdmin, sendCustomNotification);
+router.get('/admin/notifications/stats', requireAuth, requireAdmin, getNotificationStats);
 
 // ── Referral System ───────────────────────────────────────────────────────
 router.get('/referral/my-code', requireAuth, async (req, res) => {
@@ -856,16 +864,5 @@ router.get('/gifts/sent', requireAuth, async (req, res) => {
     res.status(500).json({ ok: false, message: e.message });
   }
 });
-
-// ── Add XP when request is approved (called internally from updateRequestStatus)
-export async function awardXpForPurchase(userId, packagePrice) {
-  try {
-    const price = parseFloat(packagePrice) || 0;
-    const xpGain = Math.max(10, Math.floor(price / 10)); // 10 XP per Rs 100 spent, min 10
-    await User.findByIdAndUpdate(userId, {
-      $inc: { xp: xpGain, totalSpend: price }
-    });
-  } catch {}
-}
 
 export default router;

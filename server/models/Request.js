@@ -23,6 +23,8 @@ const requestSchema = new mongoose.Schema(
     status: { type: String, default: 'Awaiting review' },
     notes: { type: String, default: '' },
     lastPingAt: { type: Date, default: Date.now },
+    // Payment window expiry (2 hours from creation)
+    expiryTime: { type: Date, default: null },
     // Gift fields
     isGift:       { type: Boolean, default: false },
     giftSenderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },

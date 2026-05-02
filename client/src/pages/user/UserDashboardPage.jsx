@@ -17,6 +17,7 @@ import SpinWheel from '../../components/gamification/SpinWheel';
 import AdBanner from '../../components/ads/AdBanner';
 import VipModal from '../../components/ads/VipModal';
 import QrDisplay from '../../components/shared/QrDisplay';
+import NotificationPanel from '../../components/notifications/NotificationPanel';
 import { playCashRegister, playKeyDelivered, playNotif, isSoundEnabled, setSoundEnabled, startBgSound, stopBgSound, isBgSoundPlaying, playUiClick } from '../../utils/sounds';
 import { motion } from 'framer-motion';
 
@@ -224,6 +225,10 @@ export default function UserDashboardPage() {
   // VIP modal
   const [vipModalOpen, setVipModalOpen] = useState(false);
 
+  // Notifications
+  const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
+  const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+
   // Gift to friends
   const [giftForm, setGiftForm] = useState({ recipientEmail: '', product: '', packageName: '', packagePrice: '', transaction: '', paymentMethod: 'esewa', message: '' });
   const [giftStep, setGiftStep] = useState('form'); // 'form' | 'qr' | 'done'
@@ -262,7 +267,20 @@ export default function UserDashboardPage() {
     api.birthdayCheck().then(res => {
       if (res?.gift) Notif.showNotification('🎂 Happy Birthday!', res.message, 'key', 0);
     }).catch(() => {});
+    // Load notification count
+    loadNotificationCount();
   }, []);
+
+  const loadNotificationCount = async () => {
+    try {
+      const res = await api.getNotifications({ unread: true, limit: 1 });
+      if (res?.ok) {
+        setUnreadNotificationCount(res.unreadCount || 0);
+      }
+    } catch (error) {
+      console.error('Failed to load notification count:', error);
+    }
+  };
 
   useEffect(() => {
     loadData();
@@ -286,6 +304,8 @@ export default function UserDashboardPage() {
               Notif.requestRejected(r.product);
               sendBrowserNotification('Request Rejected', `Your ${r.product} request was rejected.`, { tag: `reject-${id}` });
             }
+            // Refresh notification count when status changes
+            loadNotificationCount();
           }
           prevStatusRef.current[id] = curr;
         });
@@ -594,6 +614,36 @@ export default function UserDashboardPage() {
         </div>
 
         <div className="topbar-actions">
+          {/* Notification button */}
+          <button
+            onClick={() => {
+              setNotificationPanelOpen(true);
+              loadNotificationCount(); // Refresh count when opened
+            }}
+            title="Notifications"
+            style={{
+              background: unreadNotificationCount > 0 ? 'rgba(230,57,70,0.15)' : 'none',
+              border: `1px solid ${unreadNotificationCount > 0 ? 'rgba(230,57,70,0.4)' : 'rgba(255,255,255,0.1)'}`,
+              borderRadius:'8px', 
+              color: unreadNotificationCount > 0 ? 'var(--primary)' : 'var(--muted)',
+              padding:'8px 12px', cursor:'pointer', fontSize:'1rem', transition:'all 0.2s',
+              position: 'relative', display: 'flex', alignItems: 'center', gap: '6px'
+            }}
+          >
+            <i className="fas fa-bell" />
+            {unreadNotificationCount > 0 && (
+              <span style={{
+                position: 'absolute', top: '-2px', right: '-2px',
+                background: 'var(--primary)', color: '#fff',
+                fontSize: '0.7rem', fontWeight: 700,
+                padding: '2px 6px', borderRadius: '10px',
+                minWidth: '18px', textAlign: 'center',
+                lineHeight: 1
+              }}>
+                {unreadNotificationCount > 99 ? '99+' : unreadNotificationCount}
+              </span>
+            )}
+          </button>
           <button
             onClick={() => setShowSpinWheel(true)}
             title="Daily Spin Wheel"
@@ -834,13 +884,68 @@ export default function UserDashboardPage() {
               {userRequests.map(request => {
                 const reqId = request.id || request._id;
                 const isAccepted = request.status?.toLowerCase().includes('accept');
+                const isPending = request.status?.toLowerCase().includes('pending') || request.status?.toLowerCase().includes('awaiting');
                 const hasKey = isAccepted && request.notes;
+                
+                // Calculate remaining time for pending payments
+                const createdAt = new Date(request.createdAt);
+                // Prefer server-stored expiryTime; fall back to createdAt + 2h
+                const expiryTime = request.expiryTime
+                  ? new Date(request.expiryTime)
+                  : new Date(createdAt.getTime() + 2 * 60 * 60 * 1000);
+                const now = new Date();
+                const remainingMs = expiryTime - now;
+                const remainingMinutes = Math.max(0, Math.ceil(remainingMs / (1000 * 60)));
+                const isExpired = remainingMs <= 0;
+                
                 return (
                   <div key={reqId} className="request-row">
                     <div>
                       <strong>{request.product}</strong>
                       {request.packageName && <p>{request.packageName}</p>}
                       <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{reqId}</p>
+                      
+                      {/* Payment countdown for pending orders */}
+                      {isPending && !isExpired && (
+                        <div style={{
+                          marginTop: '6px',
+                          padding: '4px 8px',
+                          background: remainingMinutes <= 30 ? 'rgba(230,57,70,0.1)' : 'rgba(251,191,36,0.1)',
+                          border: `1px solid ${remainingMinutes <= 30 ? 'rgba(230,57,70,0.3)' : 'rgba(251,191,36,0.3)'}`,
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          color: remainingMinutes <= 30 ? '#ff6b6b' : '#fbbf24',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <i className="fas fa-clock" />
+                          {remainingMinutes > 60 
+                            ? `${Math.floor(remainingMinutes / 60)}h ${remainingMinutes % 60}m left`
+                            : `${remainingMinutes}m left to pay`
+                          }
+                        </div>
+                      )}
+                      
+                      {isPending && isExpired && (
+                        <div style={{
+                          marginTop: '6px',
+                          padding: '4px 8px',
+                          background: 'rgba(230,57,70,0.15)',
+                          border: '1px solid rgba(230,57,70,0.4)',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
+                          color: '#ff6b6b',
+                          fontWeight: 700,
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '4px'
+                        }}>
+                          <i className="fas fa-exclamation-triangle" />
+                          Payment window expired
+                        </div>
+                      )}
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <Badge variant={getStatusColor(request.status)}>
@@ -1469,27 +1574,15 @@ export default function UserDashboardPage() {
       >
         {(() => {
           const now = new Date();
-
-          // Payment window is 8AM–10PM Nepal Time (UTC+5:45)
-          // Convert to user's local time for display
-          const nptOffsetMs = (5 * 60 + 45) * 60 * 1000; // NPT = UTC+5:45
-          const localOffsetMs = -now.getTimezoneOffset() * 60 * 1000; // user's UTC offset
-
-          // Create today's 8AM and 10PM in NPT, then convert to local
-          const todayUTC = new Date(now);
-          todayUTC.setUTCHours(0, 0, 0, 0);
-
-          const openNPT  = new Date(todayUTC.getTime() + (8 * 60) * 60 * 1000 - nptOffsetMs);
-          const closeNPT = new Date(todayUTC.getTime() + (22 * 60) * 60 * 1000 - nptOffsetMs);
-
-          const openLocal  = new Date(openNPT.getTime());
-          const closeLocal = new Date(closeNPT.getTime());
+          
+          // Dynamic payment window: current time + 2 hours
+          const startTime = new Date(now);
+          const endTime = new Date(now.getTime() + 2 * 60 * 60 * 1000); // +2 hours
 
           const fmt = (d) => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
-          const openStr  = fmt(openLocal);
-          const closeStr = fmt(closeLocal);
+          const startStr = fmt(startTime);
+          const endStr = fmt(endTime);
 
-          const isOpen = now >= openLocal && now < closeLocal;
           const userTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
           const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
@@ -1497,14 +1590,14 @@ export default function UserDashboardPage() {
             <div>
               <div style={{
                 padding: '14px', borderRadius: '10px', marginBottom: '14px',
-                background: isOpen ? 'rgba(74,222,128,0.08)' : 'rgba(230,57,70,0.1)',
-                border: `1px solid ${isOpen ? 'rgba(74,222,128,0.3)' : 'rgba(230,57,70,0.3)'}`,
+                background: 'rgba(74,222,128,0.08)',
+                border: '1px solid rgba(74,222,128,0.3)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '1.3rem' }}>{isOpen ? '🟢' : '🔴'}</span>
+                  <span style={{ fontSize: '1.3rem' }}>🟢</span>
                   <div>
-                    <strong style={{ color: isOpen ? '#4ade80' : '#ff6b6b', fontSize: '0.95rem' }}>
-                      {isOpen ? 'Payment Window is OPEN' : 'Payment Window is CLOSED'}
+                    <strong style={{ color: '#4ade80', fontSize: '0.95rem' }}>
+                      Payment Window is OPEN
                     </strong>
                     <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginTop: '2px' }}>
                       Your time: <strong style={{ color: 'var(--text)' }}>{userTime}</strong>
@@ -1513,26 +1606,16 @@ export default function UserDashboardPage() {
                   </div>
                 </div>
                 <div style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>
-                  {isOpen ? (
-                    <>
-                      ⏰ Window closes at <strong style={{ color: '#ff6b6b' }}>{closeStr}</strong>
-                      {' — '}
-                      <strong style={{ color: '#ff6b6b' }}>
-                        payments after {closeStr} won't be accepted
-                      </strong>
-                    </>
-                  ) : (
-                    <>
-                      ⏰ Window opens at <strong style={{ color: '#4ade80' }}>{openStr}</strong>
-                      {' — '}payments outside this window are not processed
-                    </>
-                  )}
-                </div>
-                {!isOpen && (
-                  <div style={{ marginTop: '8px', fontSize: '0.82rem', color: '#ff6b6b', fontWeight: 600 }}>
-                    ⚠️ Payments outside this window will not be processed until the next day.
+                  ⏰ Payment Window: <strong style={{ color: '#4ade80' }}>{startStr}</strong>
+                  {' → '}
+                  <strong style={{ color: '#ff6b6b' }}>{endStr}</strong>
+                  <div style={{ marginTop: '6px', fontSize: '0.78rem', color: '#fbbf24', fontWeight: 600 }}>
+                    ⚡ You have 2 hours from now to complete your payment
                   </div>
-                )}
+                </div>
+                <div style={{ marginTop: '8px', fontSize: '0.82rem', color: '#ff6b6b', fontWeight: 600 }}>
+                  ⚠️ Payments made after {endStr} will be rejected automatically.
+                </div>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '10px' }}>Next steps:</p>
               <ul style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '4px', listStyle: 'none' }}>
@@ -1881,6 +1964,15 @@ export default function UserDashboardPage() {
       </Modal>
 
       <SupportFab />
+
+      {/* Notification Panel */}
+      <NotificationPanel 
+        isOpen={notificationPanelOpen} 
+        onClose={() => {
+          setNotificationPanelOpen(false);
+          loadNotificationCount(); // Refresh count when closed
+        }} 
+      />
 
       {/* VIP Subscription Modal */}
       <VipModal open={vipModalOpen} onClose={() => setVipModalOpen(false)} />

@@ -4,6 +4,7 @@ import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
 import User from '../models/User.js';
 import { ensureUserReferralCoupon } from './couponController.js';
+import { NotificationHelpers } from './notificationController.js';
 
 // ---------------------------------------------------------------------------
 // In-memory store — used when MongoDB is not connected
@@ -200,6 +201,9 @@ export async function register(req, res) {
   });
 
   await ensureUserReferralCoupon(user);
+  
+  // Send welcome notification
+  await NotificationHelpers.welcomeUser(user._id, user.name);
 
   if (!isDev) {
     await sendVerificationEmail(user, rawVerificationToken);
@@ -471,6 +475,8 @@ export async function firebaseSession(req, res) {
 
   // Upsert user in MongoDB — find by email, create if not exists
   let user = await User.findOne({ email });
+  const isNewUser = !user;
+  
   if (!user) {
     user = await User.create({
       name,
@@ -483,6 +489,9 @@ export async function firebaseSession(req, res) {
       profile: { uid: '', gameId: '', tiktok: '', whatsapp: '', displayName: name, birthday: '' },
       firebaseUid
     });
+    
+    // Send welcome notification for new users
+    await NotificationHelpers.welcomeUser(user._id, user.name);
   } else {
     // Update last login and sync name if it was empty
     user.lastLoginAt = new Date();

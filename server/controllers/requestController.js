@@ -1,6 +1,7 @@
 import Request from '../models/Request.js';
 import User from '../models/User.js';
 import { resolveCouponCode } from './couponController.js';
+import { NotificationHelpers } from './notificationController.js';
 
 const inMemoryRequests = [
   {
@@ -107,7 +108,8 @@ export async function createRequest(req, res) {
     referralRewardAmount,
     couponRewardedAt: null,
     paymentMethod,
-    status: 'Awaiting review'
+    status: 'Awaiting review',
+    expiryTime: new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours from now
   };
 
   if (!shouldUseDb) {
@@ -121,6 +123,13 @@ export async function createRequest(req, res) {
   }
 
   const request = await Request.create(requestData);
+  
+  // Award XP for request submission (5 XP base)
+  await awardXpForPurchase(userId, 0, 5); // 5 XP for submitting request
+  
+  // Send notification
+  await NotificationHelpers.xpGained(userId, 5, 'Request submitted');
+  
   res.status(201).json({ ok: true, request });
 }
 
@@ -161,6 +170,34 @@ export async function updateRequestStatus(req, res) {
     return res.status(404).json({ ok: false, message: 'Request not found' });
   }
 
+  // ── Payment Window Validation (2 hours from order creation) ──
+  if (status === 'Accepted') {
+    const now = new Date();
+    
+    // Check if order has expired (using stored expiryTime if available)
+    if (request.expiryTime && now > new Date(request.expiryTime)) {
+      const createdAt = new Date(request.createdAt);
+      const diffHours = (now - createdAt) / (1000 * 60 * 60);
+      return res.status(400).json({ 
+        ok: false, 
+        message: `Payment time expired. This order was created ${diffHours.toFixed(1)} hours ago. Payment must be completed within 2 hours of order creation.` 
+      });
+    }
+    
+    // Fallback: check createdAt if expiryTime is not set (for old orders)
+    if (!request.expiryTime) {
+      const createdAt = new Date(request.createdAt);
+      const diffHours = (now - createdAt) / (1000 * 60 * 60);
+      
+      if (diffHours > 2) {
+        return res.status(400).json({ 
+          ok: false, 
+          message: `Payment time expired. This order was created ${diffHours.toFixed(1)} hours ago. Payment must be completed within 2 hours of order creation.` 
+        });
+      }
+    }
+  }
+
   request.status = status;
   request.notes = notes;
 
@@ -176,6 +213,35 @@ export async function updateRequestStatus(req, res) {
       user.vipExpiresAt = new Date(currentExpiry.getTime() + months * 30 * 24 * 60 * 60 * 1000);
       await user.save();
     }
+  }
+
+  // ── Award XP and send notifications when request is accepted ──
+  if (status === 'Accepted') {
+    const packagePrice = parseFloat(request.packagePrice) || 0;
+    await awardXpForPurchase(request.userId, packagePrice);
+    
+    // Send notifications
+    await NotificationHelpers.requestStatusChanged(
+      request.userId, 
+      request._id, 
+      status, 
+      request.product
+    );
+    
+    const xpGain = Math.max(10, Math.floor(packagePrice / 10));
+    await NotificationHelpers.xpGained(
+      request.userId, 
+      xpGain, 
+      `Purchase completed: ${request.product}`
+    );
+  } else {
+    // Send status change notification for other statuses
+    await NotificationHelpers.requestStatusChanged(
+      request.userId, 
+      request._id, 
+      status, 
+      request.product
+    );
   }
 
   if (status === 'Accepted' && request.couponOwnerId && !request.couponRewardedAt && String(request.couponOwnerId) !== String(request.userId)) {
@@ -232,4 +298,23 @@ export async function markHeartbeat(_req, res) {
   }
 
   res.json({ ok: true, message: 'Heartbeat stored', time: new Date().toISOString() });
+}
+
+// ── Add XP when request is approved (called internally from updateRequestStatus)
+export async function awardXpForPurchase(userId, packagePrice, bonusXp = 0) {
+  try {
+    const price = parseFloat(packagePrice) || 0;
+    const baseXp = Math.max(10, Math.floor(price / 10)); // 10 XP per Rs 100 spent, min 10
+    const totalXp = baseXp + bonusXp;
+    
+    await User.findByIdAndUpdate(userId, {
+      $inc: { xp: totalXp, totalSpend: price }
+    });
+    
+    console.log(`[XP] User ${userId} gained ${totalXp} XP (${baseXp} base + ${bonusXp} bonus) for Rs ${price} purchase`);
+    return totalXp;
+  } catch (error) {
+    console.error('[XP] Failed to award XP:', error);
+    return 0;
+  }
 }
