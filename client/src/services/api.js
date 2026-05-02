@@ -1,10 +1,21 @@
 const baseUrl = import.meta.env.VITE_API_URL || '';
 
+// Lazily import Firebase token to avoid circular deps
+function getAuthHeader() {
+  try {
+    // Dynamic import to avoid circular dependency
+    const token = window.__firebaseToken;
+    if (token) return { 'Authorization': `Bearer ${token}` };
+  } catch {}
+  return {};
+}
+
 async function request(path, options = {}) {
   const response = await fetch(`${baseUrl}${path}`, {
     credentials: 'include',
     headers: {
       'Content-Type': 'application/json',
+      ...getAuthHeader(),
       ...(options.headers || {})
     },
     ...options

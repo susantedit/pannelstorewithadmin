@@ -1,30 +1,52 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { api } from '../services/api';
 import { signInWithGoogle, firebaseSignOut, auth } from '../firebase/firebaseConfig';
 import { onAuthStateChanged } from 'firebase/auth';
 
 const AuthContext = createContext(null);
 
+// Store Firebase token globally so api.js can use it as fallback
+let _firebaseToken = null;
+export function getFirebaseToken() { return _firebaseToken; }
+
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const firebaseUserRef = useRef(null);
 
   useEffect(() => {
     let cancelled = false;
 
     const tryAuth = async (firebaseUser) => {
+      firebaseUserRef.current = firebaseUser;
+
+      // Refresh Firebase token and store it
+      if (firebaseUser) {
+        try {
+          _firebaseToken = await firebaseUser.getIdToken(false);
+          window.__firebaseToken = _firebaseToken;
+        } catch { _firebaseToken = null; window.__firebaseToken = null; }
+      } else {
+        _firebaseToken = null;
+        window.__firebaseToken = null;
+      }
+
       if (cancelled) return;
+
       try {
+        // Try existing backend cookie
         const res = await api.me();
         if (res?.user) {
           if (!cancelled) { setUser(res.user); setLoading(false); }
           return;
         }
 
-        // No valid cookie — re-auth via Firebase token
+        // Cookie failed — use Firebase token to get a new session
         if (firebaseUser) {
           try {
             const idToken = await firebaseUser.getIdToken(true);
+            _firebaseToken = idToken;
+            window.__firebaseToken = idToken;
             const res2 = await api.firebaseSession(idToken, firebaseUser.displayName || '');
             if (res2?.ok && res2?.user) {
               if (!cancelled) { setUser(res2.user); setLoading(false); }
@@ -39,10 +61,7 @@ export function AuthProvider({ children }) {
       }
     };
 
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-      tryAuth(firebaseUser);
-    });
-
+    const unsubscribe = onAuthStateChanged(auth, tryAuth);
     return () => { cancelled = true; unsubscribe(); };
   }, []);
 
