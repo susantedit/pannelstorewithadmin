@@ -1034,7 +1034,18 @@ export default function UserDashboardPage() {
                           alt={product.name}
                           style={{ width: '100%', height: '190px', objectFit: 'cover', borderRadius: '18px' }}
                         />
-                        {hype > 70 && (
+                        {/* Product badge (RECOMMENDED, FAST, etc.) */}
+                        {product.badge && (
+                          <span style={{
+                            position: 'absolute', top: '10px', left: '10px',
+                            background: 'linear-gradient(135deg,rgba(230,57,70,0.95),rgba(180,30,50,0.95))',
+                            color: '#fff', padding: '3px 10px', borderRadius: '20px',
+                            fontSize: '0.68rem', fontFamily: "'Orbitron',sans-serif",
+                            fontWeight: 700, letterSpacing: '1px',
+                            boxShadow: '0 2px 8px rgba(230,57,70,0.5)'
+                          }}>{product.badge}</span>
+                        )}
+                        {hype > 70 && !product.badge && (
                           <span style={{
                             position: 'absolute', top: '10px', right: '10px',
                             background: 'rgba(230,57,70,0.9)', color: '#fff',
@@ -1046,7 +1057,7 @@ export default function UserDashboardPage() {
                         )}
                         {flashSale && (
                           <span style={{
-                            position: 'absolute', top: '10px', left: '10px',
+                            position: 'absolute', top: '10px', right: '10px',
                             background: 'var(--primary)', color: '#fff',
                             padding: '3px 10px', borderRadius: '20px',
                             fontSize: '0.72rem', fontFamily: "'Orbitron',sans-serif",
@@ -1112,6 +1123,18 @@ export default function UserDashboardPage() {
                     {flashSale && <FlashCountdown endsAt={flashSale.endsAt} />}
                     <p>{product.description}</p>
 
+                    {/* Feature list for panels/rank push */}
+                    {Array.isArray(product.features) && product.features.length > 0 && (
+                      <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                        {product.features.map((f, i) => (
+                          <li key={i} style={{ fontSize: '0.78rem', color: '#4ade80', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <i className="fas fa-check-circle" style={{ fontSize: '0.7rem', flexShrink: 0 }} />
+                            {f}
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
                     {/* Trust signals */}
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', fontSize: '0.72rem', color: 'var(--muted)' }}>
                       <span><i className="fas fa-shield-halved" style={{ color: '#4ade80', marginRight: '4px' }} />Verified Safe</span>
@@ -1133,7 +1156,7 @@ export default function UserDashboardPage() {
                       icon={<ChevronRightIcon />}
                       onClick={() => handleBuyClick(product)}
                     >
-                      Buy now
+                      Get Instant Access
                     </Button>
                     {/* Price drop notify */}
                     <button

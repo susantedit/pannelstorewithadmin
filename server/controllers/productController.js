@@ -125,6 +125,114 @@ const fallbackProducts = [
     img: 'monthly.webp',
     description: 'Monthly member top-up membership.',
     packages: [{ label: 'Monthly Member', price: '1,050' }]
+  },
+  {
+    id: '4k-panel',
+    name: '4K PANEL',
+    category: 'Performance',
+    price: 'Rs 4,000',
+    status: 'Available',
+    img: 'head.jpg',
+    badge: 'BEST VALUE',
+    description: '1 full year access — no domain required. One-time payment, lifetime-style value. Includes all updates for the year.',
+    packages: [
+      { label: '1 Year (No Domain Required)', price: '4,000', originalPrice: '9,999' }
+    ]
+  },
+  {
+    id: 'rank-push',
+    name: 'RANK PUSHING',
+    category: 'Rank Boost',
+    price: 'From Rs 50',
+    status: 'Available',
+    img: 'rankpush.webp',
+    badge: 'FAST 🚀',
+    description: 'Professional rank boosting service. Fast completion in 2–6 hours by verified pro players. Safe rank boost with no risk.',
+    features: ['Fast 🚀 Completed in 2–6 hours', 'Professional players', 'Safe rank boost', 'Fast completion'],
+    packages: [
+      { label: '25 Stars Rank Push', price: '50', originalPrice: '100' }
+    ]
+  },
+  {
+    id: 'drag-headshot',
+    name: 'DRAG HEADSHOT',
+    category: 'Android Panel',
+    price: 'From Rs 899',
+    status: 'Available',
+    img: 'head.jpg',
+    badge: 'ANDROID ⚡',
+    description: 'Precision aim assist panel for Android. Activated in 5–10 minutes. Valid until next update. Android optimized.',
+    features: ['Android ⚡ Activated in 5–10 minutes', 'Precision aim assist', 'Valid until update', 'Android optimized'],
+    packages: [
+      { label: 'Drag Headshot Access', price: '899', originalPrice: '1,299' }
+    ]
+  },
+  {
+    id: 'redmi-poco',
+    name: 'REDMI / POCO PANEL',
+    category: 'Android Panel',
+    price: 'From Rs 899',
+    status: 'Available',
+    img: 'head.jpg',
+    badge: 'RECOMMENDED',
+    description: 'Optimized panel specifically tuned for Redmi and POCO devices. Instant activation.',
+    packages: [
+      { label: 'Redmi / POCO Access', price: '899', originalPrice: '1,299' }
+    ]
+  },
+  {
+    id: 'gula-v3',
+    name: 'GULA PANEL V3',
+    category: 'Android Panel',
+    price: 'From Rs 999',
+    status: 'Available',
+    img: 'head.jpg',
+    badge: 'UPGRADED',
+    description: 'Enhanced V3 edition of the popular Gula Panel. More features, better stability.',
+    packages: [
+      { label: 'Gula Panel V3 Access', price: '999', originalPrice: '1,499' }
+    ]
+  },
+  {
+    id: 'aim-silent-redmi',
+    name: 'AIM SILENT (REDMI)',
+    category: 'Android Panel',
+    price: 'From Rs 999',
+    status: 'Available',
+    img: 'head.jpg',
+    badge: 'TOP RATED',
+    description: 'Precision silent aim panel optimized for Redmi devices. High accuracy, low detection risk.',
+    packages: [
+      { label: 'Aim Silent Redmi Access', price: '999', originalPrice: '1,499' }
+    ]
+  },
+  {
+    id: 'aim-silent-all',
+    name: 'AIM SILENT (ALL DEVICES)',
+    category: 'Android Panel',
+    price: 'From Rs 1,099',
+    status: 'Available',
+    img: 'head.jpg',
+    badge: 'PREMIUM',
+    description: 'Universal silent aim panel — works on all Android devices. Maximum compatibility.',
+    packages: [
+      { label: 'Aim Silent Universal Access', price: '1,099', originalPrice: '1,599' }
+    ]
+  },
+  {
+    id: 'proxy-panel',
+    name: 'PROXY PANEL',
+    category: 'Android Panel',
+    price: 'From Rs 899',
+    status: 'Available',
+    img: 'head.jpg',
+    badge: 'SECURE',
+    description: 'Secure proxy-based panel for maximum safety. Routes through secure servers to minimize detection.',
+    packages: [
+      { label: 'Proxy Panel Basic', price: '899', originalPrice: '1,299' },
+      { label: 'Proxy Panel Pro', price: '1,099', originalPrice: '1,599' },
+      { label: 'Proxy Panel Elite', price: '1,299', originalPrice: '1,899' }
+    ]
   }
 ];
 
