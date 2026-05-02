@@ -18,6 +18,7 @@ import AdBanner from '../../components/ads/AdBanner';
 import VipModal from '../../components/ads/VipModal';
 import QrDisplay from '../../components/shared/QrDisplay';
 import { playCashRegister, playKeyDelivered, playNotif, isSoundEnabled, setSoundEnabled, startBgSound, stopBgSound, isBgSoundPlaying, playUiClick } from '../../utils/sounds';
+import { motion } from 'framer-motion';
 
 // ── LootBox sub-component ─────────────────────────────────────────────────
 function LootBox({ requestId, keyText }) {
@@ -534,6 +535,11 @@ export default function UserDashboardPage() {
 
   return (
     <div className="app-shell">
+      {/* Subtle animated background */}
+      <div style={{
+        position: 'fixed', inset: 0, zIndex: -1, pointerEvents: 'none',
+        background: 'radial-gradient(ellipse at 20% 20%, rgba(230,57,70,0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.06) 0%, transparent 50%)'
+      }} />
       {/* Announcement banner */}
       {appSettings?.announcement && (
         <div style={{
@@ -1059,15 +1065,7 @@ export default function UserDashboardPage() {
       {/* ── AD SLOT — between products and squad ── */}
       <AdBanner slot="dashboard-mid" onVipClick={() => setVipModalOpen(true)} />
 
-      {/* ── MOBILE BANNER — fixed bottom (320×50) ── */}
-      <div style={{
-        position: 'fixed', bottom: 0, left: 0, right: 0,
-        zIndex: 9990, display: 'flex', justifyContent: 'center',
-        background: 'rgba(7,7,16,0.95)', borderTop: '1px solid rgba(255,255,255,0.06)',
-        padding: '4px 0'
-      }}>
-        <AdBanner slot="mobile-bottom" onVipClick={() => setVipModalOpen(true)} />
-      </div>
+      
 
       </>)}
 
@@ -1471,10 +1469,30 @@ export default function UserDashboardPage() {
       >
         {(() => {
           const now = new Date();
-          const hour = now.getHours();
-          const isOpen = hour >= 8 && hour < 22; // 8AM–10PM user local time
+
+          // Payment window is 8AM–10PM Nepal Time (UTC+5:45)
+          // Convert to user's local time for display
+          const nptOffsetMs = (5 * 60 + 45) * 60 * 1000; // NPT = UTC+5:45
+          const localOffsetMs = -now.getTimezoneOffset() * 60 * 1000; // user's UTC offset
+
+          // Create today's 8AM and 10PM in NPT, then convert to local
+          const todayUTC = new Date(now);
+          todayUTC.setUTCHours(0, 0, 0, 0);
+
+          const openNPT  = new Date(todayUTC.getTime() + (8 * 60) * 60 * 1000 - nptOffsetMs);
+          const closeNPT = new Date(todayUTC.getTime() + (22 * 60) * 60 * 1000 - nptOffsetMs);
+
+          const openLocal  = new Date(openNPT.getTime());
+          const closeLocal = new Date(closeNPT.getTime());
+
+          const fmt = (d) => d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+          const openStr  = fmt(openLocal);
+          const closeStr = fmt(closeLocal);
+
+          const isOpen = now >= openLocal && now < closeLocal;
           const userTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
           const userTZ = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
           return (
             <div>
               <div style={{
@@ -1495,11 +1513,24 @@ export default function UserDashboardPage() {
                   </div>
                 </div>
                 <div style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>
-                  Payment Time: <strong style={{ color: 'var(--text)' }}>8:00 AM – 10:00 PM</strong> (your local time)
+                  {isOpen ? (
+                    <>
+                      ⏰ Window closes at <strong style={{ color: '#ff6b6b' }}>{closeStr}</strong>
+                      {' — '}
+                      <strong style={{ color: '#ff6b6b' }}>
+                        payments after {closeStr} won't be accepted
+                      </strong>
+                    </>
+                  ) : (
+                    <>
+                      ⏰ Window opens at <strong style={{ color: '#4ade80' }}>{openStr}</strong>
+                      {' — '}payments outside this window are not processed
+                    </>
+                  )}
                 </div>
                 {!isOpen && (
                   <div style={{ marginTop: '8px', fontSize: '0.82rem', color: '#ff6b6b', fontWeight: 600 }}>
-                    ⚠️ Payments submitted outside this window will not be processed until the next day.
+                    ⚠️ Payments outside this window will not be processed until the next day.
                   </div>
                 )}
               </div>

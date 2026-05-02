@@ -85,10 +85,12 @@ export default function KillFeed() {
           display: flex;
           align-items: center;
           gap: 10px;
-          background: rgba(10, 10, 10, 0.92);
-          border: 1px solid rgba(230, 57, 70, 0.5);
+          background: rgba(3, 3, 3, 0.7);
+          backdrop-filter: blur(12px);
+          -webkit-backdrop-filter: blur(12px);
+          border: 1px solid rgba(255, 255, 255, 0.1);
           border-left: 3px solid var(--primary);
-          border-radius: 8px;
+          border-radius: 12px;
           padding: 10px 16px;
           font-family: 'Rajdhani', sans-serif;
           font-size: 0.88rem;

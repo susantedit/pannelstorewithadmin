@@ -6,29 +6,29 @@ const STYLES = `
   @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 
   :root {
-    --c-bg:        #070710;
-    --c-surface:   #0d0d1a;
-    --c-panel:     #11111f;
-    --c-panel2:    #15152a;
-    --c-border:    rgba(255,255,255,0.06);
+    --c-bg:        #030303;
+    --c-surface:   rgba(10, 10, 10, 0.7);
+    --c-panel:     rgba(255, 255, 255, 0.03);
+    --c-panel2:    rgba(255, 255, 255, 0.05);
+    --c-border:    rgba(255,255,255,0.08);
     --c-border2:   rgba(255,255,255,0.12);
     --c-red:       #e63946;
-    --c-red2:      #ff6b6b;
+    --c-red2:      #ff007a;
     --c-red3:      #ff9999;
     --c-red-glow:  rgba(230,57,70,0.3);
     --c-red-deep:  rgba(230,57,70,0.08);
     --c-green:     #39d98a;
-    --c-blue:      #4fc3f7;
+    --c-blue:      #00e5ff;
     --c-gold:      #ffd166;
     --c-muted:     rgba(255,255,255,0.35);
     --c-muted2:    rgba(255,255,255,0.55);
     --c-text:      rgba(255,255,255,0.88);
     --c-white:     #ffffff;
     --font-body:   'Outfit', sans-serif;
-    --font-head:   'Rajdhani', sans-serif;
-    --radius:      20px;
-    --radius-sm:   12px;
-    --shadow:      0 32px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.04);
+    --font-head:   'Orbitron', sans-serif;
+    --radius:      24px;
+    --radius-sm:   14px;
+    --shadow:      0 32px 100px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.06);
   }
 
   .su * { box-sizing:border-box; margin:0; padding:0; }
@@ -70,8 +70,10 @@ const STYLES = `
     position:fixed; bottom:104px; right:28px;
     width:420px; max-width:calc(100vw - 24px);
     height:660px; max-height:calc(100dvh - 130px);
-    background:var(--c-surface);
-    border:1px solid rgba(255,255,255,0.08);
+    background:rgba(10, 10, 10, 0.7);
+    backdrop-filter: blur(40px) saturate(180%);
+    -webkit-backdrop-filter: blur(40px) saturate(180%);
+    border:1px solid rgba(255,255,255,0.1);
     border-radius:24px; z-index:9997;
     display:flex; flex-direction:column;
     box-shadow:var(--shadow);

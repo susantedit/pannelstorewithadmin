@@ -262,7 +262,7 @@ susantedit/
 - Node.js 18+
 - MongoDB Atlas account (free tier works)
 - Firebase project with Google Sign-In enabled
-
+1111
 ### 1. Clone and install
 ```bash
 git clone https://github.com/susantedit/pannelstorewithadmin
