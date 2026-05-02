@@ -112,6 +112,7 @@ export const api = {
   getNotifications: (params = {}) => request(`/api/notifications?${new URLSearchParams(params)}`),
   markNotificationsRead: (notificationIds) => request('/api/notifications/read', { method: 'PATCH', body: JSON.stringify({ notificationIds }) }),
   markAllNotificationsRead: () => request('/api/notifications/read-all', { method: 'PATCH' }),
+  trackNotificationClick: (id) => request(`/api/notifications/${id}/click`, { method: 'PATCH' }),
   
   // Admin notifications
   sendCustomNotification: (payload) => request('/api/admin/notifications/send', { method: 'POST', body: JSON.stringify(payload) }),

@@ -64,6 +64,11 @@ export async function requireAuth(req, res, next) {
         return res.status(401).json({ ok: false, message: 'Invalid session' });
       }
       req.user = user;
+      // Update lastActiveAt (throttled — only if not updated in last 5 min)
+      const fiveMinAgo = new Date(Date.now() - 5 * 60 * 1000);
+      if (!user.lastActiveAt || user.lastActiveAt < fiveMinAgo) {
+        User.findByIdAndUpdate(userId, { lastActiveAt: new Date() }).catch(() => {});
+      }
     } else {
       req.user = { _id: userId, id: userId, name: 'User', email: '', role, emailVerified };
     }

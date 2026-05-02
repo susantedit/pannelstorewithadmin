@@ -51,6 +51,14 @@ const userSchema = new mongoose.Schema(
     // FCM push notification tokens (one per device)
     fcmTokens: { type: [String], default: [] },
 
+    // Notification intelligence
+    notifSentToday:    { type: Number, default: 0 },       // cooldown counter
+    notifSentDate:     { type: Date, default: null },       // date of last reset
+    lastNotifAt:       { type: Date, default: null },       // last notification sent
+    notifRoastToday:   { type: Boolean, default: false },   // max 1 roast/day
+    totalOrders:       { type: Number, default: 0 },        // for targeting
+    lastActiveAt:      { type: Date, default: null },       // for inactivity detection
+
     // Profile fields — auto-fill purchase form
     profile: {
       uid:         { type: String, default: '' },

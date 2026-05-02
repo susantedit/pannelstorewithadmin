@@ -5,7 +5,7 @@ import { listProducts, createProduct, updateProduct, deleteProduct } from '../co
 import { listCoupons, createCoupon, updateCoupon, deleteCoupon } from '../controllers/couponController.js';
 import { login, logout, me, register, verifyEmail, forgotPassword, resetPassword, firebaseSession } from '../controllers/authController.js';
 import { requireAuth, requireAdmin, requireVerifiedEmail } from '../middleware/auth.js';
-import { getUserNotifications, markNotificationsRead, markAllNotificationsRead, sendCustomNotification, getNotificationStats } from '../controllers/notificationController.js';
+import { getUserNotifications, markNotificationsRead, markAllNotificationsRead, sendCustomNotification, getNotificationStats, trackNotificationClick } from '../controllers/notificationController.js';
 import { queueScheduledNotification } from '../lib/scheduler.js';
 import User from '../models/User.js';
 import AppSettings from '../models/AppSettings.js';
@@ -200,6 +200,7 @@ router.delete('/coupons/:id', requireAuth, requireAdmin, deleteCoupon);
 router.get('/notifications', requireAuth, getUserNotifications);
 router.patch('/notifications/read', requireAuth, markNotificationsRead);
 router.patch('/notifications/read-all', requireAuth, markAllNotificationsRead);
+router.patch('/notifications/:id/click', requireAuth, trackNotificationClick);
 router.post('/admin/notifications/send', requireAuth, requireAdmin, sendCustomNotification);
 router.get('/admin/notifications/stats', requireAuth, requireAdmin, getNotificationStats);
 

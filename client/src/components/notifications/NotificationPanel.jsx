@@ -1,28 +1,31 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import { formatDate } from '../../utils/helpers';
 import { Button } from '../shared/Button';
 
+// FA icon per type — no emojis
 const NOTIFICATION_ICONS = {
-  info: '💬',
-  success: '✅',
-  warning: '⚠️',
-  error: '❌',
-  key: '🔑',
-  xp: '🎯'
+  info:    'fa-circle-info',
+  success: 'fa-circle-check',
+  warning: 'fa-triangle-exclamation',
+  error:   'fa-circle-xmark',
+  key:     'fa-key',
+  xp:      'fa-star',
 };
 
 const NOTIFICATION_COLORS = {
-  info: { bg: 'rgba(96,165,250,0.08)', border: 'rgba(96,165,250,0.25)', text: '#60a5fa' },
-  success: { bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.25)', text: '#4ade80' },
-  warning: { bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.25)', text: '#f59e0b' },
-  error: { bg: 'rgba(230,57,70,0.08)', border: 'rgba(230,57,70,0.3)', text: '#ff6b6b' },
-  key: { bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.3)', text: '#fbbf24' },
-  xp: { bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.25)', text: '#a78bfa' }
+  info:    { bg: 'rgba(96,165,250,0.08)',  border: 'rgba(96,165,250,0.25)',  text: '#60a5fa' },
+  success: { bg: 'rgba(74,222,128,0.08)',  border: 'rgba(74,222,128,0.25)',  text: '#4ade80' },
+  warning: { bg: 'rgba(245,158,11,0.08)',  border: 'rgba(245,158,11,0.25)',  text: '#f59e0b' },
+  error:   { bg: 'rgba(230,57,70,0.08)',   border: 'rgba(230,57,70,0.3)',    text: '#ff6b6b' },
+  key:     { bg: 'rgba(251,191,36,0.08)',  border: 'rgba(251,191,36,0.3)',   text: '#fbbf24' },
+  xp:      { bg: 'rgba(167,139,250,0.08)', border: 'rgba(167,139,250,0.25)', text: '#a78bfa' },
 };
 
 export default function NotificationPanel({ isOpen, onClose }) {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -86,9 +89,27 @@ export default function NotificationPanel({ isOpen, onClose }) {
     }
   };
 
-  const handleNotificationClick = (notification) => {
+  const handleNotificationClick = async (notification) => {
+    // Track click on server
+    try {
+      await api.request(`/api/notifications/${notification._id}/click`, { method: 'PATCH' });
+    } catch {}
+
+    // Mark read locally
     if (!notification.read) {
-      markAsRead([notification._id]);
+      setNotifications(prev =>
+        prev.map(n => n._id === notification._id ? { ...n, read: true, clicked: true } : n)
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+    }
+
+    // Deep link redirect
+    const link = notification.deepLink || '/dashboard';
+    onClose();
+    if (link.startsWith('http')) {
+      window.open(link, '_blank');
+    } else {
+      navigate(link);
     }
   };
 
@@ -184,10 +205,12 @@ export default function NotificationPanel({ isOpen, onClose }) {
             </div>
           ) : notifications.length === 0 ? (
             <div style={{ textAlign: 'center', color: 'var(--muted)' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px' }}>🔔</div>
+              <div style={{ fontSize: '2rem', marginBottom: '16px', color: '#333' }}>
+                <i className="fas fa-bell-slash" />
+              </div>
               <h3 style={{ margin: '0 0 8px', fontSize: '1.1rem', color: '#fff' }}>No notifications yet</h3>
               <p style={{ margin: 0, fontSize: '0.9rem' }}>
-                You'll receive notifications when your requests are processed or when you earn XP.
+                You will receive notifications when your requests are processed or when you earn XP.
               </p>
             </div>
           ) : (
@@ -222,10 +245,10 @@ export default function NotificationPanel({ isOpen, onClose }) {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '1rem',
+                          fontSize: '0.9rem',
                           flexShrink: 0
                         }}>
-                          {icon}
+                          <i className={`fas ${icon}`} style={{ color: colors.text }} />
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{
