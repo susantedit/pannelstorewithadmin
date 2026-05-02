@@ -114,9 +114,9 @@ export default function NotificationPanel({ isOpen, onClose }) {
       onClick={onClose}
     >
       <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
         className="notification-panel"
         style={{
           background: 'rgba(22,22,22,0.95)',
@@ -200,10 +200,6 @@ export default function NotificationPanel({ isOpen, onClose }) {
                   return (
                     <motion.div
                       key={notification._id}
-                      initial={{ opacity: 0, y: 20 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -20 }}
-                      transition={{ delay: index * 0.05 }}
                       className="notification-item"
                       style={{
                         padding: '16px 24px',

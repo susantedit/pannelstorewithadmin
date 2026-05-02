@@ -183,8 +183,8 @@ export default function LandingPage() {
           {user ? (
             <div style={{ position: 'relative' }} ref={profileRef}>
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setProfileOpen(o => !o)}
                 className="glass"
                 style={{
@@ -309,12 +309,12 @@ export default function LandingPage() {
             The only platform built for competitive dominance.
           </p>
           <div className="hero-actions" style={{ gap: '20px' }}>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-              <Button variant="primary" onClick={() => navigate('/dashboard')} style={{ padding: '16px 32px', fontSize: '1.1rem', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', boxShadow: '0 10px 20px rgba(230, 57, 70, 0.3)' }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+              <Button variant="primary" onClick={() => navigate('/dashboard')} style={{ padding: '16px 32px', fontSize: '1.1rem', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', boxShadow: '0 10px 20px rgba(230, 57, 70, 0.3)', color: '#fff', fontWeight: 700 }}>
                 Get Started — Rs 40 <ChevronRight size={20} />
               </Button>
             </motion.div>
-            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
               <Button variant="ghost" className="glass" onClick={() => window.open('https://wa.me/9779708838261', '_blank')} style={{ padding: '16px 32px', fontSize: '1.1rem' }}>
                 <MessageSquare size={20} /> WhatsApp Support
               </Button>

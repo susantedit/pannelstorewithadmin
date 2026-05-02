@@ -142,8 +142,8 @@ button{border:0;cursor:pointer;}
 .button{display:inline-flex;align-items:center;justify-content:center;gap:8px;border-radius:8px;padding:11px 18px;color:var(--text);background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);transition:all 0.2s;font-weight:600;font-size:0.88rem;letter-spacing:0.5px;cursor:pointer;}
 .button:hover:not(:disabled){background:rgba(255,255,255,0.08);}
 .button:disabled{opacity:0.45;cursor:not-allowed;}
-.button-primary{background:transparent;color:var(--primary);border-color:var(--primary);}
-.button-primary:hover:not(:disabled){background:var(--primary);color:#fff;box-shadow:var(--glow);}
+.button-primary{background:var(--primary);color:#fff;border-color:var(--primary);}
+.button-primary:hover:not(:disabled){background:var(--primary-dark, #b91c2c);color:#fff;box-shadow:var(--glow);}
 .button-secondary{background:rgba(255,255,255,0.06);}
 .button-ghost{background:transparent;border-color:transparent;}
 .button-ghost:hover:not(:disabled){background:rgba(255,255,255,0.06);}
