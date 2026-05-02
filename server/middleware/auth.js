@@ -32,21 +32,21 @@ export async function requireAuth(req, res, next) {
         role = payload.role;
         emailVerified = payload.emailVerified;
       } catch {
-        // JWT failed — try Firebase token as fallback
-        if (tokenInfo.type === 'bearer') {
-          try {
-            const decoded = await verifyFirebaseToken(tokenInfo.token);
-            if (decoded) {
-              const email = (decoded.email || '').toLowerCase();
-              const user = await User.findOne({ email });
+        // JWT failed — try Firebase token verification for any token type
+        try {
+          const decoded = await verifyFirebaseToken(tokenInfo.token);
+          if (decoded) {
+            const email = (decoded.email || '').toLowerCase();
+            if (email) {
+              let user = await User.findOne({ email });
               if (user) {
                 userId = user._id.toString();
                 role = user.role;
                 emailVerified = decoded.email_verified ?? true;
               }
             }
-          } catch {}
-        }
+          }
+        } catch {}
       }
     }
 

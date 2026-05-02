@@ -1,9 +1,29 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, Suspense } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Shield, 
+  Layers, 
+  Clock, 
+  ChevronRight, 
+  Star, 
+  Gamepad2, 
+  Zap, 
+  Users, 
+  Crown, 
+  CheckCircle2, 
+  Globe2,
+  Mail,
+  MessageSquare
+} from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Button } from '../../components/shared/Button';
-import { ChevronRightIcon, ShieldIcon, LayersIcon, ClockIcon } from '../../components/shared/Icons';
+import Scene3D from '../../components/3d/Scene3D';
+import FloatingDiamond from '../../components/3d/FloatingDiamond';
+import BentoGrid from '../../components/layout/BentoGrid';
 import AdBanner from '../../components/ads/AdBanner';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
 
 // ── Social links ──────────────────────────────────────────────────────────────
 const SOCIALS = [
@@ -132,499 +152,250 @@ export default function LandingPage() {
   }, [profileOpen]);
 
   return (
-    <div className="app-shell">
+    <div className="app-shell" style={{ overflow: 'hidden' }}>
+      {/* ── 3D BACKGROUND ── */}
+      <Scene3D />
 
-      {/* ── TOPBAR ── */}
-      <header className="topbar panel">
-        <div className="brand">
-          <img src="/logo.png" alt="Logo" style={{ height: '48px', width: '48px', objectFit: 'contain' }} />
+      <header className="topbar glass floating-nav" style={{ 
+        position: 'fixed', 
+        top: '12px', 
+        left: '50%', 
+        transform: 'translateX(-50%)', 
+        width: 'calc(100% - 24px)', 
+        maxWidth: '1200px', 
+        zIndex: 1000,
+        borderRadius: '16px',
+        border: '1px solid rgba(255,255,255,0.1)',
+        padding: '10px 16px'
+      }}>
+        <motion.div 
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          className="brand"
+        >
+          <img src="/logo.png" alt="Logo" style={{ height: '40px', width: '40px', objectFit: 'contain', filter: 'drop-shadow(0 0 10px var(--primary))' }} />
           <div>
-            <div className="brand-title">SUSANTEDIT</div>
-            <div className="brand-subtitle">Elite Gaming Performance Platform</div>
+            <div className="brand-title text-gradient" style={{ fontSize: '1.1rem', letterSpacing: '1px' }}>SUSANTEDIT</div>
           </div>
-        </div>
+        </motion.div>
+        
         <div className="topbar-actions">
           {user ? (
-            <>
-              <div style={{ position: 'relative' }} ref={profileRef}>
-                <button
-                  onClick={() => setProfileOpen(o => !o)}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '10px',
-                    background: 'rgba(255,255,255,0.06)',
-                    border: '1px solid rgba(255,255,255,0.1)',
-                    borderRadius: '8px',
-                    padding: '8px 14px',
-                    color: 'var(--text)',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s',
-                    fontSize: '0.9rem'
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; }}
-                >
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '50%',
-                    background: isAdmin ? '#a855f7' : '#34d399',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    color: '#fff',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    flexShrink: 0
-                  }}>
-                    {user.name?.charAt(0).toUpperCase() || 'U'}
-                  </div>
-                  <div style={{ textAlign: 'left', fontSize: '0.85rem' }}>
-                    <div style={{ fontWeight: 600, color: '#fff' }}>
-                      {isAdmin && <i className="fas fa-crown" style={{ color: '#a855f7', marginRight: '4px' }} />}
-                      {user.name || 'User'}
-                    </div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>
-                      {isAdmin ? 'Admin' : 'Player'}
-                    </div>
-                  </div>
-                  <i className={`fas fa-chevron-${profileOpen ? 'up' : 'down'}`} style={{ fontSize: '0.8rem', color: 'var(--muted)' }} />
-                </button>
-
-                {/* Dropdown Menu */}
-                {profileOpen && (
-                  <div style={{
-                    position: 'absolute',
-                    top: '100%',
-                    right: 0,
-                    marginTop: '8px',
-                    background: '#111',
-                    border: '1px solid var(--line)',
-                    borderRadius: '10px',
-                    minWidth: '220px',
-                    zIndex: 100,
-                    boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
-                    animation: 'slideInDown 0.2s ease-out'
-                  }}>
-                    <div style={{ padding: '12px 0' }}>
-                      <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--line)', fontSize: '0.8rem', color: 'var(--muted)', textTransform: 'uppercase', fontWeight: 700, letterSpacing: '1px' }}>
-                        Account
-                      </div>
-                      
-                      <button
-                        onClick={() => {
-                          navigate(isAdmin ? '/admin' : '/dashboard');
-                          setProfileOpen(false);
-                        }}
-                        style={{
-                          width: '100%',
-                          padding: '11px 16px',
-                          background: 'none',
-                          border: 'none',
-                          textAlign: 'left',
-                          color: 'var(--text)',
-                          cursor: 'pointer',
-                          fontSize: '0.9rem',
-                          transition: 'all 0.2s',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px'
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(230,57,70,0.1)'; e.currentTarget.style.color = 'var(--primary)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text)'; }}
-                      >
-                        <i className={`fas ${isAdmin ? 'fa-sliders-h' : 'fa-shopping-cart'}`} />
-                        {isAdmin ? 'Admin Panel' : 'Dashboard'}
-                      </button>
-
-                      <button
-                        onClick={() => {
-                          navigate('/dashboard');
-                          setProfileOpen(false);
-                        }}
-                        style={{
-                          width: '100%',
-                          padding: '11px 16px',
-                          background: 'none',
-                          border: 'none',
-                          textAlign: 'left',
-                          color: 'var(--text)',
-                          cursor: 'pointer',
-                          fontSize: '0.9rem',
-                          transition: 'all 0.2s',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '10px'
-                        }}
-                        onMouseEnter={e => { e.currentTarget.style.background = 'rgba(230,57,70,0.1)'; e.currentTarget.style.color = 'var(--primary)'; }}
-                        onMouseLeave={e => { e.currentTarget.style.background = 'none'; e.currentTarget.style.color = 'var(--text)'; }}
-                      >
-                        <i className="fas fa-user" />
-                        My Profile
-                      </button>
-
-                      <div style={{ borderTop: '1px solid var(--line)', marginTop: '8px', paddingTop: '8px' }}>
-                        <button
-                          onClick={() => {
-                            logout();
-                            setProfileOpen(false);
-                            navigate('/');
-                          }}
-                          style={{
-                            width: '100%',
-                            padding: '11px 16px',
-                            background: 'none',
-                            border: 'none',
-                            textAlign: 'left',
-                            color: '#ff6b6b',
-                            cursor: 'pointer',
-                            fontSize: '0.9rem',
-                            transition: 'all 0.2s',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px'
-                          }}
-                          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255, 107, 107, 0.1)'; }}
-                          onMouseLeave={e => { e.currentTarget.style.background = 'none'; }}
-                        >
-                          <i className="fas fa-sign-out-alt" />
-                          Logout
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              <Button variant="primary" onClick={() => navigate(isAdmin ? '/admin' : '/dashboard')}>
-                <i className={`fas ${isAdmin ? 'fa-sliders-h' : 'fa-shopping-cart'}`} /> {isAdmin ? 'Admin Panel' : 'Dashboard'}
-              </Button>
-            </>
-          ) : (
-            <>
-              <Button variant="ghost" onClick={() => navigate('/login')}>
-                <i className="fas fa-user" /> Player Login
-              </Button>
-              <Button variant="primary" onClick={() => navigate('/login')} style={{ background: 'transparent', color: '#a855f7', borderColor: '#a855f7' }}
-                onMouseEnter={e => { e.currentTarget.style.background = '#a855f7'; e.currentTarget.style.color = '#fff'; }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#a855f7'; }}
+            <div style={{ position: 'relative' }} ref={profileRef}>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => setProfileOpen(o => !o)}
+                className="glass"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  borderRadius: '12px',
+                  padding: '8px 16px',
+                  color: 'var(--text)',
+                  cursor: 'pointer',
+                  border: '1px solid var(--glass-border)'
+                }}
               >
-                <i className="fas fa-crown" /> Admin Login
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: isAdmin ? 'linear-gradient(135deg, #a855f7, #6366f1)' : 'linear-gradient(135deg, #34d399, #059669)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#fff',
+                  fontWeight: 700,
+                  fontSize: '0.85rem'
+                }}>
+                  {user.name?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div style={{ textAlign: 'left', fontSize: '0.85rem' }} className="hide-mobile">
+                  <div style={{ fontWeight: 600 }}>{user.name || 'User'}</div>
+                  <div style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>{isAdmin ? 'Admin' : 'Player'}</div>
+                </div>
+              </motion.button>
+              
+              <AnimatePresence>
+                {profileOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="glass"
+                    style={{
+                      position: 'absolute',
+                      top: '100%',
+                      right: 0,
+                      marginTop: '12px',
+                      borderRadius: '16px',
+                      minWidth: '220px',
+                      zIndex: 100,
+                      padding: '8px',
+                      border: '1px solid var(--glass-border)'
+                    }}
+                  >
+                    <div style={{ padding: '12px', borderBottom: '1px solid var(--line)', fontSize: '0.75rem', color: 'var(--muted)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '1px' }}>
+                      Account Menu
+                    </div>
+                    {[
+                      { label: isAdmin ? 'Admin Panel' : 'Dashboard', icon: isAdmin ? <Shield size={16} /> : <Gamepad2 size={16} />, path: isAdmin ? '/admin' : '/dashboard' },
+                      { label: 'My Profile', icon: <Users size={16} />, path: '/dashboard' }
+                    ].map(item => (
+                      <button
+                        key={item.label}
+                        onClick={() => { navigate(item.path); setProfileOpen(false); }}
+                        style={{
+                          width: '100%', padding: '12px', background: 'none', border: 'none', textAlign: 'left',
+                          color: 'var(--text)', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px',
+                          borderRadius: '8px', transition: 'background 0.2s'
+                        }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                      >
+                        {item.icon} {item.label}
+                      </button>
+                    ))}
+                    <button
+                      onClick={() => { logout(); setProfileOpen(false); navigate('/'); }}
+                      style={{
+                        width: '100%', padding: '12px', background: 'none', border: 'none', textAlign: 'left',
+                        color: '#ff6b6b', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px',
+                        borderRadius: '8px', marginTop: '4px'
+                      }}
+                    >
+                      <Zap size={16} /> Logout
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <Button variant="ghost" onClick={() => navigate('/login')}>
+                <Users size={18} /> Player Login
               </Button>
-            </>
+              <Button variant="primary" onClick={() => navigate('/login')} className="glass" style={{ borderColor: 'var(--secondary)', color: 'var(--secondary)' }}>
+                <Crown size={18} /> Admin Panel
+              </Button>
+            </div>
           )}
         </div>
       </header>
 
-      {/* ── HERO ── */}
-      <section className="hero-grid">
-        <div className="panel hero-copy">
-          <span className="eyebrow">
-            <i className="fas fa-gamepad" /> Trusted by 10,000+ Competitive Players
-          </span>
-          <h1>Elite Gaming Services. Instant Delivery.</h1>
-          <p>
-            Premium panels, diamond top-ups, and rank services — delivered fast, verified manually, and backed by 24/7 support.
+      {/* ── HERO SECTION ── */}
+      <section className="hero-grid" style={{ minHeight: '100vh', alignItems: 'center', paddingTop: '80px' }}>
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          className="hero-copy"
+        >
+          <motion.span 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.3 }}
+            className="eyebrow glass"
+          >
+            <Zap size={14} fill="currentColor" /> Trusted by 10,000+ Elite Players
+          </motion.span>
+          <h1 style={{ fontSize: 'clamp(2rem, 8vw, 4.5rem)', fontWeight: 900, marginBottom: '20px', lineHeight: 1.1, color: '#fff' }}>
+            Next-Gen <span className="text-gradient" style={{ color: 'var(--primary)' }}>Gaming</span> <Zap className="inline-icon" size={32} style={{ verticalAlign: 'middle', color: 'var(--primary)', filter: 'drop-shadow(0 0 15px var(--primary))' }} /> <br /> Performance.
+          </h1>
+          <p style={{ fontSize: 'clamp(0.9rem, 3vw, 1.2rem)', maxWidth: '600px', color: 'rgba(255,255,255,0.7)', marginBottom: '32px', lineHeight: 1.6 }}>
+            Elevate your gameplay with premium panels, instant top-ups, and 24/7 manual verification. 
+            The only platform built for competitive dominance.
           </p>
-          <div className="hero-actions">
-            <Button variant="primary" onClick={() => navigate('/dashboard')}>
-              <i className="fas fa-shopping-cart" /> Select Package — Starting Rs 40
-            </Button>
-            <Button variant="ghost" onClick={() => window.open('https://wa.me/9779708838261', '_blank')}>
-              <i className="fab fa-whatsapp" style={{ color: '#25D366' }} /> WhatsApp Us
-            </Button>
+          <div className="hero-actions" style={{ gap: '20px' }}>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="primary" onClick={() => navigate('/dashboard')} style={{ padding: '16px 32px', fontSize: '1.1rem', background: 'linear-gradient(135deg, var(--primary), var(--primary-dark))', boxShadow: '0 10px 20px rgba(230, 57, 70, 0.3)' }}>
+                Get Started — Rs 40 <ChevronRight size={20} />
+              </Button>
+            </motion.div>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Button variant="ghost" className="glass" onClick={() => window.open('https://wa.me/9779708838261', '_blank')} style={{ padding: '16px 32px', fontSize: '1.1rem' }}>
+                <MessageSquare size={20} /> WhatsApp Support
+              </Button>
+            </motion.div>
           </div>
-
-          {/* Login options */}
-          <div style={{ display: 'flex', gap: '10px', marginTop: '12px', flexWrap: 'wrap' }}>
-            <button
-              onClick={() => navigate('/login')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '8px 16px', borderRadius: '8px', cursor: 'pointer',
-                background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)',
-                color: '#34d399', fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.5px'
-              }}
-            >
-              <i className="fas fa-user" /> Player Login
-            </button>
-            <button
-              onClick={() => navigate('/login')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '8px 16px', borderRadius: '8px', cursor: 'pointer',
-                background: 'rgba(168,85,247,0.1)', border: '1px solid rgba(168,85,247,0.3)',
-                color: '#a855f7', fontSize: '0.82rem', fontWeight: 700, letterSpacing: '0.5px'
-              }}
-            >
-              <i className="fas fa-crown" /> Admin Login
-            </button>
-          </div>
-
-          {/* Trust badges */}
-          <div style={{ display: 'flex', gap: '20px', marginTop: '24px', flexWrap: 'wrap' }}>
+          
+          <div style={{ display: 'flex', gap: '32px', marginTop: '48px', opacity: 0.7 }}>
             {[
-              { icon: 'fa-bolt',         label: 'Instant Delivery'  },
-              { icon: 'fa-shield-halved',label: '100% Secure'       },
-              { icon: 'fa-headset',      label: '24/7 Support'      },
-              { icon: 'fa-users',        label: '10,000+ Players'   },
-            ].map(b => (
-              <div key={b.label} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.82rem', color: 'var(--muted)' }}>
-                <i className={`fas ${b.icon}`} style={{ color: 'var(--primary)', fontSize: '0.9rem' }} />
-                {b.label}
+              { icon: <Zap size={20} />, label: 'Instant' },
+              { icon: <Shield size={20} />, label: 'Secure' },
+              { icon: <Globe2 size={20} />, label: 'Global' }
+            ].map(item => (
+              <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.9rem', fontWeight: 600 }}>
+                {item.icon} {item.label}
               </div>
             ))}
           </div>
+        </motion.div>
+
+        <div className="side-panel" style={{ position: 'relative', minHeight: '400px', display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          {/* 3D Canvas — hidden on mobile to prevent overlap */}
+          <div style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 0 }} className="hide-mobile">
+            <Canvas>
+              <PerspectiveCamera makeDefault position={[0, 0, 5]} />
+              <ambientLight intensity={0.5} />
+              <pointLight position={[10, 10, 10]} intensity={1} />
+              <FloatingDiamond />
+              <OrbitControls enableZoom={false} autoRotate autoRotateSpeed={0.5} />
+            </Canvas>
+          </div>
+          
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 1, delay: 0.5 }}
+            style={{ width: '80%', maxWidth: '400px', zIndex: 1 }}
+          >
+            <div className="glass" style={{ padding: '32px', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.15)', backdropFilter: 'blur(30px)', background: 'rgba(10,10,10,0.75)' }}>
+               <h3 style={{ fontFamily: 'var(--font-heading)', marginBottom: '16px', color: 'var(--primary)' }}>ELITE PERFORMANCE</h3>
+               <div className="timeline" style={{ gap: '20px' }}>
+                {[
+                  { title: 'Global Reach', desc: 'Serving 100+ countries.' },
+                  { title: 'Ultra Low Latency', desc: 'Optimized for speed.' },
+                  { title: 'Secure Protocol', desc: 'Encryption at every step.' }
+                ].map((s, i) => (
+                  <motion.div 
+                    key={s.title}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.8 + (i * 0.2) }}
+                    style={{ display: 'flex', gap: '16px' }}
+                  >
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: 'rgba(230,57,70,0.1)', border: '1px solid var(--primary)', display: 'grid', placeItems: 'center', color: 'var(--primary)', fontWeight: 900, flexShrink: 0 }}>{i + 1}</div>
+                    <div>
+                      <div style={{ fontWeight: 700, color: '#fff' }}>{s.title}</div>
+                      <div style={{ fontSize: '0.85rem', color: 'rgba(255,255,255,0.6)' }}>{s.desc}</div>
+                    </div>
+                  </motion.div>
+                ))}
+               </div>
+            </div>
+          </motion.div>
         </div>
-
-        <aside className="panel side-panel">
-          <div className="panel-header"><h2>How it works</h2></div>
-          <div className="timeline">
-            {[
-              { icon: 'fa-box-open',    title: 'Select Package',   desc: 'Choose from panels, top-ups, or rank services.' },
-              { icon: 'fa-qrcode',      title: 'Scan & Pay',       desc: 'Pay via eSewa or Bank using QR, and add remark with your name.' },
-              { icon: 'fa-receipt',     title: 'Enter TXN Number', desc: 'Enter the transaction ID from your payment app.' },
-              { icon: 'fa-clock',       title: 'Admin Reviews',    desc: 'Manual verification — up to 40 minutes.' },
-              { icon: 'fa-key',         title: 'Get Your Key',     desc: 'Receive activation key directly in the app.' },
-            ].map(s => (
-              <div key={s.title} className="timeline-item">
-                <i className={`fas ${s.icon}`} style={{ color: 'var(--primary)', width: '20px', textAlign: 'center' }} />
-                <div>
-                  <strong>{s.title}</strong>
-                  <p>{s.desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </aside>
       </section>
 
-      {/* ── AD — below hero ── */}
-      <AdBanner slot="landing-top" />
+      {/* ── BENTO GRID FEATURES ── */}
+      <section style={{ margin: '80px 0' }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <motion.h2 
+            initial={{ opacity: 0 }}
+            whileInView={{ opacity: 1 }}
+            className="text-gradient"
+            style={{ fontSize: '2.5rem', fontWeight: 800 }}
+          >
+            Built for Domination.
+          </motion.h2>
+          <p style={{ color: 'var(--muted)' }}>Premium features designed for the competitive edge.</p>
+        </div>
 
-      {/* ── USER TYPE SELECTION ── */}
-      {!user && (
-        <section>
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <span className="eyebrow"><i className="fas fa-arrow-right-arrow-left" style={{ color: 'var(--primary)' }} /> Choose Your Role</span>
-            <h2 style={{ marginTop: '8px' }}>Admin or Player?</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-            {/* Admin Option */}
-            <div className="panel" style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-              padding: '24px',
-              border: '2px solid rgba(168, 85, 247, 0.3)',
-              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(168, 85, 247, 0.02))',
-              position: 'relative',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.6)';
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168, 85, 247, 0.15), rgba(168, 85, 247, 0.08))';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.3)';
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168, 85, 247, 0.08), rgba(168, 85, 247, 0.02))';
-              e.currentTarget.style.transform = 'none';
-            }}
-            >
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '12px',
-                background: 'rgba(168, 85, 247, 0.2)',
-                border: '1px solid rgba(168, 85, 247, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.6rem'
-              }}>
-                <i className="fas fa-crown" style={{ color: '#a855f7' }} />
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 6px', fontSize: '1.2rem', color: '#fff', fontWeight: 700 }}>Admin Panel</h3>
-                <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                  Manage products, orders, and payments. View analytics and control your store.
-                </p>
-              </div>
-              <div style={{ marginTop: 'auto', display: 'flex', gap: '8px', flexDirection: 'column' }}>
-                <Button variant="primary" onClick={() => navigate('/login')} style={{ width: '100%', fontSize: '0.9rem' }}>
-                  <i className="fas fa-sign-in-alt" /> Admin Login
-                </Button>
-                <div style={{ fontSize: '0.78rem', color: 'var(--muted)', textAlign: 'center' }}>
-                  Manage orders & analytics
-                </div>
-              </div>
-            </div>
-
-            {/* Normal User Option */}
-            <div className="panel" style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-              padding: '24px',
-              border: '2px solid rgba(52, 211, 153, 0.3)',
-              background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.08), rgba(52, 211, 153, 0.02))',
-              position: 'relative',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'rgba(52, 211, 153, 0.6)';
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.15), rgba(52, 211, 153, 0.08))';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = 'rgba(52, 211, 153, 0.3)';
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.08), rgba(52, 211, 153, 0.02))';
-              e.currentTarget.style.transform = 'none';
-            }}
-            >
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '12px',
-                background: 'rgba(52, 211, 153, 0.2)',
-                border: '1px solid rgba(52, 211, 153, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.6rem'
-              }}>
-                <i className="fas fa-gamepad" style={{ color: '#34d399' }} />
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 6px', fontSize: '1.2rem', color: '#fff', fontWeight: 700 }}>Player Dashboard</h3>
-                <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                  Browse and purchase packages. Track your orders and manage your account.
-                </p>
-              </div>
-              <div style={{ marginTop: 'auto', display: 'flex', gap: '8px', flexDirection: 'column' }}>
-                <Button variant="primary" onClick={() => navigate('/dashboard')} style={{ width: '100%', fontSize: '0.9rem', background: '#34d399', color: '#000' }}>
-                  <i className="fas fa-shopping-cart" /> Player Dashboard
-                </Button>
-                <div style={{ fontSize: '0.78rem', color: 'var(--muted)', textAlign: 'center' }}>
-                  Browse packages & buy
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
-
-      {/* ── ADMIN SWITCH SECTION ── */}
-      {isAdmin && (
-        <section>
-          <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-            <span className="eyebrow"><i className="fas fa-arrow-right-arrow-left" style={{ color: 'var(--primary)' }} /> Admin Access</span>
-            <h2 style={{ marginTop: '8px' }}>Switch Between Views</h2>
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-            {/* Admin Panel Option */}
-            <div className="panel" style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-              padding: '24px',
-              border: '2px solid rgba(168, 85, 247, 0.5)',
-              background: 'linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(168, 85, 247, 0.05))',
-              position: 'relative',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.8)';
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168, 85, 247, 0.2), rgba(168, 85, 247, 0.1))';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = 'rgba(168, 85, 247, 0.5)';
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(168, 85, 247, 0.12), rgba(168, 85, 247, 0.05))';
-              e.currentTarget.style.transform = 'none';
-            }}
-            >
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '12px',
-                background: 'rgba(168, 85, 247, 0.2)',
-                border: '1px solid rgba(168, 85, 247, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.6rem'
-              }}>
-                <i className="fas fa-sliders-h" style={{ color: '#a855f7' }} />
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 6px', fontSize: '1.2rem', color: '#fff', fontWeight: 700 }}>Admin Control Panel</h3>
-                <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                  Manage all products, orders, payments, and view detailed analytics.
-                </p>
-              </div>
-              <div style={{ marginTop: 'auto', display: 'flex', gap: '8px', flexDirection: 'column' }}>
-                <Button variant="primary" onClick={() => navigate('/admin')} style={{ width: '100%', fontSize: '0.9rem' }}>
-                  <i className="fas fa-sliders-h" /> Go to Admin Panel
-                </Button>
-              </div>
-            </div>
-
-            {/* Player View Option */}
-            <div className="panel" style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '16px',
-              padding: '24px',
-              border: '2px solid rgba(52, 211, 153, 0.5)',
-              background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(52, 211, 153, 0.05))',
-              position: 'relative',
-              cursor: 'pointer',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={e => {
-              e.currentTarget.style.borderColor = 'rgba(52, 211, 153, 0.8)';
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(52, 211, 153, 0.1))';
-              e.currentTarget.style.transform = 'translateY(-2px)';
-            }}
-            onMouseLeave={e => {
-              e.currentTarget.style.borderColor = 'rgba(52, 211, 153, 0.5)';
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(52, 211, 153, 0.12), rgba(52, 211, 153, 0.05))';
-              e.currentTarget.style.transform = 'none';
-            }}
-            >
-              <div style={{
-                width: '56px',
-                height: '56px',
-                borderRadius: '12px',
-                background: 'rgba(52, 211, 153, 0.2)',
-                border: '1px solid rgba(52, 211, 153, 0.4)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '1.6rem'
-              }}>
-                <i className="fas fa-eye" style={{ color: '#34d399' }} />
-              </div>
-              <div>
-                <h3 style={{ margin: '0 0 6px', fontSize: '1.2rem', color: '#fff', fontWeight: 700 }}>Player View</h3>
-                <p style={{ margin: 0, color: 'var(--muted)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-                  Browse and test products as a player would see them.
-                </p>
-              </div>
-              <div style={{ marginTop: 'auto', display: 'flex', gap: '8px', flexDirection: 'column' }}>
-                <Button variant="primary" onClick={() => navigate('/dashboard')} style={{ width: '100%', fontSize: '0.9rem', background: '#34d399', color: '#000' }}>
-                  <i className="fas fa-eye" /> Browse as Player
-                </Button>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+        <BentoGrid />
+      </section>
 
       {/* ── TESTIMONIALS ── */}
       <section>

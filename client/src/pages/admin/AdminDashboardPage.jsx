@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import { Button } from '../../components/shared/Button';
@@ -495,22 +496,41 @@ export default function AdminDashboardPage() {
   return (
     <div className="admin-shell">
       {/* Sidebar */}
-      <aside className={`admin-sidebar ${sidebarOpen ? 'open' : ''}`}>
-        <div className="sidebar-logo">
-          <i className="fas fa-gamepad" />
-          GAME PANEL
+      <aside className={`admin-sidebar glass ${sidebarOpen ? 'open' : ''}`} style={{ 
+        borderRight: '1px solid rgba(255,255,255,0.05)',
+        background: 'rgba(3, 3, 3, 0.8)',
+        backdropFilter: 'blur(40px)',
+        zIndex: 200
+      }}>
+        <div className="sidebar-logo text-gradient" style={{ padding: '24px', fontWeight: 900, fontSize: '1.2rem', letterSpacing: '2px' }}>
+          ⚔️ SUSANTEDIT
         </div>
         <ul className="sidebar-nav">
           {TABS.map(t => (
-            <li key={t.id}>
+            <motion.li 
+              key={t.id}
+              whileHover={{ x: 5 }}
+            >
               <button
                 className={`sidebar-item ${activeTab === t.id ? 'active' : ''}`}
                 onClick={() => { setActiveTab(t.id); setSidebarOpen(false); }}
+                style={{
+                  margin: '4px 12px',
+                  borderRadius: '12px',
+                  width: 'calc(100% - 24px)',
+                  transition: 'all 0.3s'
+                }}
               >
-                <i className={`fas ${t.icon}`} />
+                <i className={`fas ${t.icon}`} style={{ width: '20px', textAlign: 'center' }} />
                 {t.label}
+                {activeTab === t.id && (
+                  <motion.div 
+                    layoutId="active-pill"
+                    style={{ position: 'absolute', right: 0, width: '4px', height: '20px', background: 'var(--primary)', borderRadius: '2px' }}
+                  />
+                )}
               </button>
-            </li>
+            </motion.li>
           ))}
           <li style={{ marginTop: 'auto', paddingTop: '20px' }}>
             <button className="sidebar-item logout" onClick={handleLogout}>
@@ -523,8 +543,7 @@ export default function AdminDashboardPage() {
 
       {/* Main */}
       <div className="admin-main">
-        {/* Top bar */}
-        <div className="admin-topbar">
+        <div className="admin-topbar glass" style={{ borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
           <button
             onClick={() => setSidebarOpen(o => !o)}
             style={{ background:'none', border:'none', color:'var(--text)', fontSize:'1.2rem', cursor:'pointer', display:'none' }}
@@ -546,19 +565,19 @@ export default function AdminDashboardPage() {
                 <h1>Overview</h1>
               </div>
               <div className="stats-grid">
-                <div className="stat-card">
+                <div className="stat-card glass-card">
                   <div className="stat-icon"><i className="fas fa-indian-rupee-sign" /></div>
                   <div className="stat-info"><h3>Rs {stats.revenue.toLocaleString()}</h3><p>Revenue</p></div>
                 </div>
-                <div className="stat-card">
+                <div className="stat-card glass-card">
                   <div className="stat-icon"><i className="fas fa-bag-shopping" /></div>
                   <div className="stat-info"><h3>{stats.total}</h3><p>Total Orders</p></div>
                 </div>
-                <div className="stat-card">
+                <div className="stat-card glass-card">
                   <div className="stat-icon" style={{ color:'var(--status-pending)', background:'rgba(245,158,11,0.15)', borderColor:'rgba(245,158,11,0.3)' }}><i className="fas fa-clock" /></div>
                   <div className="stat-info"><h3 style={{ color:'var(--status-pending)' }}>{stats.pending}</h3><p>Pending</p></div>
                 </div>
-                <div className="stat-card">
+                <div className="stat-card glass-card">
                   <div className="stat-icon" style={{ color:'var(--status-success)', background:'rgba(74,222,128,0.15)', borderColor:'rgba(74,222,128,0.3)' }}><i className="fas fa-check-circle" /></div>
                   <div className="stat-info"><h3 style={{ color:'var(--status-success)' }}>{stats.accepted}</h3><p>Completed</p></div>
                 </div>
