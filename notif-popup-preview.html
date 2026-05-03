@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Notification Popup Preview</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Inter, system-ui, sans-serif;
+    background: #0d0d0d;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+
+  /* ── Fake dashboard behind the popup ── */
+  .fake-dashboard {
+    position: fixed;
+    inset: 0;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    filter: blur(6px);
+    pointer-events: none;
+    user-select: none;
+  }
+  .fake-topbar {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    padding: 14px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .fake-brand { display: flex; align-items: center; gap: 10px; }
+  .fake-logo {
+    width: 40px; height: 40px; border-radius: 10px;
+    background: linear-gradient(135deg, #e63946, #b91c2c);
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 900; font-size: 1rem;
+  }
+  .fake-title { color: #fff; font-weight: 700; font-size: 0.95rem; }
+  .fake-sub { color: #555; font-size: 0.75rem; }
+  .fake-actions { display: flex; gap: 8px; }
+  .fake-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: #555;
+    font-size: 0.8rem;
+  }
+  .fake-cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  .fake-card {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    padding: 20px;
+    height: 120px;
+  }
+  .fake-card-title { color: #333; font-size: 0.75rem; margin-bottom: 8px; }
+  .fake-card-val { color: #555; font-size: 1.4rem; font-weight: 700; }
+  .fake-products {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+  }
+  .fake-product {
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 12px;
+    height: 180px;
+  }
+  .fake-product-img {
+    height: 100px;
+    background: linear-gradient(135deg, rgba(230,57,70,0.1), rgba(168,85,247,0.1));
+    border-radius: 12px 12px 0 0;
+  }
+  .fake-product-body { padding: 10px; }
+  .fake-product-name { color: #333; font-size: 0.75rem; font-weight: 700; }
+  .fake-product-price { color: #444; font-size: 0.7rem; margin-top: 4px; }
+
+  /* ── Overlay ── */
+  .overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(2px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 100;
+  }
+
+  /* ── Popup card ── */
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.88) translateY(20px); }
+    to   { opacity: 1; transform: scale(1)    translateY(0);    }
+  }
+
+  .popup {
+    max-width: 380px;
+    width: 100%;
+    background: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 36px 28px;
+    text-align: center;
+    box-shadow: 0 24px 60px rgba(0,0,0,0.8);
+    animation: popIn 0.35s cubic-bezier(0.22,1,0.36,1) forwards;
+    position: relative;
+  }
+
+  /* Pulsing ring behind bell */
+  @keyframes ring-pulse {
+    0%   { transform: scale(1);   opacity: 0.6; }
+    100% { transform: scale(1.6); opacity: 0;   }
+  }
+  .bell-wrap {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  .bell-ring {
+    position: absolute;
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    border: 2px solid rgba(230,57,70,0.5);
+    animation: ring-pulse 1.8s ease-out infinite;
+  }
+  .bell-ring:nth-child(2) { animation-delay: 0.6s; }
+  .bell-icon {
+    width: 70px; height: 70px;
+    border-radius: 50%;
+    background: rgba(230,57,70,0.12);
+    border: 2px solid rgba(230,57,70,0.4);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.8rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .popup h2 {
+    font-size: 1.25rem;
+    font-weight: 800;
+    color: #fff;
+    margin-bottom: 10px;
+  }
+  .popup p.sub {
+    font-size: 0.88rem;
+    color: #aaa;
+    line-height: 1.6;
+    margin-bottom: 6px;
+  }
+  .popup p.hint {
+    font-size: 0.75rem;
+    color: #555;
+    margin-bottom: 24px;
+  }
+
+  /* Benefits list */
+  .benefits {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  .benefit {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    color: #ccc;
+  }
+  .benefit i { width: 16px; text-align: center; }
+
+  /* Allow button */
+  .btn-allow {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #e63946, #b91c2c);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: opacity 0.15s, transform 0.15s;
+    box-shadow: 0 8px 20px rgba(230,57,70,0.35);
+    margin-bottom: 12px;
+  }
+  .btn-allow:hover { opacity: 0.9; transform: translateY(-1px); }
+  .btn-allow:active { transform: scale(0.98); }
+
+  .skip-link {
+    font-size: 0.72rem;
+    color: #444;
+    cursor: pointer;
+    text-decoration: underline;
+    background: none;
+    border: none;
+    display: block;
+    width: 100%;
+    text-align: center;
+  }
+  .skip-link:hover { color: #666; }
+
+  /* ── DENIED STATE ── */
+  .denied-box {
+    padding: 14px;
+    background: rgba(230,57,70,0.08);
+    border: 1px solid rgba(230,57,70,0.3);
+    border-radius: 10px;
+    font-size: 0.8rem;
+    color: #ff6b6b;
+    line-height: 1.7;
+    text-align: left;
+    margin-bottom: 16px;
+  }
+  .denied-box strong { color: #fff; }
+  .denied-box .step {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 8px;
+    color: #ccc;
+    font-size: 0.78rem;
+  }
+  .denied-box .step-num {
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.08);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700; color: #fff;
+    flex-shrink: 0;
+  }
+  .btn-refresh {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px;
+    color: #ccc;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: background 0.15s;
+  }
+  .btn-refresh:hover { background: rgba(255,255,255,0.08); }
+
+  /* Toggle buttons */
+  .toggle-row {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 8px;
+    z-index: 200;
+  }
+  .toggle-btn {
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .toggle-btn:hover { background: rgba(255,255,255,0.1); }
+  .toggle-btn.active { background: rgba(230,57,70,0.2); border-color: rgba(230,57,70,0.5); color: #e63946; }
+</style>
+</head>
+<body>
+
+<!-- Fake blurred dashboard -->
+<div class="fake-dashboard">
+  <div class="fake-topbar">
+    <div class="fake-brand">
+      <div class="fake-logo">S</div>
+      <div>
+        <div class="fake-title">My Dashboard</div>
+        <div class="fake-sub">Welcome, Itachi Uchiha</div>
+      </div>
+    </div>
+    <div class="fake-actions">
+      <div class="fake-btn"><i class="fas fa-bell"></i></div>
+      <div class="fake-btn">Profile</div>
+      <div class="fake-btn">Log out</div>
+    </div>
+  </div>
+  <div class="fake-cards">
+    <div class="fake-card"><div class="fake-card-title">XP</div><div class="fake-card-val">27</div></div>
+    <div class="fake-card"><div class="fake-card-title">Wallet</div><div class="fake-card-val">Rs 0</div></div>
+    <div class="fake-card"><div class="fake-card-title">Streak</div><div class="fake-card-val">1 day</div></div>
+  </div>
+  <div class="fake-products">
+    <div class="fake-product"><div class="fake-product-img"></div><div class="fake-product-body"><div class="fake-product-name">DRIP CLIENT</div><div class="fake-product-price">From Rs 299</div></div></div>
+    <div class="fake-product"><div class="fake-product-img"></div><div class="fake-product-body"><div class="fake-product-name">HG CHEATS</div><div class="fake-product-price">From Rs 399</div></div></div>
+    <div class="fake-product"><div class="fake-product-img"></div><div class="fake-product-body"><div class="fake-product-name">RANK PUSH</div><div class="fake-product-price">From Rs 50</div></div></div>
+    <div class="fake-product"><div class="fake-product-img"></div><div class="fake-product-body"><div class="fake-product-name">4K PANEL</div><div class="fake-product-price">Rs 4,000</div></div></div>
+  </div>
+</div>
+
+<!-- Overlay + Popup -->
+<div class="overlay" id="overlay">
+
+  <!-- DEFAULT STATE -->
+  <div class="popup" id="popup-default">
+    <div class="bell-wrap">
+      <div class="bell-ring"></div>
+      <div class="bell-ring"></div>
+      <div class="bell-icon">
+        <i class="fas fa-bell" style="color:#e63946;"></i>
+      </div>
+    </div>
+
+    <h2>Turn On Notifications</h2>
+    <p class="sub">Stay updated on your orders, key deliveries, and exclusive deals.</p>
+    <p class="hint">No spam. Only what matters.</p>
+
+    <div class="benefits">
+      <div class="benefit">
+        <i class="fas fa-key" style="color:#fbbf24;"></i>
+        Instant alert when your key is delivered
+      </div>
+      <div class="benefit">
+        <i class="fas fa-circle-check" style="color:#4ade80;"></i>
+        Order approved notification
+      </div>
+      <div class="benefit">
+        <i class="fas fa-bolt" style="color:#f59e0b;"></i>
+        Flash deals and limited offers
+      </div>
+    </div>
+
+    <button class="btn-allow" onclick="showGranted()">
+      <i class="fas fa-bell"></i> Allow Notifications
+    </button>
+    <button class="skip-link" onclick="showDenied()">
+      See what happens if I deny →
+    </button>
+  </div>
+
+  <!-- DENIED STATE (hidden by default) -->
+  <div class="popup" id="popup-denied" style="display:none;">
+    <div class="bell-wrap" style="margin-bottom:20px;">
+      <div class="bell-icon" style="background:rgba(230,57,70,0.08); border-color:rgba(230,57,70,0.3);">
+        <i class="fas fa-bell-slash" style="color:#ff6b6b;"></i>
+      </div>
+    </div>
+
+    <h2 style="color:#ff6b6b;">Notifications Blocked</h2>
+    <p class="sub" style="margin-bottom:20px;">You will not receive order updates or key delivery alerts until you enable notifications.</p>
+
+    <div class="denied-box">
+      <strong><i class="fas fa-circle-xmark" style="margin-right:6px;"></i>How to fix this:</strong>
+      <div class="step">
+        <div class="step-num">1</div>
+        Click the <strong>lock icon</strong> in your browser address bar
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        Find <strong>Notifications</strong> and set it to <strong style="color:#4ade80;">Allow</strong>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        Refresh this page
+      </div>
+    </div>
+
+    <button class="btn-refresh" onclick="showDefault()">
+      <i class="fas fa-rotate"></i> I allowed it — Refresh
+    </button>
+    <button class="skip-link" style="margin-top:10px;" onclick="showDefault()">
+      ← Back
+    </button>
+  </div>
+
+  <!-- GRANTED STATE (hidden by default) -->
+  <div class="popup" id="popup-granted" style="display:none;">
+    <div class="bell-wrap" style="margin-bottom:20px;">
+      <div class="bell-icon" style="background:rgba(74,222,128,0.1); border-color:rgba(74,222,128,0.4);">
+        <i class="fas fa-circle-check" style="color:#4ade80;"></i>
+      </div>
+    </div>
+    <h2 style="color:#4ade80;">Notifications Enabled</h2>
+    <p class="sub">You are all set. The dashboard is loading...</p>
+    <p class="hint" style="margin-top:8px;">This popup disappears automatically.</p>
+  </div>
+
+</div>
+
+<!-- Toggle buttons for preview -->
+<div class="toggle-row">
+  <button class="toggle-btn active" onclick="showDefault()">Default (not asked)</button>
+  <button class="toggle-btn" onclick="showDenied()">Denied state</button>
+  <button class="toggle-btn" onclick="showGranted()">Granted state</button>
+</div>
+
+<script>
+  function showDefault() {
+    document.getElementById('popup-default').style.display = 'block';
+    document.getElementById('popup-denied').style.display = 'none';
+    document.getElementById('popup-granted').style.display = 'none';
+    document.querySelectorAll('.toggle-btn')[0].classList.add('active');
+    document.querySelectorAll('.toggle-btn')[1].classList.remove('active');
+    document.querySelectorAll('.toggle-btn')[2].classList.remove('active');
+  }
+  function showDenied() {
+    document.getElementById('popup-default').style.display = 'none';
+    document.getElementById('popup-denied').style.display = 'block';
+    document.getElementById('popup-granted').style.display = 'none';
+    document.querySelectorAll('.toggle-btn')[0].classList.remove('active');
+    document.querySelectorAll('.toggle-btn')[1].classList.add('active');
+    document.querySelectorAll('.toggle-btn')[2].classList.remove('active');
+  }
+  function showGranted() {
+    document.getElementById('popup-default').style.display = 'none';
+    document.getElementById('popup-denied').style.display = 'none';
+    document.getElementById('popup-granted').style.display = 'block';
+    document.querySelectorAll('.toggle-btn')[0].classList.remove('active');
+    document.querySelectorAll('.toggle-btn')[1].classList.remove('active');
+    document.querySelectorAll('.toggle-btn')[2].classList.add('active');
+    // Auto hide after 2s like real app
+    setTimeout(() => {
+      document.getElementById('overlay').style.display = 'none';
+    }, 2000);
+  }
+</script>
+</body>
+</html>
