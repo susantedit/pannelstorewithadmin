@@ -621,10 +621,10 @@ router.post('/gamification/birthday-check', requireAuth, async (req, res) => {
     const todayMMDD = `${String(today.getMonth() + 1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
     const lastBdayYear = user.lastBirthdayCredit ? new Date(user.lastBirthdayCredit).getFullYear() : 0;
     if (birthday === todayMMDD && lastBdayYear < today.getFullYear()) {
-      user.walletBalance = (user.walletBalance || 0) + 100;
+      user.walletBalance = (user.walletBalance || 0) + 50;
       user.lastBirthdayCredit = new Date();
       await user.save();
-      return res.json({ ok: true, gift: true, message: `🎂 Happy Birthday! Rs 100 added to your wallet!` });
+      return res.json({ ok: true, gift: true, message: `🎂 Happy Birthday! Rs 50 added to your wallet!` });
     }
     res.json({ ok: true, gift: false });
   } catch (e) {

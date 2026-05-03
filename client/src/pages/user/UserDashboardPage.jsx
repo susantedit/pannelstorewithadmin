@@ -224,6 +224,18 @@ export default function UserDashboardPage() {
     try { return JSON.parse(localStorage.getItem('price_watchlist') || '[]'); } catch { return []; }
   });
 
+  // Product category filter & search
+  const [productCategory, setProductCategory] = useState('All');
+  const [productSearch, setProductSearch] = useState('');
+
+  // Order search & filter
+  const [orderSearch, setOrderSearch] = useState('');
+  const [orderStatusFilter, setOrderStatusFilter] = useState('all');
+
+  // Birthday celebration
+  const [showBirthdayCelebration, setShowBirthdayCelebration] = useState(false);
+  const [birthdayMsg, setBirthdayMsg] = useState('');
+
   // VIP modal
   const [vipModalOpen, setVipModalOpen] = useState(false);
 
@@ -288,7 +300,10 @@ export default function UserDashboardPage() {
     api.getGamificationProfile().then(res => { if (res?.ok) setGamProfile(res); }).catch(() => {});
     // Birthday check
     api.birthdayCheck().then(res => {
-      if (res?.gift) Notif.showNotification('🎂 Happy Birthday!', res.message, 'key', 0);
+      if (res?.gift) {
+        setBirthdayMsg(res.message || '🎂 Happy Birthday! Rs 50 added to your wallet!');
+        setShowBirthdayCelebration(true);
+      }
     }).catch(() => {});
     // Load notification count
     loadNotificationCount();
@@ -693,6 +708,105 @@ export default function UserDashboardPage() {
           </div>
         </div>
       )}
+      {/* ── Birthday Celebration Overlay ── */}
+      {showBirthdayCelebration && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 999999,
+          background: 'rgba(0,0,0,0.85)',
+          backdropFilter: 'blur(16px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <style>{`
+            @keyframes bdayBounce { 0%,100%{transform:scale(1)} 50%{transform:scale(1.08)} }
+            @keyframes bdayFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+            @keyframes confettiFall {
+              0%{transform:translateY(-20px) rotate(0deg);opacity:1}
+              100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+            }
+          `}</style>
+          {/* Confetti particles */}
+          {[...Array(30)].map((_, i) => (
+            <div key={i} style={{
+              position: 'fixed',
+              left: `${Math.random() * 100}%`,
+              top: '-20px',
+              width: `${Math.random() * 10 + 6}px`,
+              height: `${Math.random() * 10 + 6}px`,
+              borderRadius: Math.random() > 0.5 ? '50%' : '2px',
+              background: ['#e63946','#fbbf24','#4ade80','#60a5fa','#a78bfa','#f472b6'][Math.floor(Math.random()*6)],
+              animation: `confettiFall ${Math.random() * 3 + 2}s ease-in ${Math.random() * 2}s forwards`,
+              pointerEvents: 'none', zIndex: 999998
+            }} />
+          ))}
+          <div style={{
+            maxWidth: '420px', width: '100%',
+            background: 'linear-gradient(135deg, #1a0a0a, #0d0d1a)',
+            border: '2px solid rgba(251,191,36,0.5)',
+            borderRadius: '24px',
+            padding: '44px 32px',
+            textAlign: 'center',
+            boxShadow: '0 0 60px rgba(251,191,36,0.3), 0 24px 60px rgba(0,0,0,0.8)',
+            animation: 'bdayBounce 1.5s ease-in-out infinite',
+            position: 'relative', zIndex: 999999
+          }}>
+            {/* Cake emoji floating */}
+            <div style={{ fontSize: '5rem', animation: 'bdayFloat 2s ease-in-out infinite', marginBottom: '16px' }}>
+              🎂
+            </div>
+            <div style={{
+              fontFamily: "'Orbitron',sans-serif",
+              fontSize: '1.6rem', fontWeight: 900,
+              background: 'linear-gradient(135deg, #fbbf24, #f59e0b, #fbbf24)',
+              WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
+              marginBottom: '8px', letterSpacing: '2px'
+            }}>
+              HAPPY BIRTHDAY!
+            </div>
+            <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 700, marginBottom: '6px' }}>
+              🎉 {user?.name?.split(' ')[0] || 'Player'} 🎉
+            </div>
+            <div style={{
+              fontSize: '0.9rem', color: '#aaa', lineHeight: 1.7, marginBottom: '20px'
+            }}>
+              {birthdayMsg || 'Wishing you an amazing day! A special gift has been added to your wallet.'}
+            </div>
+            {/* Gift box */}
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '10px',
+              padding: '14px 28px', borderRadius: '14px',
+              background: 'linear-gradient(135deg, rgba(251,191,36,0.2), rgba(251,191,36,0.08))',
+              border: '1px solid rgba(251,191,36,0.4)',
+              marginBottom: '24px'
+            }}>
+              <span style={{ fontSize: '1.8rem' }}>🎁</span>
+              <div style={{ textAlign: 'left' }}>
+                <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: '1.4rem', fontWeight: 900, color: '#fbbf24' }}>
+                  Rs 50
+                </div>
+                <div style={{ fontSize: '0.75rem', color: '#aaa' }}>Added to your wallet</div>
+              </div>
+            </div>
+            <br />
+            <button
+              onClick={() => setShowBirthdayCelebration(false)}
+              style={{
+                background: 'linear-gradient(135deg, #fbbf24, #f59e0b)',
+                border: 'none', borderRadius: '12px',
+                color: '#000', padding: '14px 40px',
+                fontFamily: "'Orbitron',sans-serif",
+                fontSize: '0.85rem', fontWeight: 900,
+                letterSpacing: '2px', cursor: 'pointer',
+                boxShadow: '0 4px 20px rgba(251,191,36,0.4)',
+                transition: 'all 0.2s'
+              }}
+            >
+              🎮 LET'S PLAY!
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Announcement banner */}
       {appSettings?.announcement && (
         <div style={{
@@ -1010,11 +1124,58 @@ export default function UserDashboardPage() {
           <p style={{ fontSize: '0.78rem', color: 'var(--muted)', marginTop: '6px', marginBottom: '12px' }}>
             Referral codes give the owner Rs 30 credit after the request is approved.
           </p>
+
+          {/* Order search + status filter */}
+          {userRequests.length > 0 && (
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '14px', flexWrap: 'wrap' }}>
+              <input
+                value={orderSearch}
+                onChange={e => setOrderSearch(e.target.value)}
+                placeholder="🔍 Search orders..."
+                style={{
+                  flex: 1, minWidth: '160px', padding: '8px 12px', borderRadius: '8px',
+                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                  color: 'var(--text)', fontSize: '0.85rem', outline: 'none'
+                }}
+              />
+              {['all','pending','accepted','rejected'].map(f => (
+                <button
+                  key={f}
+                  onClick={() => setOrderStatusFilter(f)}
+                  style={{
+                    padding: '6px 12px', borderRadius: '8px', cursor: 'pointer',
+                    fontSize: '0.72rem', fontWeight: 700, transition: 'all 0.2s',
+                    fontFamily: "'Orbitron',sans-serif", letterSpacing: '1px',
+                    background: orderStatusFilter === f ? 'var(--primary)' : 'rgba(255,255,255,0.04)',
+                    border: orderStatusFilter === f ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.1)',
+                    color: orderStatusFilter === f ? '#fff' : 'var(--muted)'
+                  }}
+                >
+                  {f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
+          )}
+
           {userRequests.length === 0 ? (
             <p style={{ textAlign: 'center', color: 'var(--text-secondary)' }}>No requests yet</p>
-          ) : (
+          ) : (() => {
+            const filtered = userRequests.filter(r => {
+              const matchStatus = orderStatusFilter === 'all' || r.status?.toLowerCase().includes(orderStatusFilter);
+              const matchSearch = !orderSearch.trim() ||
+                r.product?.toLowerCase().includes(orderSearch.toLowerCase()) ||
+                r.packageName?.toLowerCase().includes(orderSearch.toLowerCase()) ||
+                String(r.id || r._id || '').toLowerCase().includes(orderSearch.toLowerCase());
+              return matchStatus && matchSearch;
+            });
+            if (filtered.length === 0) return (
+              <p style={{ textAlign: 'center', color: 'var(--muted)', padding: '20px 0', fontSize: '0.85rem' }}>
+                No orders match your search
+              </p>
+            );
+            return (
             <div className="request-list">
-              {userRequests.map(request => {
+              {filtered.map(request => {
                 const reqId = request.id || request._id;
                 const isAccepted = request.status?.toLowerCase().includes('accept');
                 const isPending = request.status?.toLowerCase().includes('pending') || request.status?.toLowerCase().includes('awaiting');
@@ -1093,7 +1254,8 @@ export default function UserDashboardPage() {
                 );
               })}
             </div>
-          )}
+            );
+          })()}
         </div>
       </section>
 
@@ -1102,6 +1264,41 @@ export default function UserDashboardPage() {
           <div className="panel-header">
             <h2>Available Products</h2>
             <span>{products.length} products</span>
+          </div>
+
+          {/* Category filter + search */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '16px' }}>
+            {/* Search bar */}
+            <input
+              value={productSearch}
+              onChange={e => setProductSearch(e.target.value)}
+              placeholder="🔍 Search products..."
+              style={{
+                width: '100%', padding: '10px 14px', borderRadius: '10px',
+                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                color: 'var(--text)', fontSize: '0.88rem', outline: 'none', boxSizing: 'border-box'
+              }}
+            />
+            {/* Category pills */}
+            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+              {['All', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))].map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setProductCategory(cat)}
+                  style={{
+                    padding: '5px 14px', borderRadius: '999px', cursor: 'pointer',
+                    fontFamily: "'Orbitron',sans-serif", fontSize: '0.68rem', fontWeight: 700,
+                    letterSpacing: '1px', transition: 'all 0.2s',
+                    background: productCategory === cat ? 'var(--primary)' : 'rgba(255,255,255,0.05)',
+                    border: productCategory === cat ? '1px solid var(--primary)' : '1px solid rgba(255,255,255,0.1)',
+                    color: productCategory === cat ? '#fff' : 'var(--muted)',
+                    boxShadow: productCategory === cat ? '0 0 12px rgba(230,57,70,0.4)' : 'none'
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
 
           {loading ? (
@@ -1114,7 +1311,14 @@ export default function UserDashboardPage() {
             </div>
           ) : (
             <div className="card-grid">
-              {products.map((product) => {
+              {products.filter(product => {
+                const matchCat = productCategory === 'All' || product.category === productCategory;
+                const matchSearch = !productSearch.trim() ||
+                  product.name.toLowerCase().includes(productSearch.toLowerCase()) ||
+                  (product.description || '').toLowerCase().includes(productSearch.toLowerCase()) ||
+                  (product.category || '').toLowerCase().includes(productSearch.toLowerCase());
+                return matchCat && matchSearch;
+              }).map((product) => {
                 // Top-up products (memberships/diamonds) get NO discounts, flash sales, or hype
                 const isTopup = product.category === 'Top-up' ||
                   /weekly|monthly|diamond|membership/i.test(product.name);
