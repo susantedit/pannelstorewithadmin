@@ -2,7 +2,7 @@ import Request from '../models/Request.js';
 import User from '../models/User.js';
 import { resolveCouponCode } from './couponController.js';
 import { NotificationHelpers } from './notificationController.js';
-import { sendWhatsAppAlert } from '../lib/whatsapp.js';
+import { sendDiscordAlert } from '../lib/alerts.js';
 
 const inMemoryRequests = [
   {
@@ -131,20 +131,17 @@ export async function createRequest(req, res) {
   // Send in-app notification to user
   await NotificationHelpers.xpGained(userId, 5, 'Request submitted');
 
-  // WhatsApp alert to admin — non-blocking
-  const price = finalPrice || basePrice;
-  const method = paymentMethod === 'esewa' ? 'eSewa' : 'Bank';
-  sendWhatsAppAlert(
-    `NEW ORDER - SUSANTEDIT\n` +
-    `Customer: ${userName}\n` +
-    `Product: ${product}${packageName ? ' - ' + packageName : ''}\n` +
-    `Amount: Rs ${price}\n` +
-    `Payment: ${method}\n` +
-    `TikTok: ${tikTok}\n` +
-    `WhatsApp: ${whatsapp}\n` +
-    `Txn: ${transaction}\n` +
-    `Review at: https://pannelstorewithadmin.vercel.app/admin`
-  ).catch(() => {});
+  // Discord/Telegram alert to admin — non-blocking, rich embed
+  sendDiscordAlert({
+    userName,
+    product,
+    packageName,
+    price:         finalPrice || basePrice,
+    paymentMethod,
+    tikTok,
+    whatsapp,
+    transaction,
+  }).catch(() => {});
   
   res.status(201).json({ ok: true, request });
 }
