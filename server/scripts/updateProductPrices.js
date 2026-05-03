@@ -9,14 +9,10 @@ const __dirname = dirname(__filename);
 
 dotenv.config({ path: join(__dirname, '../.env') });
 
-const products = [
+const updatedProducts = [
   {
     name: 'DRIP CLINT (ROOT)',
-    category: 'Digital key',
     price: 'Rs 200',
-    status: 'Available',
-    description: 'ROOT DEVICE Support',
-    img: 'https://i.postimg.cc/Jnwh1T2q/Screenshot-20260421-102516.jpg',
     packages: [
       { label: '1 Day', price: '200', originalPrice: '' },
       { label: '7 Days', price: '590', originalPrice: '' },
@@ -25,11 +21,7 @@ const products = [
   },
   {
     name: 'DRIP CLINT (PC)',
-    category: 'Digital key',
     price: 'Rs 230',
-    status: 'Available',
-    description: 'PC EMULATOR Support',
-    img: 'https://i.postimg.cc/Jnwh1T2q/Screenshot-20260421-102516.jpg',
     packages: [
       { label: '1 Day', price: '230', originalPrice: '' },
       { label: '7 Days', price: '690', originalPrice: '' },
@@ -39,11 +31,7 @@ const products = [
   },
   {
     name: 'HG CHEATS (ROOT)',
-    category: 'Digital key',
     price: 'Rs 160',
-    status: 'Available',
-    description: 'ROOT APK',
-    img: 'https://i.postimg.cc/fRGsXVfy/Screenshot-20260421-102611.jpg',
     packages: [
       { label: '1 Day', price: '160', originalPrice: '' },
       { label: '7 Days', price: '390', originalPrice: '' },
@@ -53,11 +41,7 @@ const products = [
   },
   {
     name: 'BR MOD ROOT',
-    category: 'Digital key',
     price: 'Rs 180',
-    status: 'Available',
-    description: 'ROOT APK MAIN ID SAFE',
-    img: 'https://i.postimg.cc/65Fdfcgp/Screenshot-20260425-150006.jpg',
     packages: [
       { label: '1 Day', price: '180', originalPrice: '' },
       { label: '7 Days', price: '490', originalPrice: '' },
@@ -67,11 +51,7 @@ const products = [
   },
   {
     name: 'BR MOD PC',
-    category: 'Digital key',
     price: 'Rs 210',
-    status: 'Available',
-    description: 'PC EMULATOR SAFE',
-    img: 'https://i.postimg.cc/65Fdfcgp/Screenshot-20260425-150006.jpg',
     packages: [
       { label: '1 Day', price: '210', originalPrice: '' },
       { label: '10 Days', price: '690', originalPrice: '' },
@@ -83,30 +63,34 @@ const products = [
   }
 ];
 
-async function seedProducts() {
+async function updatePrices() {
   try {
     await mongoose.connect(process.env.MONGO_URI);
     console.log('✅ Connected to MongoDB');
 
-    // Check if products already exist
-    for (const productData of products) {
-      const existing = await Product.findOne({ name: productData.name });
-      if (existing) {
-        console.log(`⚠️  Product "${productData.name}" already exists, skipping...`);
-        continue;
-      }
+    for (const productData of updatedProducts) {
+      const result = await Product.findOneAndUpdate(
+        { name: productData.name },
+        { 
+          price: productData.price,
+          packages: productData.packages 
+        },
+        { new: true }
+      );
 
-      const product = new Product(productData);
-      await product.save();
-      console.log(`✅ Added product: ${productData.name}`);
+      if (result) {
+        console.log(`✅ Updated prices for: ${productData.name}`);
+      } else {
+        console.log(`⚠️  Product "${productData.name}" not found`);
+      }
     }
 
-    console.log('\n🎉 Product seeding completed!');
+    console.log('\n🎉 Price update completed!');
     process.exit(0);
   } catch (error) {
-    console.error('❌ Error seeding products:', error);
+    console.error('❌ Error updating prices:', error);
     process.exit(1);
   }
 }
 
-seedProducts();
+updatePrices();
