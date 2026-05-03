@@ -244,12 +244,10 @@ export default function UserDashboardPage() {
     });
   };
 
-  // Ask for notification permission on mount
+  // Ask for notification permission on mount — gate handles the blocking UI
   useEffect(() => {
-    requestNotificationPermission();
-    // Setup FCM real push notifications (OS-level, shows in phone notification shade)
+    // Setup Web Push (VAPID) — registers SW and saves subscription to server
     setupPushNotifications((payload) => {
-      // Foreground message received — refresh notification count
       loadNotificationCount();
     });
     // Auto-resume bg sound if user had it on
@@ -572,6 +570,88 @@ export default function UserDashboardPage() {
               Go to login
             </Button>
           </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ── Notification Permission Gate ─────────────────────────────────────────────
+  // Block dashboard access until user grants notification permission
+  const notifPermission = typeof Notification !== 'undefined' ? Notification.permission : 'granted';
+  if (notifPermission !== 'granted') {
+    return (
+      <div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{
+          maxWidth: '420px', width: '100%', margin: '0 auto',
+          padding: '40px 32px', textAlign: 'center',
+          background: 'rgba(22,22,22,0.95)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: '20px',
+          boxShadow: '0 20px 60px rgba(0,0,0,0.6)'
+        }}>
+          {/* Icon */}
+          <div style={{
+            width: '72px', height: '72px', borderRadius: '18px',
+            background: 'rgba(230,57,70,0.12)', border: '1px solid rgba(230,57,70,0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            margin: '0 auto 24px', fontSize: '2rem'
+          }}>
+            <i className="fas fa-bell" style={{ color: 'var(--primary)' }} />
+          </div>
+
+          <h2 style={{ margin: '0 0 10px', fontSize: '1.3rem', fontWeight: 800, color: '#fff' }}>
+            Enable Notifications
+          </h2>
+          <p style={{ margin: '0 0 8px', fontSize: '0.9rem', color: '#aaa', lineHeight: 1.6 }}>
+            SUSANTEDIT requires notification permission to keep you updated on your orders, key deliveries, and exclusive deals.
+          </p>
+          <p style={{ margin: '0 0 28px', fontSize: '0.8rem', color: '#666', lineHeight: 1.5 }}>
+            You will not miss a key delivery or important update.
+          </p>
+
+          {notifPermission === 'denied' ? (
+            // Permission was permanently blocked
+            <div>
+              <div style={{
+                padding: '14px 16px', borderRadius: '10px', marginBottom: '20px',
+                background: 'rgba(230,57,70,0.08)', border: '1px solid rgba(230,57,70,0.25)',
+                fontSize: '0.82rem', color: '#ff6b6b', lineHeight: 1.6, textAlign: 'left'
+              }}>
+                <i className="fas fa-circle-xmark" style={{ marginRight: '8px' }} />
+                Notifications are blocked in your browser settings.
+                <br /><br />
+                <strong style={{ color: '#fff' }}>To fix this:</strong>
+                <br />
+                1. Click the lock icon in your browser address bar
+                <br />
+                2. Find <strong style={{ color: '#fff' }}>Notifications</strong> and set it to <strong style={{ color: '#4ade80' }}>Allow</strong>
+                <br />
+                3. Refresh this page
+              </div>
+              <Button variant="ghost" onClick={() => window.location.reload()}>
+                <i className="fas fa-rotate" /> I enabled it, refresh
+              </Button>
+            </div>
+          ) : (
+            // Permission not yet asked
+            <Button
+              variant="primary"
+              onClick={async () => {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                  // Trigger re-render by forcing state update
+                  window.location.reload();
+                }
+              }}
+              style={{ width: '100%', padding: '14px', fontSize: '1rem', fontWeight: 700 }}
+            >
+              <i className="fas fa-bell" /> Allow Notifications to Continue
+            </Button>
+          )}
+
+          <p style={{ marginTop: '16px', fontSize: '0.72rem', color: '#444' }}>
+            We only send order updates, key deliveries, and important alerts. No spam.
+          </p>
         </div>
       </div>
     );
