@@ -578,87 +578,7 @@ export default function UserDashboardPage() {
     );
   }
 
-  // ── Notification Permission Gate ─────────────────────────────────────────────
-  // Uses state so the component re-renders when permission changes
-  if (notifPermission !== 'granted') {
-    return (
-      <div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{
-          maxWidth: '420px', width: '100%', margin: '0 auto',
-          padding: '40px 32px', textAlign: 'center',
-          background: 'rgba(22,22,22,0.95)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          borderRadius: '20px',
-          boxShadow: '0 20px 60px rgba(0,0,0,0.6)'
-        }}>
-          {/* Icon */}
-          <div style={{
-            width: '72px', height: '72px', borderRadius: '18px',
-            background: 'rgba(230,57,70,0.12)', border: '1px solid rgba(230,57,70,0.3)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            margin: '0 auto 24px', fontSize: '2rem'
-          }}>
-            <i className="fas fa-bell" style={{ color: 'var(--primary)' }} />
-          </div>
-
-          <h2 style={{ margin: '0 0 10px', fontSize: '1.3rem', fontWeight: 800, color: '#fff' }}>
-            Enable Notifications
-          </h2>
-          <p style={{ margin: '0 0 8px', fontSize: '0.9rem', color: '#aaa', lineHeight: 1.6 }}>
-            SUSANTEDIT requires notification permission to keep you updated on your orders, key deliveries, and exclusive deals.
-          </p>
-          <p style={{ margin: '0 0 28px', fontSize: '0.8rem', color: '#666', lineHeight: 1.5 }}>
-            You will not miss a key delivery or important update.
-          </p>
-
-          {notifPermission === 'denied' ? (
-            // Permanently blocked — show manual instructions
-            <div>
-              <div style={{
-                padding: '14px 16px', borderRadius: '10px', marginBottom: '20px',
-                background: 'rgba(230,57,70,0.08)', border: '1px solid rgba(230,57,70,0.25)',
-                fontSize: '0.82rem', color: '#ff6b6b', lineHeight: 1.6, textAlign: 'left'
-              }}>
-                <i className="fas fa-circle-xmark" style={{ marginRight: '8px' }} />
-                Notifications are blocked in your browser settings.
-                <br /><br />
-                <strong style={{ color: '#fff' }}>To fix this:</strong><br />
-                1. Click the <strong style={{ color: '#fff' }}>lock icon</strong> in your browser address bar<br />
-                2. Find <strong style={{ color: '#fff' }}>Notifications</strong> → set to <strong style={{ color: '#4ade80' }}>Allow</strong><br />
-                3. Refresh this page
-              </div>
-              <Button variant="ghost" onClick={() => window.location.reload()}>
-                <i className="fas fa-rotate" /> I enabled it — Refresh
-              </Button>
-            </div>
-          ) : (
-            // Default — show the allow button which triggers the browser prompt
-            <Button
-              variant="primary"
-              onClick={async () => {
-                try {
-                  const result = await Notification.requestPermission();
-                  setNotifPermission(result); // update state → re-renders immediately
-                } catch (e) {
-                  // Some browsers use callback style
-                  Notification.requestPermission((result) => {
-                    setNotifPermission(result);
-                  });
-                }
-              }}
-              style={{ width: '100%', padding: '14px', fontSize: '1rem', fontWeight: 700 }}
-            >
-              <i className="fas fa-bell" /> Allow Notifications to Continue
-            </Button>
-          )}
-
-          <p style={{ marginTop: '16px', fontSize: '0.72rem', color: '#444' }}>
-            We only send order updates, key deliveries, and important alerts. No spam.
-          </p>
-        </div>
-      </div>
-    );
-  }
+  // ── Notification Permission Gate — modal popup over dashboard ───────────────
 
   const userRequests = requests;
 
@@ -676,6 +596,87 @@ export default function UserDashboardPage() {
         position: 'fixed', inset: 0, zIndex: -1, pointerEvents: 'none',
         background: 'radial-gradient(ellipse at 20% 20%, rgba(230,57,70,0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.06) 0%, transparent 50%)'
       }} />
+
+      {/* ── Notification Permission Popup ── */}
+      {notifPermission !== 'granted' && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          background: 'rgba(0,0,0,0.75)',
+          backdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px'
+        }}>
+          <div style={{
+            maxWidth: '400px', width: '100%',
+            background: '#1a1a1a',
+            border: '1px solid rgba(255,255,255,0.1)',
+            borderRadius: '20px',
+            padding: '36px 28px',
+            textAlign: 'center',
+            boxShadow: '0 24px 60px rgba(0,0,0,0.7)',
+            animation: 'scaleIn 0.3s ease'
+          }}>
+            {/* Bell icon with pulse ring */}
+            <div style={{ position: 'relative', display: 'inline-block', marginBottom: '20px' }}>
+              <div style={{
+                width: '70px', height: '70px', borderRadius: '50%',
+                background: 'rgba(230,57,70,0.12)',
+                border: '2px solid rgba(230,57,70,0.4)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: '1.8rem', margin: '0 auto'
+              }}>
+                <i className="fas fa-bell" style={{ color: '#e63946' }} />
+              </div>
+            </div>
+
+            <h2 style={{ margin: '0 0 10px', fontSize: '1.25rem', fontWeight: 800, color: '#fff' }}>
+              Turn On Notifications
+            </h2>
+            <p style={{ margin: '0 0 6px', fontSize: '0.88rem', color: '#aaa', lineHeight: 1.6 }}>
+              Get instant alerts when your key is delivered, order is approved, or there is a new deal.
+            </p>
+            <p style={{ margin: '0 0 24px', fontSize: '0.78rem', color: '#555' }}>
+              No spam. Only important updates.
+            </p>
+
+            {notifPermission === 'denied' ? (
+              <div>
+                <div style={{
+                  padding: '12px 14px', borderRadius: '10px', marginBottom: '16px',
+                  background: 'rgba(230,57,70,0.08)', border: '1px solid rgba(230,57,70,0.3)',
+                  fontSize: '0.8rem', color: '#ff6b6b', lineHeight: 1.7, textAlign: 'left'
+                }}>
+                  <i className="fas fa-circle-xmark" style={{ marginRight: '6px' }} />
+                  <strong style={{ color: '#fff' }}>Notifications are blocked.</strong>
+                  <br />
+                  To fix: click the <strong style={{ color: '#fff' }}>lock icon</strong> in your address bar
+                  → <strong style={{ color: '#fff' }}>Notifications</strong>
+                  → set to <strong style={{ color: '#4ade80' }}>Allow</strong>
+                  → then refresh.
+                </div>
+                <Button variant="ghost" onClick={() => window.location.reload()} style={{ width: '100%' }}>
+                  <i className="fas fa-rotate" /> I allowed it — Refresh
+                </Button>
+              </div>
+            ) : (
+              <Button
+                variant="primary"
+                onClick={async () => {
+                  try {
+                    const result = await Notification.requestPermission();
+                    setNotifPermission(result);
+                  } catch {
+                    Notification.requestPermission((result) => setNotifPermission(result));
+                  }
+                }}
+                style={{ width: '100%', padding: '14px', fontSize: '1rem', fontWeight: 700 }}
+              >
+                <i className="fas fa-bell" /> Allow Notifications
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
       {/* Announcement banner */}
       {appSettings?.announcement && (
         <div style={{
