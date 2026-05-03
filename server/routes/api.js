@@ -895,47 +895,7 @@ router.get('/gifts/sent', requireAuth, async (req, res) => {
   }
 });
 
-// ── Web Push Subscription (VAPID — no Firebase needed) ───────────────────────
-router.get('/push/vapid-public-key', (_req, res) => {
-  const key = process.env.VAPID_PUBLIC_KEY;
-  if (!key) return res.status(503).json({ ok: false, message: 'Push not configured' });
-  res.json({ ok: true, publicKey: key });
-});
-
-router.post('/push/subscribe', requireAuth, async (req, res) => {
-  try {
-    const subscription = req.body?.subscription;
-    if (!subscription?.endpoint) {
-      return res.status(400).json({ ok: false, message: 'subscription object required' });
-    }
-    // Add if not already stored (dedupe by endpoint)
-    await User.findByIdAndUpdate(req.auth.userId, {
-      $pull: { pushSubscriptions: { endpoint: subscription.endpoint } }, // remove old first
-    });
-    await User.findByIdAndUpdate(req.auth.userId, {
-      $push: { pushSubscriptions: { $each: [subscription], $slice: -5 } }, // keep last 5
-    });
-    res.json({ ok: true, message: 'Subscribed to push notifications' });
-  } catch (e) {
-    res.status(500).json({ ok: false, message: e.message });
-  }
-});
-
-router.post('/push/unsubscribe', requireAuth, async (req, res) => {
-  try {
-    const endpoint = req.body?.endpoint;
-    if (endpoint) {
-      await User.findByIdAndUpdate(req.auth.userId, {
-        $pull: { pushSubscriptions: { endpoint } },
-      });
-    }
-    res.json({ ok: true });
-  } catch (e) {
-    res.status(500).json({ ok: false, message: e.message });
-  }
-});
-
-// ── Web Push subscription registration ───────────────────────────────────────
+// ── Web Push (VAPID) — subscribe / unsubscribe / test ────────────────────────
 router.get('/push/vapid-public-key', (_req, res) => {
   const key = process.env.VAPID_PUBLIC_KEY;
   if (!key) return res.status(503).json({ ok: false, message: 'Push not configured' });
@@ -948,15 +908,13 @@ router.post('/push/subscribe', requireAuth, async (req, res) => {
     if (!endpoint || !keys?.p256dh || !keys?.auth) {
       return res.status(400).json({ ok: false, message: 'Invalid subscription object' });
     }
+    // Remove old entry for same endpoint, then add fresh
     await User.findByIdAndUpdate(req.auth.userId, {
-      $addToSet: { pushSubscriptions: { endpoint, keys } }
+      $pull: { pushSubscriptions: { endpoint } }
     });
-    const user = await User.findById(req.auth.userId).select('pushSubscriptions');
-    if (user?.pushSubscriptions?.length > 5) {
-      await User.findByIdAndUpdate(req.auth.userId, {
-        pushSubscriptions: user.pushSubscriptions.slice(-5)
-      });
-    }
+    await User.findByIdAndUpdate(req.auth.userId, {
+      $push: { pushSubscriptions: { $each: [{ endpoint, keys }], $slice: -5 } }
+    });
     res.json({ ok: true, message: 'Subscribed' });
   } catch (e) {
     res.status(500).json({ ok: false, message: e.message });
@@ -977,7 +935,24 @@ router.post('/push/unsubscribe', requireAuth, async (req, res) => {
   }
 });
 
-// ── FCM token (kept for backward compat) ─────────────────────────────────────
+// Test endpoint — send push to a raw subscription object (no auth needed for local testing)
+router.post('/push/test', async (req, res) => {
+  try {
+    const { subscription, title = 'Test Push', body = 'Web Push is working!' } = req.body || {};
+    if (!subscription?.endpoint) {
+      return res.status(400).json({ ok: false, message: 'subscription required' });
+    }
+    const { sendPushToSubscription } = await import('../lib/webpush.js');
+    const result = await sendPushToSubscription(subscription, title, body, { url: '/dashboard' });
+    if (result === true)       return res.json({ ok: true,  message: 'Push sent!' });
+    if (result === 'expired')  return res.json({ ok: false, message: 'Subscription expired' });
+    return res.json({ ok: false, message: 'Push failed — check server logs' });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
+});
+
+// FCM token (legacy — kept for backward compat)
 router.post('/push/register', requireAuth, async (req, res) => {
   try {
     const token = String(req.body?.token || '').trim();

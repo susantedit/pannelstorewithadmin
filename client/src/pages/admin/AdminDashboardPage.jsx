@@ -262,7 +262,7 @@ export default function AdminDashboardPage() {
   const loadRequests = async () => {
     setLoading(true);
     try {
-      const res = await api.getRequests();
+      const res = await api.getRequests('all');
       if (res?.requests) setRequests(res.requests.map(r => ({ ...r, id: r.id || r._id })));
     } catch(e) { console.error(e); }
     finally { setLoading(false); }
