@@ -1258,6 +1258,96 @@ export default function UserDashboardPage() {
                   </article>
                 );
               })}
+
+              {/* ── Website For Sale Card ── */}
+              <article className="product-card" style={{
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(168,85,247,0.08))',
+                border: '1px solid rgba(99,102,241,0.35)',
+                position: 'relative',
+                overflow: 'hidden'
+              }}>
+                {/* Glow accent */}
+                <div style={{
+                  position: 'absolute', top: '-40px', right: '-40px',
+                  width: '120px', height: '120px', borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(168,85,247,0.25), transparent 70%)',
+                  pointerEvents: 'none'
+                }} />
+
+                {/* Header badge */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+                  <span style={{
+                    background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                    color: '#fff', padding: '3px 12px', borderRadius: '20px',
+                    fontSize: '0.68rem', fontFamily: "'Orbitron',sans-serif",
+                    fontWeight: 700, letterSpacing: '1px'
+                  }}>🛒 FOR SALE</span>
+                  <span style={{
+                    fontSize: '0.7rem', color: '#a78bfa', fontWeight: 700,
+                    fontFamily: "'Orbitron',sans-serif", letterSpacing: '1px'
+                  }}>LIMITED OFFER</span>
+                </div>
+
+                <h3 style={{ margin: '0 0 4px', color: '#fff', fontSize: '1rem' }}>
+                  This Website — Yours
+                </h3>
+                <p style={{ margin: '0 0 10px', fontSize: '0.82rem', color: 'var(--muted)', lineHeight: 1.6 }}>
+                  I built this exact panel store. Fully customizable — change branding, products, prices, colors, everything. Ready to deploy.
+                </p>
+
+                {/* Price */}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px', marginBottom: '12px' }}>
+                  <span style={{
+                    fontFamily: "'Orbitron',sans-serif", fontSize: '1.6rem',
+                    fontWeight: 900, color: '#a78bfa',
+                    textShadow: '0 0 20px rgba(168,85,247,0.5)'
+                  }}>Rs 4,000</span>
+                  <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>one-time</span>
+                </div>
+
+                {/* What's included */}
+                <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 12px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                  {[
+                    { icon: 'fa-check-circle', color: '#4ade80', text: 'Full source code' },
+                    { icon: 'fa-check-circle', color: '#4ade80', text: 'Admin panel + user dashboard' },
+                    { icon: 'fa-check-circle', color: '#4ade80', text: 'Discord order alerts' },
+                    { icon: 'fa-check-circle', color: '#4ade80', text: 'Gamification, referrals, spin wheel' },
+                    { icon: 'fa-times-circle', color: '#f87171', text: 'Domain not included' },
+                    { icon: 'fa-times-circle', color: '#f87171', text: 'Deployment not included' },
+                  ].map((item, i) => (
+                    <li key={i} style={{ fontSize: '0.78rem', color: item.color, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <i className={`fas ${item.icon}`} style={{ fontSize: '0.7rem', flexShrink: 0 }} />
+                      {item.text}
+                    </li>
+                  ))}
+                </ul>
+
+                {/* CTA */}
+                <a
+                  href="https://wa.me/9779708838261?text=Hi%2C+I%27m+interested+in+buying+the+panel+store+website+for+Rs+4000"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                    width: '100%', padding: '12px', borderRadius: '10px',
+                    background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                    color: '#fff', fontWeight: 700, fontSize: '0.9rem',
+                    textDecoration: 'none', fontFamily: "'Orbitron',sans-serif",
+                    letterSpacing: '1px', transition: 'opacity 0.2s',
+                    boxShadow: '0 4px 20px rgba(99,102,241,0.4)'
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '0.85'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                >
+                  <i className="fab fa-whatsapp" style={{ fontSize: '1rem' }} />
+                  Buy via WhatsApp
+                </a>
+
+                <p style={{ margin: '8px 0 0', fontSize: '0.7rem', color: '#555', textAlign: 'center' }}>
+                  Contact on WhatsApp to discuss & purchase
+                </p>
+              </article>
+
             </div>
           )}
         </div>
