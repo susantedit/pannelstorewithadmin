@@ -2,6 +2,7 @@ import Request from '../models/Request.js';
 import User from '../models/User.js';
 import { resolveCouponCode } from './couponController.js';
 import { NotificationHelpers } from './notificationController.js';
+import { sendWhatsAppAlert } from '../lib/whatsapp.js';
 
 const inMemoryRequests = [
   {
@@ -125,10 +126,25 @@ export async function createRequest(req, res) {
   const request = await Request.create(requestData);
   
   // Award XP for request submission (5 XP base)
-  await awardXpForPurchase(userId, 0, 5); // 5 XP for submitting request
+  await awardXpForPurchase(userId, 0, 5);
   
-  // Send notification
+  // Send in-app notification to user
   await NotificationHelpers.xpGained(userId, 5, 'Request submitted');
+
+  // WhatsApp alert to admin — non-blocking
+  const price = finalPrice || basePrice;
+  const method = paymentMethod === 'esewa' ? 'eSewa' : 'Bank';
+  sendWhatsAppAlert(
+    `NEW ORDER - SUSANTEDIT\n` +
+    `Customer: ${userName}\n` +
+    `Product: ${product}${packageName ? ' - ' + packageName : ''}\n` +
+    `Amount: Rs ${price}\n` +
+    `Payment: ${method}\n` +
+    `TikTok: ${tikTok}\n` +
+    `WhatsApp: ${whatsapp}\n` +
+    `Txn: ${transaction}\n` +
+    `Review at: https://pannelstorewithadmin.vercel.app/admin`
+  ).catch(() => {});
   
   res.status(201).json({ ok: true, request });
 }

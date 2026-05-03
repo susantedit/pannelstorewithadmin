@@ -15,8 +15,10 @@ self.addEventListener('push', (event) => {
 
   const title   = data.title   || 'SUSANTEDIT';
   const body    = data.body    || '';
-  const icon    = data.icon    || '/logo.png';
-  const badge   = data.badge   || '/logo.png';
+  // Use absolute URL for icon — relative paths don't work in service workers
+  const origin  = self.location.origin;
+  const icon    = data.icon    || `${origin}/logo.png`;
+  const badge   = data.badge   || `${origin}/logo.png`;
   const url     = data.data?.url || '/dashboard';
 
   event.waitUntil(

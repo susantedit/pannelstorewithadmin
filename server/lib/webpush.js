@@ -36,10 +36,17 @@ function init() {
  */
 export async function sendPushToSubscription(subscription, title, body, data = {}) {
   if (!init()) return false;
+  const siteUrl = process.env.CLIENT_URL || 'https://pannelstorewithadmin.vercel.app';
   try {
     await webpush.sendNotification(
       subscription,
-      JSON.stringify({ title, body, icon: '/logo.png', badge: '/logo.png', data })
+      JSON.stringify({
+        title,
+        body,
+        icon:  `${siteUrl}/logo.png`,
+        badge: `${siteUrl}/logo.png`,
+        data
+      })
     );
     return true;
   } catch (e) {

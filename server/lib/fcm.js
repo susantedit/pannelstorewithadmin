@@ -37,12 +37,14 @@ function buildPayload(tokens, notification, data = {}) {
     Object.entries(data).map(([k, v]) => [k, String(v)])
   );
 
+  const siteUrl = process.env.CLIENT_URL || 'https://pannelstorewithadmin.vercel.app';
+
   const base = {
     notification: {
       title: notification.title || 'SUSANTEDIT',
       body:  notification.body  || '',
-      icon:  '/logo.png',
-      badge: '/logo.png',
+      icon:  `${siteUrl}/logo.png`,
+      badge: `${siteUrl}/logo.png`,
       click_action: data.url || '/',
     },
     data: stringData,
