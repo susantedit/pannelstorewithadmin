@@ -17,8 +17,8 @@ self.addEventListener('push', (event) => {
   const body    = data.body    || '';
   // Use absolute URL for icon — relative paths don't work in service workers
   const origin  = self.location.origin;
-  const icon    = data.icon    || `${origin}/logo.png`;
-  const badge   = data.badge   || `${origin}/logo.png`;
+  const icon    = data.icon    || `${origin}/icon-192.png`;
+  const badge   = data.badge   || `${origin}/badge-96.png`;
   const url     = data.data?.url || '/dashboard';
 
   event.waitUntil(

@@ -34,13 +34,13 @@ messaging.onBackgroundMessage((payload) => {
 
   const title = notification.title || 'SUSANTEDIT';
   const body  = notification.body  || '';
-  const icon  = notification.icon  || '/logo.png';
+  const icon  = notification.icon  || '/icon-192.png';
   const url   = data.url           || '/dashboard';
 
   self.registration.showNotification(title, {
     body,
     icon,
-    badge:             '/logo.png',
+    badge:             '/badge-96.png',
     vibrate:           [200, 100, 200, 100, 200],
     requireInteraction: false,
     data:              { url, ...data },

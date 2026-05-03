@@ -258,8 +258,8 @@ export function sendBrowserNotification(title, body, options = {}) {
   if (!('Notification' in window) || Notification.permission !== 'granted') return;
   const n = new Notification(title, {
     body,
-    icon: '/logo.png',
-    badge: '/logo.png',
+    icon: '/icon-192.png',
+    badge: '/badge-96.png',
     tag: options.tag || 'susantedit',
     requireInteraction: options.requireInteraction || false,
   });
