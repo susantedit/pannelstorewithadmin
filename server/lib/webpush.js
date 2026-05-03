@@ -43,8 +43,8 @@ export async function sendPushToSubscription(subscription, title, body, data = {
       JSON.stringify({
         title,
         body,
-        icon:  `${siteUrl}/logo.png`,
-        badge: `${siteUrl}/logo.png`,
+        icon:  `${siteUrl}/icon-192.png`,
+        badge: `${siteUrl}/badge-96.png`,
         data
       })
     );
