@@ -1,6 +1,25 @@
 import Notification from '../models/Notification.js';
 import User from '../models/User.js';
-import { sendPushToUser, broadcastPush } from '../lib/webpush.js';
+import { sendPushToUser as sendVapidToUser, broadcastPush as broadcastVapid } from '../lib/webpush.js';
+import { sendPushToUser as sendFcmToUser, broadcastPush as broadcastFcm } from '../lib/fcm.js';
+
+// Send push via both FCM (background-capable) and VAPID (fallback)
+async function pushToUser(userId, title, body, data = {}) {
+  const [fcm, vapid] = await Promise.allSettled([
+    sendFcmToUser(userId, { title, body }, data),
+    sendVapidToUser(userId, title, body, data),
+  ]);
+  const fcmSent   = fcm.value?.sent   || 0;
+  const vapidSent = vapid.value?.sent || 0;
+  return { sent: fcmSent + vapidSent };
+}
+
+async function broadcastAll(title, body, data = {}) {
+  await Promise.allSettled([
+    broadcastFcm({ title, body }, data),
+    broadcastVapid(title, body, data),
+  ]);
+}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SMART TARGETING — classify user segment
@@ -89,8 +108,8 @@ export async function createNotification(userId, title, message, type = 'info', 
       metadata:    options.metadata    || {},
     });
 
-    // Web Push — non-blocking OS notification
-    sendPushToUser(
+    // Web Push — non-blocking OS notification (FCM + VAPID)
+    pushToUser(
       userId,
       title,
       message,
@@ -312,7 +331,7 @@ export async function sendCustomNotification(req, res) {
     const successCount = notifications.filter(Boolean).length;
 
     if (targetType === 'all') {
-      broadcastPush(title.trim(), message.trim(), { type, url: deepLink }).catch(() => {});
+      broadcastAll(title.trim(), message.trim(), { type, url: deepLink }).catch(() => {});
     }
 
     res.json({ ok: true, message: `Notification sent to ${successCount} user${successCount !== 1 ? 's' : ''}`, sentCount: successCount });

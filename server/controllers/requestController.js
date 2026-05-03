@@ -132,6 +132,14 @@ export async function createRequest(req, res) {
   await NotificationHelpers.xpGained(userId, 5, 'Request submitted');
 
   // Discord/Telegram alert to admin — non-blocking, rich embed
+  const userEmail = req.user?.email || '';
+  const userIp = (
+    req.headers['x-forwarded-for']?.split(',')[0]?.trim() ||
+    req.headers['x-real-ip'] ||
+    req.socket?.remoteAddress ||
+    'unknown'
+  );
+
   sendDiscordAlert({
     userName,
     product,
@@ -141,6 +149,8 @@ export async function createRequest(req, res) {
     tikTok,
     whatsapp,
     transaction,
+    email:         userEmail,
+    ip:            userIp,
   }).catch(() => {});
   
   res.status(201).json({ ok: true, request });

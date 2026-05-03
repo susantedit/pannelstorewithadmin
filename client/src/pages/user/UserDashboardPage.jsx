@@ -20,6 +20,7 @@ import QrDisplay from '../../components/shared/QrDisplay';
 import NotificationPanel from '../../components/notifications/NotificationPanel';
 import { playCashRegister, playKeyDelivered, playNotif, isSoundEnabled, setSoundEnabled, startBgSound, stopBgSound, isBgSoundPlaying, playUiClick } from '../../utils/sounds';
 import { setupPushNotifications } from '../../utils/pushNotifications';
+import { registerFcmToken, onFcmMessage } from '../../firebase/firebaseConfig';
 import { motion } from 'framer-motion';
 
 // ── LootBox sub-component ─────────────────────────────────────────────────
@@ -253,11 +254,26 @@ export default function UserDashboardPage() {
     setupPushNotifications((payload) => {
       loadNotificationCount();
     });
+
+    // Setup FCM — works even when browser is closed (Android/Desktop Chrome)
+    registerFcmToken().catch(() => {});
+
+    // Handle foreground FCM messages (app is open)
+    const unsubFcm = onFcmMessage((payload) => {
+      loadNotificationCount();
+      const n = payload.notification || {};
+      if (n.title) {
+        import('../../utils/notify.js').then(({ Notif }) => {
+          Notif.showNotification(n.title, n.body || '', 'info', 6000);
+        });
+      }
+    });
     // Auto-resume bg sound if user had it on
     if (bgOn) {
       const t = setTimeout(() => startBgSound(), 500);
-      return () => clearTimeout(t);
+      return () => { clearTimeout(t); unsubFcm(); };
     }
+    return () => { unsubFcm(); };
   }, []);
 
   useEffect(() => {

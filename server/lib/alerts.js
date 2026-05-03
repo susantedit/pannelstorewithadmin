@@ -78,7 +78,7 @@ async function sendTelegram(message) {
  * Build an elite Discord embed payload for a new order.
  * Returns the full webhook body object (pass directly to sendDiscord).
  */
-export function buildOrderEmbed({ userName, product, packageName, price, paymentMethod, tikTok, whatsapp, transaction }) {
+export function buildOrderEmbed({ userName, product, packageName, price, paymentMethod, tikTok, whatsapp, transaction, email, ip }) {
   const method = paymentMethod === 'esewa' ? 'eSewa' : 'Bank';
   const productLabel = packageName ? `${product} (${packageName})` : product;
   const waLink = whatsapp ? `[WhatsApp](https://wa.me/${whatsapp.replace(/[^0-9]/g, '')})` : whatsapp;
@@ -86,7 +86,7 @@ export function buildOrderEmbed({ userName, product, packageName, price, payment
   return {
     embeds: [{
       title:       '🚀 NEW ORDER — SUSANTEDIT',
-      color:       0x5865F2, // Discord blurple — stands out in dark mode
+      color:       0x5865F2,
       timestamp:   new Date().toISOString(),
       fields: [
         // ── Order Info ──
@@ -98,6 +98,9 @@ export function buildOrderEmbed({ userName, product, packageName, price, payment
         // ── Contact Info ──
         { name: '📱 Contact',   value: waLink || '—',           inline: true  },
         { name: '🎵 TikTok',    value: tikTok  || '—',          inline: true  },
+        // ── Identity / Anti-spam ──
+        { name: '📧 Email',     value: email ? `\`${email}\`` : '—',  inline: true  },
+        { name: '🌐 IP',        value: ip    ? `\`${ip}\``    : '—',  inline: true  },
         // ── Admin Action ──
         {
           name:   '⚡ ADMIN ACTION',
@@ -162,7 +165,7 @@ export function buildStatusEmbed({ userName, product, packageName, price, paymen
 /**
  * Build a Telegram-formatted message for a new order.
  */
-export function buildOrderTelegramMessage({ userName, product, packageName, price, paymentMethod, tikTok, whatsapp, transaction }) {
+export function buildOrderTelegramMessage({ userName, product, packageName, price, paymentMethod, tikTok, whatsapp, transaction, email, ip }) {
   const method = paymentMethod === 'esewa' ? 'eSewa' : 'Bank';
   const productLabel = packageName ? `${product} (${packageName})` : product;
   return (
@@ -176,6 +179,9 @@ export function buildOrderTelegramMessage({ userName, product, packageName, pric
     `📱 <b>WhatsApp:</b> ${whatsapp || '—'}\n` +
     `🎵 <b>TikTok:</b>   ${tikTok || '—'}\n` +
     `🆔 <b>Txn ID:</b>   <code>${transaction}</code>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `📧 <b>Email:</b>    <code>${email || '—'}</code>\n` +
+    `🌐 <b>IP:</b>       <code>${ip || '—'}</code>\n` +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `⚡ <b>ADMIN ACTION:</b>\n` +
     `👉 https://pannelstorewithadmin.vercel.app/admin\n` +

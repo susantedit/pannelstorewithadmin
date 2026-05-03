@@ -9,6 +9,7 @@ import {
   updateProfile,
   signOut
 } from 'firebase/auth';
+import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -18,6 +19,70 @@ const firebaseConfig = {
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
   appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const googleProvider = new GoogleAuthProvider();
+
+// ── FCM Messaging ─────────────────────────────────────────────────────────────
+let _messaging = null;
+function getMsg() {
+  if (_messaging) return _messaging;
+  try { _messaging = getMessaging(app); } catch { _messaging = null; }
+  return _messaging;
+}
+
+/**
+ * Register FCM token and save it to the server.
+ * Call this once after the user logs in.
+ * Works on Chrome, Edge, Firefox (desktop) and Android Chrome.
+ * iOS Safari requires the site to be added to Home Screen.
+ */
+export async function registerFcmToken() {
+  const vapidKey = import.meta.env.VITE_FIREBASE_VAPID_KEY?.trim();
+  if (!vapidKey) {
+    console.warn('[FCM] VITE_FIREBASE_VAPID_KEY not set');
+    return null;
+  }
+
+  try {
+    // Need notification permission first
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') return null;
+
+    const messaging = getMsg();
+    if (!messaging) return null;
+
+    // Register the firebase-messaging-sw.js service worker
+    const swReg = await navigator.serviceWorker.register('/firebase-messaging-sw.js', { scope: '/' });
+
+    const token = await getToken(messaging, { vapidKey, serviceWorkerRegistration: swReg });
+    if (!token) return null;
+
+    // Save to server
+    const { api } = await import('../services/api.js');
+    await api.request('/api/push/register', {
+      method: 'POST',
+      body: JSON.stringify({ token }),
+    });
+
+    console.log('[FCM] Token registered ✓');
+    return token;
+  } catch (e) {
+    console.warn('[FCM] Token registration failed:', e.message);
+    return null;
+  }
+}
+
+/**
+ * Listen for foreground FCM messages (app is open).
+ * Background messages are handled by firebase-messaging-sw.js.
+ */
+export function onFcmMessage(callback) {
+  const messaging = getMsg();
+  if (!messaging) return () => {};
+  return onMessage(messaging, callback);
+}
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);

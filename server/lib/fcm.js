@@ -43,8 +43,8 @@ function buildPayload(tokens, notification, data = {}) {
     notification: {
       title: notification.title || 'SUSANTEDIT',
       body:  notification.body  || '',
-      icon:  `${siteUrl}/logo.png`,
-      badge: `${siteUrl}/logo.png`,
+      icon:  `${siteUrl}/icon-192.png`,
+      badge: `${siteUrl}/badge-96.png`,
       click_action: data.url || '/',
     },
     data: stringData,
@@ -62,8 +62,8 @@ function buildPayload(tokens, notification, data = {}) {
     },
     webpush: {
       notification: {
-        icon:               '/logo.png',
-        badge:              '/logo.png',
+        icon:               `${siteUrl}/icon-192.png`,
+        badge:              `${siteUrl}/badge-96.png`,
         vibrate:            [200, 100, 200],
         requireInteraction: false,
       },
