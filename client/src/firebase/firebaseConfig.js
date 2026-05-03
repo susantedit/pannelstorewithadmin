@@ -84,10 +84,6 @@ export function onFcmMessage(callback) {
   return onMessage(messaging, callback);
 }
 
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const googleProvider = new GoogleAuthProvider();
-
 /**
  * Sign in with Google popup.
  * Returns the Firebase ID token string.
