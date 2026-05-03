@@ -2,7 +2,7 @@ import Request from '../models/Request.js';
 import User from '../models/User.js';
 import { resolveCouponCode } from './couponController.js';
 import { NotificationHelpers } from './notificationController.js';
-import { sendDiscordAlert } from '../lib/alerts.js';
+import { sendDiscordAlert, sendStatusAlert } from '../lib/alerts.js';
 
 const inMemoryRequests = [
   {
@@ -266,6 +266,21 @@ export async function updateRequestStatus(req, res) {
 
   await request.save();
 
+  // Discord/Telegram status-change alert — non-blocking
+  sendStatusAlert({
+    status,
+    orderId:       String(request._id),
+    userName:      request.userName,
+    product:       request.product,
+    packageName:   request.packageName,
+    price:         request.finalPrice || request.packagePrice,
+    paymentMethod: request.paymentMethod,
+    tikTok:        request.tikTok,
+    whatsapp:      request.whatsapp,
+    transaction:   request.transaction,
+    notes:         notes || '',
+  }).catch(() => {});
+
   return res.json({ ok: true, request: await Request.findById(request._id).lean() });
 }
 
@@ -294,6 +309,22 @@ export async function revokeRequest(req, res) {
   ).lean();
 
   if (!request) return res.status(404).json({ ok: false, message: 'Request not found' });
+
+  // Discord/Telegram revoke alert — non-blocking
+  sendStatusAlert({
+    status:        'Revoked',
+    orderId:       String(request._id),
+    userName:      request.userName,
+    product:       request.product,
+    packageName:   request.packageName,
+    price:         request.finalPrice || request.packagePrice,
+    paymentMethod: request.paymentMethod,
+    tikTok:        request.tikTok,
+    whatsapp:      request.whatsapp,
+    transaction:   request.transaction,
+    notes:         '',
+  }).catch(() => {});
+
   return res.json({ ok: true, request });
 }
 

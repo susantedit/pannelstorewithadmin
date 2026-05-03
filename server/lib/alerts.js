@@ -110,6 +110,55 @@ export function buildOrderEmbed({ userName, product, packageName, price, payment
   };
 }
 
+// Status → color + emoji map
+const STATUS_META = {
+  'Accepted':       { color: 0x4ade80, emoji: '✅' },
+  'Rejected':       { color: 0xf87171, emoji: '❌' },
+  'Awaiting review':{ color: 0xfbbf24, emoji: '🔍' },
+  'Pending payment':{ color: 0x60a5fa, emoji: '💳' },
+  'Revoked':        { color: 0xa78bfa, emoji: '↩️' },
+};
+
+/**
+ * Build a Discord embed for a status change event.
+ */
+export function buildStatusEmbed({ userName, product, packageName, price, paymentMethod, tikTok, whatsapp, transaction, status, notes, orderId }) {
+  const meta = STATUS_META[status] || { color: 0x888888, emoji: '🔔' };
+  const method = paymentMethod === 'esewa' ? 'eSewa' : 'Bank';
+  const productLabel = packageName ? `${product} (${packageName})` : product;
+  const waLink = whatsapp ? `[WhatsApp](https://wa.me/${whatsapp.replace(/[^0-9]/g, '')})` : (whatsapp || '—');
+
+  const fields = [
+    { name: '👤 Customer',  value: `\`${userName || '—'}\``,     inline: true },
+    { name: '📦 Product',   value: `\`${productLabel || '—'}\``, inline: true },
+    { name: '💰 Amount',    value: `\`Rs ${price || '—'}\``,      inline: true },
+    { name: '💳 Payment',   value: `\`${method}\``,               inline: true },
+    { name: '🆔 Txn ID',    value: `\`${transaction || '—'}\``,   inline: true },
+    { name: '📱 Contact',   value: waLink,                         inline: true },
+    { name: '🎵 TikTok',    value: tikTok || '—',                  inline: true },
+  ];
+
+  if (notes) {
+    fields.push({ name: '📝 Notes / Key', value: `\`${notes}\``, inline: false });
+  }
+
+  fields.push({
+    name:   '⚡ ADMIN PANEL',
+    value:  '[👉 Open Admin Panel](https://pannelstorewithadmin.vercel.app/admin)',
+    inline: false,
+  });
+
+  return {
+    embeds: [{
+      title:     `${meta.emoji} ORDER ${status.toUpperCase()} — SUSANTEDIT`,
+      color:     meta.color,
+      timestamp: new Date().toISOString(),
+      fields,
+      footer: { text: `Order ID: ${orderId || '—'}  •  SUSANTEDIT` },
+    }],
+  };
+}
+
 /**
  * Build a Telegram-formatted message for a new order.
  */
@@ -136,7 +185,7 @@ export function buildOrderTelegramMessage({ userName, product, packageName, pric
 
 // ── Main export ───────────────────────────────────────────────────────────────
 /**
- * sendDiscordAlert — sends an order alert to all configured channels.
+ * sendDiscordAlert — sends a NEW ORDER alert to all configured channels.
  * Pass an order data object for rich embeds, or a plain string for a simple message.
  *
  * @param {object|string} orderData  Order fields object (preferred) or raw string
@@ -156,6 +205,53 @@ export async function sendDiscordAlert(orderData) {
   const results = await Promise.allSettled([
     hasDiscord  ? sendDiscord(discordPayload)      : Promise.resolve(false),
     hasTelegram ? sendTelegram(telegramMessage)    : Promise.resolve(false),
+  ]);
+
+  return results.some(r => r.value === true);
+}
+
+/**
+ * sendStatusAlert — fires when an admin changes an order status.
+ * Sends a color-coded embed (green=Accepted, red=Rejected, yellow=Awaiting, blue=Pending, purple=Revoked).
+ *
+ * @param {object} data  { status, userName, product, packageName, price, paymentMethod, tikTok, whatsapp, transaction, notes, orderId }
+ */
+export async function sendStatusAlert(data) {
+  const hasDiscord  = !!process.env.DISCORD_WEBHOOK_URL;
+  const hasTelegram = !!(process.env.TELEGRAM_BOT_TOKEN && process.env.TELEGRAM_CHAT_ID);
+
+  if (!hasDiscord && !hasTelegram) return false;
+
+  const { status, userName, product, packageName, price, paymentMethod, tikTok, whatsapp, transaction, notes, orderId } = data;
+  const method = paymentMethod === 'esewa' ? 'eSewa' : 'Bank';
+  const productLabel = packageName ? `${product} (${packageName})` : product;
+
+  const discordPayload = buildStatusEmbed(data);
+
+  const STATUS_EMOJI = {
+    'Accepted': '✅', 'Rejected': '❌',
+    'Awaiting review': '🔍', 'Pending payment': '💳', 'Revoked': '↩️'
+  };
+  const emoji = STATUS_EMOJI[status] || '🔔';
+
+  const telegramMessage =
+    `${emoji} <b>ORDER ${status.toUpperCase()} — SUSANTEDIT</b>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `👤 <b>Customer:</b> <code>${userName || '—'}</code>\n` +
+    `📦 <b>Product:</b>  <code>${productLabel || '—'}</code>\n` +
+    `💰 <b>Amount:</b>   <code>Rs ${price || '—'}</code>\n` +
+    `💳 <b>Payment:</b>  <code>${method}</code>\n` +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `📱 <b>WhatsApp:</b> ${whatsapp || '—'}\n` +
+    `🎵 <b>TikTok:</b>   ${tikTok || '—'}\n` +
+    `🆔 <b>Txn ID:</b>   <code>${transaction || '—'}</code>\n` +
+    (notes ? `📝 <b>Notes:</b>    <code>${notes}</code>\n` : '') +
+    `━━━━━━━━━━━━━━━━━━━━━━\n` +
+    `👉 https://pannelstorewithadmin.vercel.app/admin`;
+
+  const results = await Promise.allSettled([
+    hasDiscord  ? sendDiscord(discordPayload)   : Promise.resolve(false),
+    hasTelegram ? sendTelegram(telegramMessage) : Promise.resolve(false),
   ]);
 
   return results.some(r => r.value === true);
