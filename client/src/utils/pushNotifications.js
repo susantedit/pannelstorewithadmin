@@ -1,68 +1,62 @@
 /**
- * Firebase Cloud Messaging (FCM) — Real OS push notifications
- * Shows in phone notification shade even when app is closed.
+ * Web Push (VAPID) — Real OS push notifications
+ * No Firebase Admin, no service account, no Google Cloud Console needed.
  *
- * REQUIREMENTS (must be set in Vercel env vars + client/.env):
- *   VITE_FIREBASE_VAPID_KEY  — from Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
+ * Works on: Android Chrome, Desktop Chrome/Firefox/Edge, iOS Safari 16.4+
  *
- * REQUIREMENTS (must be set in Render env vars + server/.env):
- *   FIREBASE_CLIENT_EMAIL    — from Firebase service account JSON
- *   FIREBASE_PRIVATE_KEY     — from Firebase service account JSON
+ * Setup:
+ *   client/.env  → VITE_VAPID_PUBLIC_KEY=BC0aVvtF...
+ *   server/.env  → VAPID_PUBLIC_KEY + VAPID_PRIVATE_KEY + VAPID_EMAIL
+ *   (keys already generated and in both .env files)
  */
 
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
-import { app as firebaseApp } from '../firebase/firebaseConfig.js';
 import { showNotification } from './notify.js';
 
-const VAPID_KEY = import.meta.env.VITE_FIREBASE_VAPID_KEY;
+const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
-let _messaging = null;
 let _swRegistration = null;
 
-function getMessagingInstance() {
-  if (_messaging) return _messaging;
-  try {
-    _messaging = getMessaging(firebaseApp);
-    return _messaging;
-  } catch (e) {
-    console.warn('[FCM] Messaging not available:', e.message);
-    return null;
-  }
+// ── Convert VAPID public key to Uint8Array ────────────────────────────────────
+function urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+  const base64  = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const raw     = atob(base64);
+  return Uint8Array.from([...raw].map(c => c.charCodeAt(0)));
 }
 
 // ── Register Service Worker ───────────────────────────────────────────────────
-
 async function registerSW() {
   if (_swRegistration) return _swRegistration;
   if (!('serviceWorker' in navigator)) return null;
 
   try {
-    // Register the SW — config is hardcoded inside the SW file
-    _swRegistration = await navigator.serviceWorker.register('/firebase-messaging-sw.js', {
-      scope: '/',
-    });
+    _swRegistration = await navigator.serviceWorker.register('/sw.js', { scope: '/' });
     await navigator.serviceWorker.ready;
-    console.log('[FCM] Service worker registered');
 
-    // Listen for navigate messages from SW (notification click deep link)
+    // Handle deep link navigation from SW notification click
     navigator.serviceWorker.addEventListener('message', (event) => {
       if (event.data?.type === 'NAVIGATE' && event.data?.url) {
         window.location.href = event.data.url;
       }
     });
 
+    console.log('[Push] Service worker registered');
     return _swRegistration;
   } catch (e) {
-    console.error('[FCM] SW registration failed:', e.message);
+    console.error('[Push] SW registration failed:', e.message);
     return null;
   }
 }
 
-// ── Request permission + get FCM token ───────────────────────────────────────
+// ── Subscribe to push ─────────────────────────────────────────────────────────
+export async function setupPushNotifications(onForegroundMessage) {
+  if (!('Notification' in window) || !('PushManager' in window)) {
+    console.warn('[Push] Not supported in this browser');
+    return null;
+  }
 
-export async function registerPushNotifications() {
-  if (!('Notification' in window)) {
-    console.warn('[FCM] Notifications not supported');
+  if (!VAPID_PUBLIC_KEY) {
+    console.error('[Push] VITE_VAPID_PUBLIC_KEY not set in .env');
     return null;
   }
 
@@ -72,81 +66,81 @@ export async function registerPushNotifications() {
     permission = await Notification.requestPermission();
   }
   if (permission !== 'granted') {
-    console.warn('[FCM] Permission denied:', permission);
-    return null;
-  }
-
-  if (!VAPID_KEY) {
-    console.error('[FCM] VITE_FIREBASE_VAPID_KEY is not set. Add it to .env and Vercel env vars.');
+    console.warn('[Push] Permission denied');
     return null;
   }
 
   const swReg = await registerSW();
   if (!swReg) return null;
 
-  const messaging = getMessagingInstance();
-  if (!messaging) return null;
-
   try {
-    const token = await getToken(messaging, {
-      vapidKey: VAPID_KEY,
-      serviceWorkerRegistration: swReg,
-    });
+    // Check if already subscribed
+    let subscription = await swReg.pushManager.getSubscription();
 
-    if (token) {
-      console.log('[FCM] Token:', token.slice(0, 20) + '...');
-      return token;
+    if (!subscription) {
+      // Subscribe
+      subscription = await swReg.pushManager.subscribe({
+        userVisibleOnly:      true,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+      });
+      console.log('[Push] New subscription created');
+    } else {
+      console.log('[Push] Existing subscription found');
     }
 
-    console.warn('[FCM] No token returned — check VAPID key and Firebase project settings');
-    return null;
+    // Save to server
+    await saveSubscription(subscription);
+
+    // Handle foreground messages via polling (SW handles background)
+    if (onForegroundMessage) {
+      // Foreground notifications are handled by the existing 30s poll in UserDashboardPage
+      // This callback is kept for compatibility
+    }
+
+    console.log('[Push] OS push notifications active');
+    return subscription;
   } catch (e) {
-    console.error('[FCM] getToken failed:', e.message);
+    console.error('[Push] Subscribe failed:', e.message);
     return null;
   }
 }
 
-// ── Foreground message handler ────────────────────────────────────────────────
-// When app is open, OS won't show a notification — show in-app toast instead
-
-export function onForegroundMessage(callback) {
-  const messaging = getMessagingInstance();
-  if (!messaging) return () => {};
-
-  return onMessage(messaging, (payload) => {
-    console.log('[FCM] Foreground message:', payload);
-    const { title, body } = payload.notification || {};
-    const data = payload.data || {};
-    showNotification(title || 'SUSANTEDIT', body || '', data.type || 'info', 6000);
-    if (callback) callback(payload);
-  });
-}
-
-// ── Save token to server ──────────────────────────────────────────────────────
-
-export async function saveFcmToken(token) {
+// ── Save subscription to server ───────────────────────────────────────────────
+async function saveSubscription(subscription) {
   try {
     const { api } = await import('../services/api.js');
-    const res = await api.request('/api/push/register', {
+    const sub = subscription.toJSON();
+    const res = await api.request('/api/push/subscribe', {
       method: 'POST',
-      body: JSON.stringify({ token }),
+      body:   JSON.stringify({
+        endpoint: sub.endpoint,
+        keys: {
+          p256dh: sub.keys.p256dh,
+          auth:   sub.keys.auth,
+        },
+      }),
     });
-    if (res?.ok) console.log('[FCM] Token saved to server');
+    if (res?.ok) console.log('[Push] Subscription saved to server');
   } catch (e) {
-    console.warn('[FCM] Failed to save token:', e.message);
+    console.warn('[Push] Failed to save subscription:', e.message);
   }
 }
 
-// ── Full setup (call once after login) ───────────────────────────────────────
-
-export async function setupPushNotifications(onNewNotification) {
-  const token = await registerPushNotifications();
-  if (token) {
-    await saveFcmToken(token);
-    onForegroundMessage(onNewNotification);
-    console.log('[FCM] Push notifications active');
-  } else {
-    console.warn('[FCM] Push notifications not active — check VAPID key and permissions');
+// ── Unsubscribe ───────────────────────────────────────────────────────────────
+export async function unsubscribePush() {
+  try {
+    const swReg = await navigator.serviceWorker.ready;
+    const sub   = await swReg.pushManager.getSubscription();
+    if (sub) {
+      const { api } = await import('../services/api.js');
+      await api.request('/api/push/unsubscribe', {
+        method: 'POST',
+        body:   JSON.stringify({ endpoint: sub.endpoint }),
+      });
+      await sub.unsubscribe();
+      console.log('[Push] Unsubscribed');
+    }
+  } catch (e) {
+    console.warn('[Push] Unsubscribe failed:', e.message);
   }
-  return token;
 }

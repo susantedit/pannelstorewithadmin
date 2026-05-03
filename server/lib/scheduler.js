@@ -15,7 +15,7 @@
 
 import User from '../models/User.js';
 import { segmentedBroadcast, createNotification } from '../controllers/notificationController.js';
-import { broadcastPush } from './fcm.js';
+import { broadcastPush } from '../lib/webpush.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SEGMENTED POOLS
@@ -243,7 +243,7 @@ async function processQueue() {
             })
           )
         );
-        broadcastPush({ title: job.title, body: job.message }, { type: job.type, url: job.deepLink || '/dashboard' }).catch(() => {});
+        broadcastPush(job.title, job.message, { type: job.type, url: job.deepLink || '/dashboard' }).catch(() => {});
       }
       console.log(`[scheduler] Queued job "${job.title}" delivered`);
     } catch (e) {

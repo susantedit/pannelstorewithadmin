@@ -1,6 +1,6 @@
 import Notification from '../models/Notification.js';
 import User from '../models/User.js';
-import { sendPushToUser, broadcastPush } from '../lib/fcm.js';
+import { sendPushToUser, broadcastPush } from '../lib/webpush.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // SMART TARGETING — classify user segment
@@ -89,12 +89,13 @@ export async function createNotification(userId, title, message, type = 'info', 
       metadata:    options.metadata    || {},
     });
 
-    // FCM push — non-blocking
-    sendPushToUser(userId, { title, body: message }, {
-      type,
-      url:            options.deepLink || '/dashboard',
-      notificationId: String(notification._id),
-    }).catch(() => {});
+    // Web Push — non-blocking OS notification
+    sendPushToUser(
+      userId,
+      title,
+      message,
+      { type, url: options.deepLink || '/dashboard', notificationId: String(notification._id) }
+    ).catch(() => {});
 
     return notification;
   } catch (error) {
@@ -311,7 +312,7 @@ export async function sendCustomNotification(req, res) {
     const successCount = notifications.filter(Boolean).length;
 
     if (targetType === 'all') {
-      broadcastPush({ title: title.trim(), body: message.trim() }, { type, url: deepLink }).catch(() => {});
+      broadcastPush(title.trim(), message.trim(), { type, url: deepLink }).catch(() => {});
     }
 
     res.json({ ok: true, message: `Notification sent to ${successCount} user${successCount !== 1 ? 's' : ''}`, sentCount: successCount });

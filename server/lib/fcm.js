@@ -1,132 +1,141 @@
 /**
- * Firebase Cloud Messaging — server-side push sender
- * Uses firebase-admin to send real OS push notifications to users' devices
+ * Firebase Cloud Messaging — HTTP v1 API
+ *
+ * NO firebase-admin / service account JSON needed.
+ * Uses Google OAuth2 with a Server Key (Legacy) OR
+ * falls back to the Web API Key approach via FCM Legacy HTTP API.
+ *
+ * Setup: just add FIREBASE_SERVER_KEY to server/.env
+ * Get it from: Firebase Console → Project Settings → Cloud Messaging
+ *              → Cloud Messaging API (Legacy) → Server key
+ *
+ * If Legacy API is disabled, enable it:
+ *   Firebase Console → Project Settings → Cloud Messaging →
+ *   Cloud Messaging API (Legacy) → click the 3-dot menu → Manage API in Google Cloud Console → Enable
  */
 
-import admin from 'firebase-admin';
+const FCM_LEGACY_URL = 'https://fcm.googleapis.com/fcm/send';
 
-let _initialized = false;
-
-function initAdmin() {
-  if (_initialized || admin.apps.length > 0) {
-    _initialized = true;
-    return true;
-  }
-
-  const projectId = process.env.FIREBASE_PROJECT_ID;
-  const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
-  const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
-
-  if (!projectId || !clientEmail || !privateKey) {
-    console.warn('[FCM] Missing FIREBASE_CLIENT_EMAIL or FIREBASE_PRIVATE_KEY in .env — push notifications disabled');
-    return false;
-  }
-
-  try {
-    admin.initializeApp({
-      credential: admin.credential.cert({ projectId, clientEmail, privateKey }),
-    });
-    _initialized = true;
-    console.log('[FCM] Firebase Admin initialized ✓');
-    return true;
-  } catch (e) {
-    console.error('[FCM] Admin init failed:', e.message);
-    return false;
-  }
+function getServerKey() {
+  return process.env.FIREBASE_SERVER_KEY || null;
 }
 
-/**
- * Send a push notification to one or more FCM tokens.
- * @param {string|string[]} tokens - FCM device token(s)
- * @param {object} notification - { title, body }
- * @param {object} data - extra key-value pairs (all strings)
- */
-export async function sendPush(tokens, notification, data = {}) {
-  if (!initAdmin()) return { sent: 0, failed: 0 };
+function isReady() {
+  const key = getServerKey();
+  if (!key) {
+    console.warn('[FCM] FIREBASE_SERVER_KEY not set in server/.env — push notifications disabled');
+    return false;
+  }
+  return true;
+}
 
+// ── Build the notification payload ───────────────────────────────────────────
+
+function buildPayload(tokens, notification, data = {}) {
   const tokenList = Array.isArray(tokens) ? tokens : [tokens];
-  if (tokenList.length === 0) return { sent: 0, failed: 0 };
+  const stringData = Object.fromEntries(
+    Object.entries(data).map(([k, v]) => [k, String(v)])
+  );
 
-  const message = {
+  const base = {
     notification: {
       title: notification.title || 'SUSANTEDIT',
-      body: notification.body || '',
+      body:  notification.body  || '',
+      icon:  '/logo.png',
+      badge: '/logo.png',
+      click_action: data.url || '/',
     },
+    data: stringData,
     android: {
-      notification: {
-        icon: 'ic_notification',
-        color: '#e63946',
-        sound: 'default',
-        channelId: 'susantedit_default',
-        priority: 'high',
-        defaultVibrateTimings: true,
-      },
       priority: 'high',
+      notification: {
+        sound:    'default',
+        color:    '#e63946',
+        priority: 'high',
+        default_vibrate_timings: true,
+      },
     },
     apns: {
-      payload: {
-        aps: {
-          sound: 'default',
-          badge: 1,
-          'content-available': 1,
-        },
-      },
+      payload: { aps: { sound: 'default', badge: 1 } },
     },
     webpush: {
       notification: {
-        icon: '/logo.png',
-        badge: '/logo.png',
-        vibrate: [200, 100, 200],
-        requireInteraction: true,
+        icon:               '/logo.png',
+        badge:              '/logo.png',
+        vibrate:            [200, 100, 200],
+        requireInteraction: false,
       },
-      fcmOptions: {
-        link: data.url || '/dashboard',
-      },
+      fcm_options: { link: data.url || '/' },
     },
-    data: Object.fromEntries(
-      Object.entries(data).map(([k, v]) => [k, String(v)])
-    ),
   };
 
+  // Single token
+  if (tokenList.length === 1) {
+    return { ...base, to: tokenList[0] };
+  }
+
+  // Multiple tokens (multicast)
+  return { ...base, registration_ids: tokenList };
+}
+
+// ── Send to token(s) ─────────────────────────────────────────────────────────
+
+export async function sendPush(tokens, notification, data = {}) {
+  if (!isReady()) return { sent: 0, failed: 0 };
+
+  const tokenList = Array.isArray(tokens) ? tokens : [tokens];
+  if (!tokenList.length) return { sent: 0, failed: 0 };
+
+  const serverKey = getServerKey();
   let sent = 0;
   let failed = 0;
   const invalidTokens = [];
 
-  // Send in batches of 500 (FCM limit)
-  for (let i = 0; i < tokenList.length; i += 500) {
-    const batch = tokenList.slice(i, i + 500);
+  // FCM legacy multicast supports max 1000 tokens per request
+  for (let i = 0; i < tokenList.length; i += 1000) {
+    const batch = tokenList.slice(i, i + 1000);
     try {
-      const response = await admin.messaging().sendEachForMulticast({
-        ...message,
-        tokens: batch,
+      const payload = buildPayload(batch, notification, data);
+      const res = await fetch(FCM_LEGACY_URL, {
+        method:  'POST',
+        headers: {
+          'Content-Type':  'application/json',
+          'Authorization': `key=${serverKey}`,
+        },
+        body: JSON.stringify(payload),
       });
-      sent += response.successCount;
-      failed += response.failureCount;
 
-      // Collect invalid tokens for cleanup
-      response.responses.forEach((r, idx) => {
-        if (!r.success) {
-          const code = r.error?.code;
-          if (
-            code === 'messaging/invalid-registration-token' ||
-            code === 'messaging/registration-token-not-registered'
-          ) {
+      if (!res.ok) {
+        const text = await res.text();
+        console.error('[FCM] HTTP error:', res.status, text);
+        failed += batch.length;
+        continue;
+      }
+
+      const result = await res.json();
+      sent   += result.success  || 0;
+      failed += result.failure  || 0;
+
+      // Collect invalid tokens
+      if (result.results) {
+        result.results.forEach((r, idx) => {
+          if (r.error === 'InvalidRegistration' || r.error === 'NotRegistered') {
             invalidTokens.push(batch[idx]);
           }
-        }
-      });
+        });
+      }
     } catch (e) {
-      console.error('[FCM] Batch send error:', e.message);
+      console.error('[FCM] sendPush error:', e.message);
       failed += batch.length;
     }
   }
 
+  if (sent > 0) console.log(`[FCM] Sent ${sent}, failed ${failed}`);
   return { sent, failed, invalidTokens };
 }
 
-/**
- * Send push to a single user by their userId (looks up stored tokens).
- */
+// ── Send to a single user by userId ─────────────────────────────────────────
+
 export async function sendPushToUser(userId, notification, data = {}) {
   try {
     const { default: User } = await import('../models/User.js');
@@ -135,7 +144,7 @@ export async function sendPushToUser(userId, notification, data = {}) {
 
     const result = await sendPush(user.fcmTokens, notification, data);
 
-    // Clean up invalid tokens
+    // Remove invalid tokens
     if (result.invalidTokens?.length > 0) {
       await User.findByIdAndUpdate(userId, {
         $pull: { fcmTokens: { $in: result.invalidTokens } },
@@ -149,19 +158,18 @@ export async function sendPushToUser(userId, notification, data = {}) {
   }
 }
 
-/**
- * Broadcast push to all users (up to 1000).
- */
+// ── Broadcast to all users ───────────────────────────────────────────────────
+
 export async function broadcastPush(notification, data = {}) {
   try {
     const { default: User } = await import('../models/User.js');
     const users = await User.find({
       role: 'user',
       fcmTokens: { $exists: true, $not: { $size: 0 } },
-    }).select('fcmTokens').limit(1000);
+    }).select('fcmTokens').limit(2000);
 
     const allTokens = users.flatMap(u => u.fcmTokens || []);
-    if (allTokens.length === 0) return { sent: 0, failed: 0 };
+    if (!allTokens.length) return { sent: 0, failed: 0 };
 
     return sendPush(allTokens, notification, data);
   } catch (e) {

@@ -895,36 +895,94 @@ router.get('/gifts/sent', requireAuth, async (req, res) => {
   }
 });
 
-// ── FCM Push Token Registration ───────────────────────────────────────────────
-router.post('/push/register', requireAuth, async (req, res) => {
+// ── Web Push Subscription (VAPID — no Firebase needed) ───────────────────────
+router.get('/push/vapid-public-key', (_req, res) => {
+  const key = process.env.VAPID_PUBLIC_KEY;
+  if (!key) return res.status(503).json({ ok: false, message: 'Push not configured' });
+  res.json({ ok: true, publicKey: key });
+});
+
+router.post('/push/subscribe', requireAuth, async (req, res) => {
   try {
-    const token = String(req.body?.token || '').trim();
-    if (!token) return res.status(400).json({ ok: false, message: 'token required' });
-
-    await User.findByIdAndUpdate(req.auth.userId, {
-      $addToSet: { fcmTokens: token }
-    });
-
-    // Keep only last 5 tokens (5 devices max)
-    const user = await User.findById(req.auth.userId).select('fcmTokens');
-    if (user?.fcmTokens?.length > 5) {
-      await User.findByIdAndUpdate(req.auth.userId, {
-        fcmTokens: user.fcmTokens.slice(-5)
-      });
+    const subscription = req.body?.subscription;
+    if (!subscription?.endpoint) {
+      return res.status(400).json({ ok: false, message: 'subscription object required' });
     }
-
-    res.json({ ok: true, message: 'Push token registered' });
+    // Add if not already stored (dedupe by endpoint)
+    await User.findByIdAndUpdate(req.auth.userId, {
+      $pull: { pushSubscriptions: { endpoint: subscription.endpoint } }, // remove old first
+    });
+    await User.findByIdAndUpdate(req.auth.userId, {
+      $push: { pushSubscriptions: { $each: [subscription], $slice: -5 } }, // keep last 5
+    });
+    res.json({ ok: true, message: 'Subscribed to push notifications' });
   } catch (e) {
     res.status(500).json({ ok: false, message: e.message });
   }
 });
 
-router.delete('/push/unregister', requireAuth, async (req, res) => {
+router.post('/push/unsubscribe', requireAuth, async (req, res) => {
+  try {
+    const endpoint = req.body?.endpoint;
+    if (endpoint) {
+      await User.findByIdAndUpdate(req.auth.userId, {
+        $pull: { pushSubscriptions: { endpoint } },
+      });
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
+});
+
+// ── Web Push subscription registration ───────────────────────────────────────
+router.get('/push/vapid-public-key', (_req, res) => {
+  const key = process.env.VAPID_PUBLIC_KEY;
+  if (!key) return res.status(503).json({ ok: false, message: 'Push not configured' });
+  res.json({ ok: true, publicKey: key });
+});
+
+router.post('/push/subscribe', requireAuth, async (req, res) => {
+  try {
+    const { endpoint, keys } = req.body || {};
+    if (!endpoint || !keys?.p256dh || !keys?.auth) {
+      return res.status(400).json({ ok: false, message: 'Invalid subscription object' });
+    }
+    await User.findByIdAndUpdate(req.auth.userId, {
+      $addToSet: { pushSubscriptions: { endpoint, keys } }
+    });
+    const user = await User.findById(req.auth.userId).select('pushSubscriptions');
+    if (user?.pushSubscriptions?.length > 5) {
+      await User.findByIdAndUpdate(req.auth.userId, {
+        pushSubscriptions: user.pushSubscriptions.slice(-5)
+      });
+    }
+    res.json({ ok: true, message: 'Subscribed' });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
+});
+
+router.post('/push/unsubscribe', requireAuth, async (req, res) => {
+  try {
+    const { endpoint } = req.body || {};
+    if (endpoint) {
+      await User.findByIdAndUpdate(req.auth.userId, {
+        $pull: { pushSubscriptions: { endpoint } }
+      });
+    }
+    res.json({ ok: true });
+  } catch (e) {
+    res.status(500).json({ ok: false, message: e.message });
+  }
+});
+
+// ── FCM token (kept for backward compat) ─────────────────────────────────────
+router.post('/push/register', requireAuth, async (req, res) => {
   try {
     const token = String(req.body?.token || '').trim();
-    if (token) {
-      await User.findByIdAndUpdate(req.auth.userId, { $pull: { fcmTokens: token } });
-    }
+    if (!token) return res.status(400).json({ ok: false, message: 'token required' });
+    await User.findByIdAndUpdate(req.auth.userId, { $addToSet: { fcmTokens: token } });
     res.json({ ok: true });
   } catch (e) {
     res.status(500).json({ ok: false, message: e.message });

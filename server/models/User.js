@@ -51,6 +51,21 @@ const userSchema = new mongoose.Schema(
     // FCM push notification tokens (one per device)
     fcmTokens: { type: [String], default: [] },
 
+    // Web Push subscriptions (VAPID — no Firebase needed)
+    pushSubscriptions: {
+      type: [{
+        endpoint: { type: String, required: true },
+        keys: {
+          p256dh: { type: String, required: true },
+          auth:   { type: String, required: true },
+        }
+      }],
+      default: []
+    },
+
+    // Web Push subscriptions (VAPID — works without Firebase)
+    pushSubscriptions: { type: [mongoose.Schema.Types.Mixed], default: [] },
+
     // Notification intelligence
     notifSentToday:    { type: Number, default: 0 },       // cooldown counter
     notifSentDate:     { type: Date, default: null },       // date of last reset
