@@ -229,6 +229,9 @@ export default function UserDashboardPage() {
   // Notifications
   const [notificationPanelOpen, setNotificationPanelOpen] = useState(false);
   const [unreadNotificationCount, setUnreadNotificationCount] = useState(0);
+  const [notifPermission, setNotifPermission] = useState(
+    typeof Notification !== 'undefined' ? Notification.permission : 'granted'
+  );
 
   // Gift to friends
   const [giftForm, setGiftForm] = useState({ recipientEmail: '', product: '', packageName: '', packagePrice: '', transaction: '', paymentMethod: 'esewa', message: '' });
@@ -576,8 +579,7 @@ export default function UserDashboardPage() {
   }
 
   // ── Notification Permission Gate ─────────────────────────────────────────────
-  // Block dashboard access until user grants notification permission
-  const notifPermission = typeof Notification !== 'undefined' ? Notification.permission : 'granted';
+  // Uses state so the component re-renders when permission changes
   if (notifPermission !== 'granted') {
     return (
       <div className="app-shell" style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -610,7 +612,7 @@ export default function UserDashboardPage() {
           </p>
 
           {notifPermission === 'denied' ? (
-            // Permission was permanently blocked
+            // Permanently blocked — show manual instructions
             <div>
               <div style={{
                 padding: '14px 16px', borderRadius: '10px', marginBottom: '20px',
@@ -620,27 +622,28 @@ export default function UserDashboardPage() {
                 <i className="fas fa-circle-xmark" style={{ marginRight: '8px' }} />
                 Notifications are blocked in your browser settings.
                 <br /><br />
-                <strong style={{ color: '#fff' }}>To fix this:</strong>
-                <br />
-                1. Click the lock icon in your browser address bar
-                <br />
-                2. Find <strong style={{ color: '#fff' }}>Notifications</strong> and set it to <strong style={{ color: '#4ade80' }}>Allow</strong>
-                <br />
+                <strong style={{ color: '#fff' }}>To fix this:</strong><br />
+                1. Click the <strong style={{ color: '#fff' }}>lock icon</strong> in your browser address bar<br />
+                2. Find <strong style={{ color: '#fff' }}>Notifications</strong> → set to <strong style={{ color: '#4ade80' }}>Allow</strong><br />
                 3. Refresh this page
               </div>
               <Button variant="ghost" onClick={() => window.location.reload()}>
-                <i className="fas fa-rotate" /> I enabled it, refresh
+                <i className="fas fa-rotate" /> I enabled it — Refresh
               </Button>
             </div>
           ) : (
-            // Permission not yet asked
+            // Default — show the allow button which triggers the browser prompt
             <Button
               variant="primary"
               onClick={async () => {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                  // Trigger re-render by forcing state update
-                  window.location.reload();
+                try {
+                  const result = await Notification.requestPermission();
+                  setNotifPermission(result); // update state → re-renders immediately
+                } catch (e) {
+                  // Some browsers use callback style
+                  Notification.requestPermission((result) => {
+                    setNotifPermission(result);
+                  });
                 }
               }}
               style={{ width: '100%', padding: '14px', fontSize: '1rem', fontWeight: 700 }}
