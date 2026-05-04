@@ -96,6 +96,14 @@ export const api = {
   birthdayCheck: () => request('/api/gamification/birthday-check', { method: 'POST' }),
   // Admin reactivation
   reactivateUsers: (days) => request('/api/admin/reactivate', { method: 'POST', body: JSON.stringify({ days }) }),
+  // Ban system
+  banUser: (userId, reason) => request('/api/admin/ban', { method: 'POST', body: JSON.stringify({ userId, reason }) }),
+  unbanUser: (userId) => request('/api/admin/unban', { method: 'POST', body: JSON.stringify({ userId }) }),
+  // Delete order
+  deleteRequest: (id) => request(`/api/requests/${id}`, { method: 'DELETE' }),
+  // Order chat
+  getOrderMessages: (id) => request(`/api/requests/${id}/messages`),
+  sendOrderMessage: (id, text) => request(`/api/requests/${id}/messages`, { method: 'POST', body: JSON.stringify({ text }) }),
   // VIP Subscription
   getVipStatus: () => request('/api/vip/status'),
   requestVip: (payload) => request('/api/vip/request', { method: 'POST', body: JSON.stringify(payload) }),

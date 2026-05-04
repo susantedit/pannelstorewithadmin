@@ -45,6 +45,11 @@ const userSchema = new mongoose.Schema(
     lastBirthdayCredit:  { type: Date, default: null },
     reactivationSentAt:  { type: Date, default: null },
 
+    // Ban system
+    isBanned:     { type: Boolean, default: false },
+    banReason:    { type: String, default: '' },
+    bannedAt:     { type: Date, default: null },
+
     // VIP Subscription — Rs 199/month, hides ads
     vipExpiresAt:        { type: Date, default: null },
 

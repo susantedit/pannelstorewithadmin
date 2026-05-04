@@ -125,7 +125,7 @@ const STATUS_META = {
 /**
  * Build a Discord embed for a status change event.
  */
-export function buildStatusEmbed({ userName, product, packageName, price, paymentMethod, tikTok, whatsapp, transaction, status, notes, orderId }) {
+export function buildStatusEmbed({ userName, product, packageName, price, paymentMethod, tikTok, whatsapp, transaction, status, notes, orderId, whatsappLink }) {
   const meta = STATUS_META[status] || { color: 0x888888, emoji: '🔔' };
   const method = paymentMethod === 'esewa' ? 'eSewa' : 'Bank';
   const productLabel = packageName ? `${product} (${packageName})` : product;
@@ -143,6 +143,15 @@ export function buildStatusEmbed({ userName, product, packageName, price, paymen
 
   if (notes) {
     fields.push({ name: '📝 Notes / Key', value: `\`${notes}\``, inline: false });
+  }
+
+  // If accepted and WhatsApp link available, add one-click send button
+  if (status === 'Accepted' && whatsappLink) {
+    fields.push({
+      name:  '📲 SEND KEY VIA WHATSAPP',
+      value: `[👉 Click to send key to ${userName}](${whatsappLink})`,
+      inline: false,
+    });
   }
 
   fields.push({

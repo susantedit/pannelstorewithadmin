@@ -236,6 +236,22 @@ export default function UserDashboardPage() {
   const [showBirthdayCelebration, setShowBirthdayCelebration] = useState(false);
   const [birthdayMsg, setBirthdayMsg] = useState('');
 
+  // PWA install prompt
+  const [pwaPrompt, setPwaPrompt] = useState(null);
+  const [showPwaBanner, setShowPwaBanner] = useState(false);
+
+  useEffect(() => {
+    const handler = (e) => { e.preventDefault(); setPwaPrompt(e); setShowPwaBanner(true); };
+    window.addEventListener('beforeinstallprompt', handler);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  // Order chat
+  const [chatOrderId, setChatOrderId] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
+
   // VIP modal
   const [vipModalOpen, setVipModalOpen] = useState(false);
 
@@ -560,6 +576,28 @@ export default function UserDashboardPage() {
     stopBgSound();
     logout();
     navigate('/');
+  };
+
+  const openOrderChat = async (orderId) => {
+    setChatOrderId(orderId);
+    setChatMessages([]);
+    try {
+      const res = await api.getOrderMessages(orderId);
+      if (res?.ok) setChatMessages(res.messages || []);
+    } catch {}
+  };
+
+  const handleSendChatMessage = async () => {
+    if (!chatInput.trim() || !chatOrderId) return;
+    setChatLoading(true);
+    try {
+      const res = await api.sendOrderMessage(chatOrderId, chatInput.trim());
+      if (res?.ok) {
+        setChatMessages(prev => [...prev, res.message]);
+        setChatInput('');
+      }
+    } catch {}
+    finally { setChatLoading(false); }
   };
 
   const handleOpenProfile = () => {
@@ -1249,6 +1287,20 @@ export default function UserDashboardPage() {
                         {formatDate(request.updatedAt)}
                       </p>
                       {hasKey && <LootBox requestId={reqId} keyText={request.notes} />}
+                      {/* Chat button */}
+                      <button
+                        onClick={() => openOrderChat(reqId)}
+                        style={{
+                          marginTop: '6px', background: 'none',
+                          border: '1px solid rgba(99,102,241,0.3)',
+                          borderRadius: '6px', color: '#a78bfa',
+                          padding: '4px 10px', cursor: 'pointer',
+                          fontSize: '0.72rem', fontWeight: 700,
+                          display: 'inline-flex', alignItems: 'center', gap: '4px'
+                        }}
+                      >
+                        <i className="fas fa-comment" /> Chat
+                      </button>
                     </div>
                   </div>
                 );
@@ -2426,6 +2478,120 @@ export default function UserDashboardPage() {
 
       {/* VIP Subscription Modal */}
       <VipModal open={vipModalOpen} onClose={() => setVipModalOpen(false)} />
+
+      {/* ── PWA Install Banner ── */}
+      {showPwaBanner && pwaPrompt && (
+        <div style={{
+          position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, width: 'calc(100% - 32px)', maxWidth: '420px',
+          background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+          border: '1px solid rgba(99,102,241,0.4)',
+          borderRadius: '16px', padding: '16px 20px',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
+          display: 'flex', alignItems: 'center', gap: '14px'
+        }}>
+          <div style={{ fontSize: '2rem', flexShrink: 0 }}>📱</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#fff', marginBottom: '2px' }}>
+              Add to Home Screen
+            </div>
+            <div style={{ fontSize: '0.75rem', color: '#aaa' }}>
+              Install SUSANTEDIT as an app for faster access
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+            <button
+              onClick={async () => {
+                pwaPrompt.prompt();
+                const { outcome } = await pwaPrompt.userChoice;
+                setShowPwaBanner(false);
+                setPwaPrompt(null);
+              }}
+              style={{
+                background: 'linear-gradient(135deg, #6366f1, #a855f7)',
+                border: 'none', borderRadius: '8px', color: '#fff',
+                padding: '8px 14px', cursor: 'pointer', fontWeight: 700, fontSize: '0.78rem'
+              }}
+            >Install</button>
+            <button
+              onClick={() => setShowPwaBanner(false)}
+              style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#aaa', padding: '8px 10px', cursor: 'pointer', fontSize: '0.78rem' }}
+            >✕</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Order Chat Modal ── */}
+      {chatOrderId && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99999,
+          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '0'
+        }} onClick={() => setChatOrderId(null)}>
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              width: '100%', maxWidth: '480px',
+              background: '#111', border: '1px solid rgba(255,255,255,0.1)',
+              borderRadius: '20px 20px 0 0', padding: '20px',
+              maxHeight: '70vh', display: 'flex', flexDirection: 'column'
+            }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+              <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>
+                💬 Order Support Chat
+              </div>
+              <button onClick={() => setChatOrderId(null)} style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+            </div>
+            {/* Messages */}
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px', minHeight: '120px' }}>
+              {chatMessages.length === 0 ? (
+                <p style={{ color: 'var(--muted)', fontSize: '0.82rem', textAlign: 'center', padding: '20px 0' }}>
+                  No messages yet. Ask admin anything about this order.
+                </p>
+              ) : chatMessages.map((m, i) => (
+                <div key={i} style={{
+                  alignSelf: m.from === 'user' ? 'flex-end' : 'flex-start',
+                  maxWidth: '80%', padding: '8px 12px', borderRadius: '12px',
+                  background: m.from === 'user' ? 'rgba(230,57,70,0.2)' : 'rgba(255,255,255,0.08)',
+                  border: `1px solid ${m.from === 'user' ? 'rgba(230,57,70,0.3)' : 'rgba(255,255,255,0.1)'}`,
+                  fontSize: '0.85rem', color: '#fff'
+                }}>
+                  <div style={{ fontSize: '0.7rem', color: '#aaa', marginBottom: '3px' }}>
+                    {m.from === 'admin' ? '👨‍💼 Admin' : '👤 You'}
+                  </div>
+                  {m.text}
+                </div>
+              ))}
+            </div>
+            {/* Input */}
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <input
+                value={chatInput}
+                onChange={e => setChatInput(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendChatMessage(); } }}
+                placeholder="Type your message..."
+                style={{
+                  flex: 1, padding: '10px 14px', borderRadius: '10px',
+                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                  color: '#fff', fontSize: '0.88rem', outline: 'none'
+                }}
+              />
+              <button
+                onClick={handleSendChatMessage}
+                disabled={chatLoading || !chatInput.trim()}
+                style={{
+                  background: 'var(--primary)', border: 'none', borderRadius: '10px',
+                  color: '#fff', padding: '10px 16px', cursor: 'pointer', fontWeight: 700,
+                  opacity: chatLoading || !chatInput.trim() ? 0.5 : 1
+                }}
+              >
+                {chatLoading ? '...' : <i className="fas fa-paper-plane" />}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

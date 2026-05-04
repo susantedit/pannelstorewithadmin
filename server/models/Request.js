@@ -30,6 +30,16 @@ const requestSchema = new mongoose.Schema(
     giftSenderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     giftFrom:     { type: String, default: '' },
     giftMessage:  { type: String, default: '' },
+
+    // Order chat messages
+    messages: {
+      type: [{
+        from:      { type: String, enum: ['user', 'admin'], required: true },
+        text:      { type: String, required: true },
+        createdAt: { type: Date, default: Date.now }
+      }],
+      default: []
+    }
   },
   { timestamps: true }
 );

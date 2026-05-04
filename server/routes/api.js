@@ -656,6 +656,80 @@ router.post('/admin/reactivate', requireAuth, requireAdmin, async (req, res) => 
   }
 });
 
+// ── User Ban System ───────────────────────────────────────────────────────
+router.post('/admin/ban', requireAuth, requireAdmin, async (req, res) => {
+  const { userId, reason = 'Banned by admin' } = req.body || {};
+  if (!userId) return res.status(400).json({ ok: false, message: 'userId required' });
+  try {
+    const user = await User.findByIdAndUpdate(userId, {
+      isBanned: true, banReason: String(reason).trim().slice(0, 200), bannedAt: new Date()
+    }, { new: true });
+    if (!user) return res.status(404).json({ ok: false, message: 'User not found' });
+    res.json({ ok: true, message: `${user.email} has been banned` });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+router.post('/admin/unban', requireAuth, requireAdmin, async (req, res) => {
+  const { userId } = req.body || {};
+  if (!userId) return res.status(400).json({ ok: false, message: 'userId required' });
+  try {
+    const user = await User.findByIdAndUpdate(userId, {
+      isBanned: false, banReason: '', bannedAt: null
+    }, { new: true });
+    if (!user) return res.status(404).json({ ok: false, message: 'User not found' });
+    res.json({ ok: true, message: `${user.email} has been unbanned` });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Delete Order (admin only) ─────────────────────────────────────────────
+router.delete('/requests/:id', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { default: Request } = await import('../models/Request.js');
+    const request = await Request.findByIdAndDelete(req.params.id);
+    if (!request) return res.status(404).json({ ok: false, message: 'Request not found' });
+    res.json({ ok: true, message: 'Order deleted' });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Order Chat (user ↔ admin) ─────────────────────────────────────────────
+// Get messages for an order
+router.get('/requests/:id/messages', requireAuth, async (req, res) => {
+  try {
+    const { default: Request } = await import('../models/Request.js');
+    const request = await Request.findById(req.params.id).select('messages userId').lean();
+    if (!request) return res.status(404).json({ ok: false, message: 'Not found' });
+    // Only owner or admin can read
+    const isAdmin = req.auth?.role === 'admin';
+    const isOwner = String(request.userId) === String(req.auth?.userId);
+    if (!isAdmin && !isOwner) return res.status(403).json({ ok: false, message: 'Forbidden' });
+    res.json({ ok: true, messages: request.messages || [] });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// Post a message on an order
+router.post('/requests/:id/messages', requireAuth, async (req, res) => {
+  const text = String(req.body?.text || '').trim().slice(0, 500);
+  if (!text) return res.status(400).json({ ok: false, message: 'Message text required' });
+  try {
+    const { default: Request } = await import('../models/Request.js');
+    const request = await Request.findById(req.params.id);
+    if (!request) return res.status(404).json({ ok: false, message: 'Not found' });
+    const isAdmin = req.auth?.role === 'admin';
+    const isOwner = String(request.userId) === String(req.auth?.userId);
+    if (!isAdmin && !isOwner) return res.status(403).json({ ok: false, message: 'Forbidden' });
+    const from = isAdmin ? 'admin' : 'user';
+    request.messages = request.messages || [];
+    request.messages.push({ from, text, createdAt: new Date() });
+    await request.save();
+    // Notify the other party
+    if (from === 'admin') {
+      const { NotificationHelpers } = await import('../controllers/notificationController.js');
+      await NotificationHelpers.showNotification(request.userId, '💬 Admin replied', `Re: ${request.product} — ${text.slice(0, 60)}`, 'info').catch(() => {});
+    }
+    res.json({ ok: true, message: request.messages[request.messages.length - 1] });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
 // ── AI Chat proxy (Gemini) ────────────────────────────────────────────────
 // Keeps the API key server-side — never exposed to the browser.
 // POST /api/ai/chat  { messages: [{role, content}], system: string }

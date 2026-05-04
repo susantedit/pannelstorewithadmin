@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
@@ -12,6 +12,101 @@ import { formatDate, getStatusColor } from '../../utils/helpers';
 import { showToast, Notif } from '../../utils/notify';
 import { SupportFab } from '../../components/shared/SupportFab';
 import NotificationSender from '../../components/admin/NotificationSender';
+
+// ── AdminOrderChat sub-component ─────────────────────────────────────────
+function AdminOrderChat({ requestId }) {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef(null);
+
+  useEffect(() => {
+    if (!requestId) return;
+    api.getOrderMessages(requestId)
+      .then(res => { if (res?.ok) setMessages(res.messages || []); })
+      .catch(() => {});
+  }, [requestId]);
+
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  const send = async () => {
+    if (!input.trim() || loading) return;
+    setLoading(true);
+    try {
+      const res = await api.sendOrderMessage(requestId, input.trim());
+      if (res?.ok) { setMessages(prev => [...prev, res.message]); setInput(''); }
+    } catch {}
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--line)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
+        <i className="fas fa-comment" style={{ color: '#a78bfa' }} />
+        <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#fff' }}>Order Chat</span>
+        <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>— reply to user messages here</span>
+      </div>
+
+      {/* Messages */}
+      <div style={{
+        maxHeight: '220px', overflowY: 'auto',
+        display: 'flex', flexDirection: 'column', gap: '8px',
+        marginBottom: '10px', padding: '4px 0'
+      }}>
+        {messages.length === 0 ? (
+          <p style={{ color: 'var(--muted)', fontSize: '0.8rem', textAlign: 'center', padding: '12px 0' }}>
+            No messages yet on this order.
+          </p>
+        ) : messages.map((m, i) => (
+          <div key={i} style={{
+            alignSelf: m.from === 'admin' ? 'flex-end' : 'flex-start',
+            maxWidth: '80%', padding: '8px 12px', borderRadius: '12px',
+            background: m.from === 'admin'
+              ? 'rgba(230,57,70,0.15)'
+              : 'rgba(255,255,255,0.07)',
+            border: `1px solid ${m.from === 'admin' ? 'rgba(230,57,70,0.3)' : 'rgba(255,255,255,0.1)'}`,
+            fontSize: '0.85rem', color: '#fff'
+          }}>
+            <div style={{ fontSize: '0.68rem', color: '#aaa', marginBottom: '3px' }}>
+              {m.from === 'admin' ? '👨‍💼 You (Admin)' : '👤 User'}
+              {m.createdAt && <span style={{ marginLeft: '6px' }}>{new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
+            </div>
+            {m.text}
+          </div>
+        ))}
+        <div ref={bottomRef} />
+      </div>
+
+      {/* Input */}
+      <div style={{ display: 'flex', gap: '8px' }}>
+        <input
+          value={input}
+          onChange={e => setInput(e.target.value)}
+          onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
+          placeholder="Reply to user..."
+          style={{
+            flex: 1, padding: '9px 12px', borderRadius: '8px',
+            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+            color: '#fff', fontSize: '0.85rem', outline: 'none'
+          }}
+        />
+        <button
+          onClick={send}
+          disabled={loading || !input.trim()}
+          style={{
+            background: 'var(--primary)', border: 'none', borderRadius: '8px',
+            color: '#fff', padding: '9px 16px', cursor: 'pointer', fontWeight: 700,
+            opacity: loading || !input.trim() ? 0.5 : 1, transition: 'opacity 0.2s'
+          }}
+        >
+          {loading ? '...' : <i className="fas fa-paper-plane" />}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // ── VIP Manager sub-component ─────────────────────────────────────────────
 function VipManager() {
@@ -107,6 +202,11 @@ function VipManager() {
                       VIP until {new Date(u.vipExpiresAt).toLocaleDateString()}
                     </div>
                   )}
+                  {u.isBanned && (
+                    <div style={{ fontSize: '0.72rem', color: '#ff6b6b', marginTop: '2px' }}>
+                      🚫 BANNED — {u.banReason || 'No reason given'}
+                    </div>
+                  )}
                 </div>
                 <div style={{ display: 'flex', gap: '6px', flexShrink: 0 }}>
                   <button
@@ -132,6 +232,28 @@ function VipManager() {
                     }}
                   >
                     +3 Months
+                  </button>
+                  <button
+                    onClick={async () => {
+                      if (u.isBanned) {
+                        if (!window.confirm(`Unban ${u.name}?`)) return;
+                        await api.unbanUser(u._id);
+                      } else {
+                        const reason = window.prompt(`Ban reason for ${u.name}:`, 'Spam / fraud');
+                        if (reason === null) return;
+                        await api.banUser(u._id, reason);
+                      }
+                      loadUsers(search);
+                    }}
+                    style={{
+                      padding: '6px 10px', borderRadius: '6px', cursor: 'pointer',
+                      background: u.isBanned ? 'rgba(74,222,128,0.1)' : 'rgba(230,57,70,0.1)',
+                      border: `1px solid ${u.isBanned ? 'rgba(74,222,128,0.3)' : 'rgba(230,57,70,0.3)'}`,
+                      color: u.isBanned ? '#4ade80' : '#ff6b6b',
+                      fontSize: '0.72rem', fontWeight: 700
+                    }}
+                  >
+                    {u.isBanned ? '✅ Unban' : '🚫 Ban'}
                   </button>
                 </div>
               </div>
@@ -682,9 +804,23 @@ export default function AdminDashboardPage() {
                             </td>
                             <td style={{ fontSize:'0.82rem', color:'var(--muted)' }}>{formatDate(r.updatedAt)}</td>
                             <td>
-                              <button className="filter-btn" onClick={() => handleViewDetails(r)}>
-                                Review
-                              </button>
+                              <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                                <button className="filter-btn" onClick={() => handleViewDetails(r)}>
+                                  Review
+                                </button>
+                                <button
+                                  className="filter-btn"
+                                  style={{ color: '#ff6b6b', borderColor: 'rgba(230,57,70,0.3)' }}
+                                  onClick={async () => {
+                                    if (!window.confirm(`Delete order from ${r.userName}?`)) return;
+                                    await api.deleteRequest(r.id || r._id);
+                                    await loadRequests();
+                                    showToast('Order deleted', 'warning');
+                                  }}
+                                >
+                                  🗑️
+                                </button>
+                              </div>
                             </td>
                           </tr>
                           );
@@ -1312,6 +1448,9 @@ export default function AdminDashboardPage() {
                 </Button>
               </div>
             )}
+
+            {/* ── Order Chat ── */}
+            <AdminOrderChat requestId={selectedRequest.id || selectedRequest._id} />
           </div>
           );
         })()}

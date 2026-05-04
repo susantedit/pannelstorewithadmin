@@ -65,6 +65,11 @@ export async function createRequest(req, res) {
     return res.status(400).json({ ok: false, message: 'All request fields are required' });
   }
 
+  // Check if user is banned
+  if (req.user?.isBanned) {
+    return res.status(403).json({ ok: false, message: 'Your account has been suspended. Contact support.' });
+  }
+
   const shouldUseDb = Request.db && Request.db.readyState === 1;
 
   if (couponCode) {
@@ -276,6 +281,22 @@ export async function updateRequestStatus(req, res) {
 
   await request.save();
 
+  // ── WhatsApp auto-message when accepted ──────────────────────────────────
+  if (status === 'Accepted' && request.whatsapp && notes) {
+    const waNumber = String(request.whatsapp).replace(/[^0-9]/g, '');
+    const waMsg = encodeURIComponent(
+      `🔑 *Your Key is Ready!*\n\n` +
+      `Product: *${request.product}*\n` +
+      `Package: ${request.packageName || 'N/A'}\n\n` +
+      `🗝️ Key: *${notes}*\n\n` +
+      `Thank you for ordering from SUSANTEDIT! 🎮`
+    );
+    // Store the WhatsApp link in notes so admin can click it from Discord
+    // The actual send happens client-side via wa.me link (no API key needed)
+    request.whatsappLink = `https://wa.me/${waNumber}?text=${waMsg}`;
+    await request.save();
+  }
+
   // Discord/Telegram status-change alert — non-blocking
   sendStatusAlert({
     status,
@@ -289,6 +310,7 @@ export async function updateRequestStatus(req, res) {
     whatsapp:      request.whatsapp,
     transaction:   request.transaction,
     notes:         notes || '',
+    whatsappLink:  request.whatsappLink || '',
   }).catch(() => {});
 
   return res.json({ ok: true, request: await Request.findById(request._id).lean() });
