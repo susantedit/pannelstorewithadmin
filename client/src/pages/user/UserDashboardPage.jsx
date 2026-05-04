@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+﻿import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -23,7 +23,7 @@ import { setupPushNotifications } from '../../utils/pushNotifications';
 import { registerFcmToken, onFcmMessage } from '../../firebase/firebaseConfig';
 import { motion } from 'framer-motion';
 
-// ── LootBox sub-component ─────────────────────────────────────────────────
+// â”€â”€ LootBox sub-component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LootBox({ requestId, keyText }) {
   const storageKey = `lootbox_${requestId}`;
   const [opened, setOpened] = useState(() => {
@@ -49,7 +49,7 @@ function LootBox({ requestId, keyText }) {
         textAlign: 'left', wordBreak: 'break-all',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <span style={{ flex: 1 }}>🔑 {keyText}</span>
+          <span style={{ flex: 1 }}>ðŸ”‘ {keyText}</span>
           <button
             onClick={() => { navigator.clipboard.writeText(keyText); }}
             style={{ background: 'none', border: '1px solid rgba(95,226,167,0.4)', color: '#5fe2a7', padding: '4px 10px', borderRadius: '6px', cursor: 'pointer', fontSize: '0.7rem', fontWeight: 700, flexShrink: 0 }}
@@ -59,7 +59,7 @@ function LootBox({ requestId, keyText }) {
         </div>
         {/* WhatsApp send */}
         <a
-          href={`https://wa.me/?text=${encodeURIComponent(`🔑 My activation key: ${keyText}\n\nFrom SUSANTEDIT — https://susantedit.com`)}`}
+          href={`https://wa.me/?text=${encodeURIComponent(`ðŸ”‘ My activation key: ${keyText}\n\nFrom SUSANTEDIT â€” https://susantedit.com`)}`}
           target="_blank" rel="noopener noreferrer"
           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 12px', borderRadius: '6px', background: 'rgba(37,211,102,0.15)', border: '1px solid rgba(37,211,102,0.3)', color: '#25D366', fontSize: '0.72rem', fontWeight: 700, textDecoration: 'none', marginRight: '6px' }}
         >
@@ -68,7 +68,7 @@ function LootBox({ requestId, keyText }) {
         {/* TikTok share */}
         <button
           onClick={() => {
-            const text = `Just got my key from @susantedit 🔑🔥 Best gaming service in Nepal! #SUSANTEDIT #FreeFire #Nepal`;
+            const text = `Just got my key from @susantedit ðŸ”‘ðŸ”¥ Best gaming service in Nepal! #SUSANTEDIT #FreeFire #Nepal`;
             window.open(`https://www.tiktok.com/upload?caption=${encodeURIComponent(text)}`, '_blank');
           }}
           style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '5px 12px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: '0.72rem', fontWeight: 700, cursor: 'pointer' }}
@@ -108,14 +108,14 @@ function LootBox({ requestId, keyText }) {
           transition: 'all 0.2s'
         }}
       >
-        <span style={{ fontSize: '1.2rem' }}>🎁</span>
+        <span style={{ fontSize: '1.2rem' }}>ðŸŽ</span>
         {animating ? 'Opening...' : 'Open Loot Box'}
       </button>
     </div>
   );
 }
 
-// ── FlashCountdown sub-component ──────────────────────────────────────────
+// â”€â”€ FlashCountdown sub-component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function FlashCountdown({ endsAt }) {
   const [timeLeft, setTimeLeft] = useState('');
 
@@ -271,19 +271,19 @@ export default function UserDashboardPage() {
     setWatchlist(prev => {
       const next = prev.includes(productName) ? prev.filter(n => n !== productName) : [...prev, productName];
       try { localStorage.setItem('price_watchlist', JSON.stringify(next)); } catch {}
-      if (!prev.includes(productName)) Notif.showNotification('🔔 Price Alert Set', `We'll notify you when ${productName} price drops!`, 'info', 3000);
+      if (!prev.includes(productName)) Notif.showNotification('ðŸ”” Price Alert Set', `We'll notify you when ${productName} price drops!`, 'info', 3000);
       return next;
     });
   };
 
-  // Ask for notification permission on mount — gate handles the blocking UI
+  // Ask for notification permission on mount â€” gate handles the blocking UI
   useEffect(() => {
-    // Setup Web Push (VAPID) — registers SW and saves subscription to server
+    // Setup Web Push (VAPID) â€” registers SW and saves subscription to server
     setupPushNotifications((payload) => {
       loadNotificationCount();
     });
 
-    // Setup FCM — works even when browser is closed (Android/Desktop Chrome)
+    // Setup FCM â€” works even when browser is closed (Android/Desktop Chrome)
     registerFcmToken().catch(() => {});
 
     // Handle foreground FCM messages (app is open)
@@ -317,7 +317,7 @@ export default function UserDashboardPage() {
     // Birthday check
     api.birthdayCheck().then(res => {
       if (res?.gift) {
-        setBirthdayMsg(res.message || '🎂 Happy Birthday! Rs 50 added to your wallet!');
+        setBirthdayMsg(res.message || 'ðŸŽ‚ Happy Birthday! Rs 50 added to your wallet!');
         setShowBirthdayCelebration(true);
       }
     }).catch(() => {});
@@ -345,7 +345,7 @@ export default function UserDashboardPage() {
     // Poll every 30s for status updates AND new notifications
     pollRef.current = setInterval(async () => {
       try {
-        // ── Check for new notifications ──────────────────────────────
+        // â”€â”€ Check for new notifications â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const notifRes = await api.getNotifications({ unread: true, limit: 5 });
         if (notifRes?.ok) {
           const newCount = notifRes.unreadCount || 0;
@@ -360,7 +360,7 @@ export default function UserDashboardPage() {
               playNotif();
               sendBrowserNotification(latest.title, latest.message, { tag: `notif-${latest._id}` });
             } else {
-              Notif.showNotification('🔔 New Notification', `You have ${diff} new notification${diff > 1 ? 's' : ''}`, 'info', 5000);
+              Notif.showNotification('ðŸ”” New Notification', `You have ${diff} new notification${diff > 1 ? 's' : ''}`, 'info', 5000);
               playNotif();
             }
           }
@@ -370,7 +370,7 @@ export default function UserDashboardPage() {
       } catch {}
 
       try {
-        // ── Check for request status changes ─────────────────────────
+        // â”€â”€ Check for request status changes â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
         const res = await api.getRequests();
         if (!res?.requests) return;
         const updated = res.requests;
@@ -382,7 +382,7 @@ export default function UserDashboardPage() {
             if (curr.toLowerCase().includes('accept')) {
               Notif.keyDelivered(r.product);
               playKeyDelivered();
-              sendBrowserNotification('🔑 Key Delivered!', `Your ${r.product} key is ready. Open the app to copy it.`, { requireInteraction: true, tag: `key-${id}` });
+              sendBrowserNotification('ðŸ”‘ Key Delivered!', `Your ${r.product} key is ready. Open the app to copy it.`, { requireInteraction: true, tag: `key-${id}` });
             } else if (curr.toLowerCase().includes('reject')) {
               Notif.requestRejected(r.product);
               sendBrowserNotification('Request Rejected', `Your ${r.product} request was rejected.`, { tag: `reject-${id}` });
@@ -415,12 +415,12 @@ export default function UserDashboardPage() {
     setApplyCodeLoading(true); setApplyCodeMsg('');
     try {
       const res = await api.applyReferralCode(applyCodeInput.trim());
-      setApplyCodeMsg(res?.ok ? `✅ ${res.message}` : `❌ ${res?.message || 'Failed'}`);
+      setApplyCodeMsg(res?.ok ? `âœ… ${res.message}` : `âŒ ${res?.message || 'Failed'}`);
       if (res?.ok) {
         setApplyCodeInput('');
         api.getReferralStats().then(r => { if (r?.ok) setReferralStats({ walletBalance: r.walletBalance, referralCount: r.referralCount, partnerBadge: r.partnerBadge }); }).catch(() => {});
       }
-    } catch { setApplyCodeMsg('❌ Request failed'); }
+    } catch { setApplyCodeMsg('âŒ Request failed'); }
     finally { setApplyCodeLoading(false); }
   };
 
@@ -485,7 +485,7 @@ export default function UserDashboardPage() {
     if (!formData.name.trim()) errors.name = 'Name is required';
     if (!formData.tiktok.trim()) errors.tiktok = 'TikTok name is required';
     if (!formData.whatsapp.trim()) errors.whatsapp = 'WhatsApp number is required';
-    // transaction is collected AFTER payment — not validated here
+    // transaction is collected AFTER payment â€” not validated here
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -500,7 +500,7 @@ export default function UserDashboardPage() {
   const handlePaymentMethodSelect = (method) => {
     setFormData(prev => ({ ...prev, paymentMethod: method }));
     setPaymentMethodModalOpen(false);
-    // Show QR — user pays, then manually clicks "I've paid" to enter transaction number
+    // Show QR â€” user pays, then manually clicks "I've paid" to enter transaction number
     setQrModalOpen(true);
   };
 
@@ -549,7 +549,7 @@ export default function UserDashboardPage() {
           requestsRes.requests.forEach(r => {
             prevStatusRef.current[r.id || r._id] = r.status;
           });
-          // First Blood — first ever order
+          // First Blood â€” first ever order
           if (wasEmpty && requestsRes.requests.length === 1) {
             setTimeout(() => setShowFirstBlood(true), 1000);
           }
@@ -622,7 +622,7 @@ export default function UserDashboardPage() {
       // Refresh user data
       const res = await api.me();
       if (res?.user) {
-        // Update local state — AuthContext doesn't expose setUser, so reload
+        // Update local state â€” AuthContext doesn't expose setUser, so reload
         window.location.reload();
       }
     } catch (e) {
@@ -647,7 +647,7 @@ export default function UserDashboardPage() {
     );
   }
 
-  // ── Notification Permission Gate — modal popup over dashboard ───────────────
+  // â”€â”€ Notification Permission Gate â€” modal popup over dashboard â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   const userRequests = requests;
 
@@ -666,7 +666,7 @@ export default function UserDashboardPage() {
         background: 'radial-gradient(ellipse at 20% 20%, rgba(230,57,70,0.06) 0%, transparent 50%), radial-gradient(ellipse at 80% 80%, rgba(168,85,247,0.06) 0%, transparent 50%)'
       }} />
 
-      {/* ── Notification Permission Popup ── */}
+      {/* â”€â”€ Notification Permission Popup â”€â”€ */}
       {notifPermission !== 'granted' && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 99999,
@@ -719,12 +719,12 @@ export default function UserDashboardPage() {
                   <strong style={{ color: '#fff' }}>Notifications are blocked.</strong>
                   <br />
                   To fix: click the <strong style={{ color: '#fff' }}>lock icon</strong> in your address bar
-                  → <strong style={{ color: '#fff' }}>Notifications</strong>
-                  → set to <strong style={{ color: '#4ade80' }}>Allow</strong>
-                  → then refresh.
+                  â†’ <strong style={{ color: '#fff' }}>Notifications</strong>
+                  â†’ set to <strong style={{ color: '#4ade80' }}>Allow</strong>
+                  â†’ then refresh.
                 </div>
                 <Button variant="ghost" onClick={() => window.location.reload()} style={{ width: '100%' }}>
-                  <i className="fas fa-rotate" /> I allowed it — Refresh
+                  <i className="fas fa-rotate" /> I allowed it â€” Refresh
                 </Button>
               </div>
             ) : (
@@ -746,7 +746,7 @@ export default function UserDashboardPage() {
           </div>
         </div>
       )}
-      {/* ── Birthday Celebration Overlay ── */}
+      {/* â”€â”€ Birthday Celebration Overlay â”€â”€ */}
       {showBirthdayCelebration && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 999999,
@@ -790,7 +790,7 @@ export default function UserDashboardPage() {
           }}>
             {/* Cake emoji floating */}
             <div style={{ fontSize: '5rem', animation: 'bdayFloat 2s ease-in-out infinite', marginBottom: '16px' }}>
-              🎂
+              ðŸŽ‚
             </div>
             <div style={{
               fontFamily: "'Orbitron',sans-serif",
@@ -802,7 +802,7 @@ export default function UserDashboardPage() {
               HAPPY BIRTHDAY!
             </div>
             <div style={{ fontSize: '1rem', color: '#fff', fontWeight: 700, marginBottom: '6px' }}>
-              🎉 {user?.name?.split(' ')[0] || 'Player'} 🎉
+              ðŸŽ‰ {user?.name?.split(' ')[0] || 'Player'} ðŸŽ‰
             </div>
             <div style={{
               fontSize: '0.9rem', color: '#aaa', lineHeight: 1.7, marginBottom: '20px'
@@ -817,7 +817,7 @@ export default function UserDashboardPage() {
               border: '1px solid rgba(251,191,36,0.4)',
               marginBottom: '24px'
             }}>
-              <span style={{ fontSize: '1.8rem' }}>🎁</span>
+              <span style={{ fontSize: '1.8rem' }}>ðŸŽ</span>
               <div style={{ textAlign: 'left' }}>
                 <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: '1.4rem', fontWeight: 900, color: '#fbbf24' }}>
                   Rs 50
@@ -839,7 +839,7 @@ export default function UserDashboardPage() {
                 transition: 'all 0.2s'
               }}
             >
-              🎮 LET'S PLAY!
+              ðŸŽ® LET'S PLAY!
             </button>
           </div>
         </div>
@@ -869,11 +869,11 @@ export default function UserDashboardPage() {
         const warnings = [];
         // Streak about to break
         if (gamProfile.streakCount >= 3 && gamProfile.canCheckIn) {
-          warnings.push({ icon: '🔥', msg: `Your ${gamProfile.streakCount}-day streak will reset if you don't check in today!`, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.25)' });
+          warnings.push({ icon: 'ðŸ”¥', msg: `Your ${gamProfile.streakCount}-day streak will reset if you don't check in today!`, color: '#f59e0b', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.25)' });
         }
         // Wallet balance unused
         if ((gamProfile.walletBalance || 0) >= 30) {
-          warnings.push({ icon: '💰', msg: `You have Rs ${gamProfile.walletBalance} in your wallet — use it on your next order!`, color: '#4ade80', bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.25)' });
+          warnings.push({ icon: 'ðŸ’°', msg: `You have Rs ${gamProfile.walletBalance} in your wallet â€” use it on your next order!`, color: '#4ade80', bg: 'rgba(74,222,128,0.08)', border: 'rgba(74,222,128,0.25)' });
         }
         if (warnings.length === 0) return null;
         return warnings.map((w, i) => (
@@ -934,12 +934,12 @@ export default function UserDashboardPage() {
             title="Daily Spin Wheel"
             style={{ background:'linear-gradient(135deg,rgba(230,57,70,0.2),rgba(230,57,70,0.1))', border:'1px solid rgba(230,57,70,0.4)', borderRadius:'8px', color:'#fff', padding:'8px 14px', cursor:'pointer', fontSize:'0.82rem', fontWeight:700, fontFamily:"'Orbitron',sans-serif", letterSpacing:'1px', transition:'all 0.2s' }}
           >
-            🎰 SPIN
+            ðŸŽ° SPIN
           </button>
           {/* VIP button */}
           <button
             onClick={() => setVipModalOpen(true)}
-            title={isVip ? 'VIP Active — Ad-Free' : 'Go VIP — Remove Ads'}
+            title={isVip ? 'VIP Active â€” Ad-Free' : 'Go VIP â€” Remove Ads'}
             style={{
               background: isVip
                 ? 'linear-gradient(135deg,rgba(251,191,36,0.25),rgba(251,191,36,0.1))'
@@ -951,7 +951,7 @@ export default function UserDashboardPage() {
               display:'flex', alignItems:'center', gap:'6px'
             }}
           >
-            ⭐ {isVip ? 'VIP' : 'Go VIP'}
+            â­ {isVip ? 'VIP' : 'Go VIP'}
           </button>
           <button
             onClick={() => { const v = !soundOn; setSoundOn(v); setSoundEnabled(v); }}
@@ -1025,7 +1025,7 @@ export default function UserDashboardPage() {
         ))}
       </div>
 
-      {/* ── STORE TAB ── */}
+      {/* â”€â”€ STORE TAB â”€â”€ */}
       {activeTab === 'store' && (<>
 
       {/* First Blood overlay */}
@@ -1042,7 +1042,7 @@ export default function UserDashboardPage() {
         />
       )}
 
-      {/* Event banner — Saturday Night Drop */}
+      {/* Event banner â€” Saturday Night Drop */}
       {(() => {
         const now = new Date();
         const day = now.getDay(); // 6 = Saturday
@@ -1059,13 +1059,13 @@ export default function UserDashboardPage() {
             display: 'flex', alignItems: 'center', gap: '12px',
             animation: 'border-glow 2s ease-in-out infinite'
           }}>
-            <span style={{ fontSize: '1.4rem' }}>🌙</span>
+            <span style={{ fontSize: '1.4rem' }}>ðŸŒ™</span>
             <div>
               <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: '0.8rem', fontWeight: 700, color: '#fbbf24', letterSpacing: '2px' }}>
                 SATURDAY NIGHT DROP
               </div>
               <div style={{ fontSize: '0.82rem', color: 'var(--muted)', marginTop: '2px' }}>
-                Special prices active until midnight — grab your package now!
+                Special prices active until midnight â€” grab your package now!
               </div>
             </div>
           </div>
@@ -1121,11 +1121,11 @@ export default function UserDashboardPage() {
           {/* Status badges */}
           {gamProfile && (() => {
             const badges = [];
-            if ((gamProfile.totalSpend || 0) >= 5000) badges.push({ icon: '🐐', label: 'Top Buyer', color: '#fbbf24' });
-            if ((gamProfile.totalSpend || 0) >= 2000) badges.push({ icon: '💰', label: 'Big Spender', color: '#4ade80' });
-            if ((gamProfile.streakCount || 0) >= 7)   badges.push({ icon: '🔥', label: 'Streak Master', color: '#f59e0b' });
-            if ((gamProfile.referralCount || 0) >= 5) badges.push({ icon: '⚡', label: 'Squad Leader', color: '#60a5fa' });
-            if (gamProfile.partnerBadge)               badges.push({ icon: '⭐', label: 'Partner', color: '#a78bfa' });
+            if ((gamProfile.totalSpend || 0) >= 5000) badges.push({ icon: 'ðŸ', label: 'Top Buyer', color: '#fbbf24' });
+            if ((gamProfile.totalSpend || 0) >= 2000) badges.push({ icon: 'ðŸ’°', label: 'Big Spender', color: '#4ade80' });
+            if ((gamProfile.streakCount || 0) >= 7)   badges.push({ icon: 'ðŸ”¥', label: 'Streak Master', color: '#f59e0b' });
+            if ((gamProfile.referralCount || 0) >= 5) badges.push({ icon: 'âš¡', label: 'Squad Leader', color: '#60a5fa' });
+            if (gamProfile.partnerBadge)               badges.push({ icon: 'â­', label: 'Partner', color: '#a78bfa' });
             if (badges.length === 0) return null;
             return (
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '4px' }}>
@@ -1169,7 +1169,7 @@ export default function UserDashboardPage() {
               <input
                 value={orderSearch}
                 onChange={e => setOrderSearch(e.target.value)}
-                placeholder="🔍 Search orders..."
+                placeholder="ðŸ” Search orders..."
                 style={{
                   flex: 1, minWidth: '160px', padding: '8px 12px', borderRadius: '8px',
                   background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
@@ -1324,7 +1324,7 @@ export default function UserDashboardPage() {
             <input
               value={productSearch}
               onChange={e => setProductSearch(e.target.value)}
-              placeholder="🔍 Search products..."
+              placeholder="ðŸ” Search products..."
               style={{
                 width: '100%', padding: '10px 14px', borderRadius: '10px',
                 background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
@@ -1409,7 +1409,7 @@ export default function UserDashboardPage() {
                             fontSize: '0.72rem', fontFamily: "'Orbitron',sans-serif",
                             fontWeight: 700, letterSpacing: '1px',
                             boxShadow: '0 0 10px rgba(230,57,70,0.6)'
-                          }}>🔥 HOT</span>
+                          }}>ðŸ”¥ HOT</span>
                         )}
                         {flashSale && (
                           <span style={{
@@ -1419,7 +1419,7 @@ export default function UserDashboardPage() {
                             fontSize: '0.72rem', fontFamily: "'Orbitron',sans-serif",
                             fontWeight: 700, letterSpacing: '1px',
                             animation: 'flash-pulse 1.5s ease-in-out infinite'
-                          }}>⚡ -{flashSale.discountPercent}%</span>
+                          }}>âš¡ -{flashSale.discountPercent}%</span>
                         )}
                         {isLimited && (
                           <span style={{
@@ -1429,7 +1429,7 @@ export default function UserDashboardPage() {
                             fontSize: '0.7rem', fontFamily: "'Orbitron',sans-serif",
                             fontWeight: 700, letterSpacing: '1px',
                             animation: 'flash-pulse 2s ease-in-out infinite'
-                          }}>⚠️ LIMITED STOCK</span>
+                          }}>âš ï¸ LIMITED STOCK</span>
                         )}
                       </div>
                     )}
@@ -1502,7 +1502,7 @@ export default function UserDashboardPage() {
                       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
                         {product.packages.slice(0, 3).map((pkg) => (
                           <span key={`${product.id || product._id}-${pkg.label}`} className="badge badge-default">
-                            {pkg.label} · Rs {pkg.price}
+                            {pkg.label} Â· Rs {pkg.price}
                           </span>
                         ))}
                       </div>
@@ -1531,7 +1531,7 @@ export default function UserDashboardPage() {
                 );
               })}
 
-              {/* ── Website For Sale Card ── */}
+              {/* â”€â”€ Website For Sale Card â”€â”€ */}
               <article className="product-card" style={{
                 background: 'linear-gradient(135deg, rgba(99,102,241,0.12), rgba(168,85,247,0.08))',
                 border: '1px solid rgba(99,102,241,0.35)',
@@ -1553,7 +1553,7 @@ export default function UserDashboardPage() {
                     color: '#fff', padding: '3px 12px', borderRadius: '20px',
                     fontSize: '0.68rem', fontFamily: "'Orbitron',sans-serif",
                     fontWeight: 700, letterSpacing: '1px'
-                  }}>🛒 FOR SALE</span>
+                  }}>ðŸ›’ FOR SALE</span>
                   <span style={{
                     fontSize: '0.7rem', color: '#a78bfa', fontWeight: 700,
                     fontFamily: "'Orbitron',sans-serif", letterSpacing: '1px'
@@ -1561,10 +1561,10 @@ export default function UserDashboardPage() {
                 </div>
 
                 <h3 style={{ margin: '0 0 4px', color: '#fff', fontSize: '1rem' }}>
-                  This Website — Yours
+                  This Website â€” Yours
                 </h3>
                 <p style={{ margin: '0 0 10px', fontSize: '0.82rem', color: 'var(--muted)', lineHeight: 1.6 }}>
-                  I built this exact panel store. Fully customizable — change branding, products, prices, colors, everything. Ready to deploy.
+                  I built this exact panel store. Fully customizable â€” change branding, products, prices, colors, everything. Ready to deploy.
                 </p>
 
                 {/* Price */}
@@ -1625,7 +1625,7 @@ export default function UserDashboardPage() {
         </div>
       </section>
 
-      {/* ── YOU MIGHT LIKE ── */}
+      {/* â”€â”€ YOU MIGHT LIKE â”€â”€ */}
       {requests.length > 0 && products.length > 0 && (() => {
         const lastProduct = requests[0]?.product || '';
         const isTopup = lastProduct.toLowerCase().includes('diamond') || lastProduct.toLowerCase().includes('weekly') || lastProduct.toLowerCase().includes('monthly');
@@ -1639,7 +1639,7 @@ export default function UserDashboardPage() {
         return (
           <div className="panel">
             <div className="panel-header">
-              <h2>⚡ You Might Like</h2>
+              <h2>âš¡ You Might Like</h2>
               <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>Based on your orders</span>
             </div>
             <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
@@ -1669,14 +1669,14 @@ export default function UserDashboardPage() {
         );
       })()}
 
-      {/* ── AD SLOT — between products and squad ── */}
+      {/* â”€â”€ AD SLOT â€” between products and squad â”€â”€ */}
       <AdBanner slot="dashboard-mid" onVipClick={() => setVipModalOpen(true)} />
 
       
 
       </>)}
 
-      {/* ── SQUAD TAB ── */}
+      {/* â”€â”€ SQUAD TAB â”€â”€ */}
       {activeTab === 'squad' && (
         <section style={{ display: 'grid', gap: '16px' }}>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
@@ -1715,7 +1715,7 @@ export default function UserDashboardPage() {
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', color: 'var(--muted)', marginBottom: '6px' }}>
                   <span>Referrals: {referralStats.referralCount}/10 to Partner</span>
-                  {referralStats.partnerBadge && <span style={{ color: 'var(--primary)', fontWeight: 700 }}>⭐ PARTNER</span>}
+                  {referralStats.partnerBadge && <span style={{ color: 'var(--primary)', fontWeight: 700 }}>â­ PARTNER</span>}
                 </div>
                 <div style={{ height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '6px', overflow: 'hidden' }}>
                   <div style={{
@@ -1727,7 +1727,7 @@ export default function UserDashboardPage() {
                 </div>
                 {referralStats.partnerBadge && (
                   <div style={{ marginTop: '12px', padding: '8px 12px', background: 'rgba(230,57,70,0.1)', border: '1px solid rgba(230,57,70,0.3)', borderRadius: '8px', fontSize: '0.82rem', color: 'var(--primary)', fontWeight: 700, textAlign: 'center' }}>
-                    ⭐ PARTNER BADGE EARNED
+                    â­ PARTNER BADGE EARNED
                   </div>
                 )}
               </div>
@@ -1750,14 +1750,14 @@ export default function UserDashboardPage() {
                 </Button>
               </div>
               {applyCodeMsg && (
-                <p style={{ marginTop: '10px', fontSize: '0.85rem', color: applyCodeMsg.startsWith('✅') ? '#4ade80' : '#ff6b6b' }}>
+                <p style={{ marginTop: '10px', fontSize: '0.85rem', color: applyCodeMsg.startsWith('âœ…') ? '#4ade80' : '#ff6b6b' }}>
                   {applyCodeMsg}
                 </p>
               )}
             </div>
 
             <div className="panel">
-              <div className="panel-header"><h2>🏆 Squad Leaderboard</h2></div>
+              <div className="panel-header"><h2>ðŸ† Squad Leaderboard</h2></div>
               {leaderboard.length === 0 ? (
                 <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>No referrals yet. Be the first!</p>
               ) : leaderboard.map((leader, i) => (
@@ -1767,7 +1767,7 @@ export default function UserDashboardPage() {
                   </span>
                   <div style={{ flex: 1 }}>
                     <strong style={{ color: '#fff', fontSize: '0.9rem' }}>{leader.name}</strong>
-                    {leader.partnerBadge && <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: 'var(--primary)' }}>⭐ PARTNER</span>}
+                    {leader.partnerBadge && <span style={{ marginLeft: '6px', fontSize: '0.7rem', color: 'var(--primary)' }}>â­ PARTNER</span>}
                   </div>
                   <span style={{ color: 'var(--primary)', fontWeight: 700, fontSize: '0.85rem' }}>{leader.referralCount} refs</span>
                 </div>
@@ -1777,23 +1777,23 @@ export default function UserDashboardPage() {
         </section>
       )}
 
-      {/* ── GIFT TAB ── */}
+      {/* â”€â”€ GIFT TAB â”€â”€ */}
       {activeTab === 'gift' && (
         <section style={{ display: 'grid', gap: '16px' }}>
           <div className="panel">
             <div className="panel-header">
-              <h2>🎁 Gift a Product to a Friend</h2>
-              <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>Pay for them — they get the key</span>
+              <h2>ðŸŽ Gift a Product to a Friend</h2>
+              <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>Pay for them â€” they get the key</span>
             </div>
             <p style={{ color: 'var(--muted)', fontSize: '0.85rem', marginBottom: '16px', lineHeight: 1.6 }}>
-              Choose a product, enter your friend's email, pay the QR, and admin will deliver the activation key directly to their account. 🎮
+              Choose a product, enter your friend's email, pay the QR, and admin will deliver the activation key directly to their account. ðŸŽ®
             </p>
 
             {giftMsg && (
               <div style={{ marginBottom: '14px', padding: '10px 14px', borderRadius: '8px', fontSize: '0.85rem',
-                background: giftMsg.startsWith('✅') ? 'rgba(74,222,128,0.1)' : 'rgba(230,57,70,0.1)',
-                border: `1px solid ${giftMsg.startsWith('✅') ? 'rgba(74,222,128,0.3)' : 'rgba(230,57,70,0.3)'}`,
-                color: giftMsg.startsWith('✅') ? '#4ade80' : '#ff6b6b'
+                background: giftMsg.startsWith('âœ…') ? 'rgba(74,222,128,0.1)' : 'rgba(230,57,70,0.1)',
+                border: `1px solid ${giftMsg.startsWith('âœ…') ? 'rgba(74,222,128,0.3)' : 'rgba(230,57,70,0.3)'}`,
+                color: giftMsg.startsWith('âœ…') ? '#4ade80' : '#ff6b6b'
               }}>{giftMsg}</div>
             )}
 
@@ -1825,7 +1825,7 @@ export default function UserDashboardPage() {
                     }}
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text)', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }}
                   >
-                    <option value="">— Select product —</option>
+                    <option value="">â€” Select product â€”</option>
                     {products.map(p => <option key={p._id || p.id} value={p.name}>{p.name}</option>)}
                   </select>
                 </div>
@@ -1845,7 +1845,7 @@ export default function UserDashboardPage() {
                               border: `1px solid ${giftForm.packageName === pkg.label ? 'var(--primary)' : 'rgba(255,255,255,0.1)'}`,
                               color: giftForm.packageName === pkg.label ? 'var(--primary)' : 'var(--muted)'
                             }}>
-                            {pkg.label} · Rs {pkg.price}
+                            {pkg.label} Â· Rs {pkg.price}
                           </button>
                         ))}
                       </div>
@@ -1861,7 +1861,7 @@ export default function UserDashboardPage() {
                   <input
                     value={giftForm.message}
                     onChange={e => setGiftForm(p => ({ ...p, message: e.target.value }))}
-                    placeholder="Happy Birthday bro! 🎮🔥"
+                    placeholder="Happy Birthday bro! ðŸŽ®ðŸ”¥"
                     maxLength={200}
                     style={{ width: '100%', padding: '10px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text)', fontSize: '0.9rem', outline: 'none', boxSizing: 'border-box' }}
                   />
@@ -1870,17 +1870,17 @@ export default function UserDashboardPage() {
                 {/* Summary */}
                 {giftForm.product && giftForm.packageName && (
                   <div style={{ padding: '12px 14px', borderRadius: '10px', background: 'rgba(230,57,70,0.08)', border: '1px solid rgba(230,57,70,0.2)', fontSize: '0.85rem' }}>
-                    <div style={{ fontWeight: 700, color: '#fff', marginBottom: '4px' }}>🎁 Gift Summary</div>
-                    <div style={{ color: 'var(--muted)' }}>Product: <strong style={{ color: '#fff' }}>{giftForm.product} — {giftForm.packageName}</strong></div>
+                    <div style={{ fontWeight: 700, color: '#fff', marginBottom: '4px' }}>ðŸŽ Gift Summary</div>
+                    <div style={{ color: 'var(--muted)' }}>Product: <strong style={{ color: '#fff' }}>{giftForm.product} â€” {giftForm.packageName}</strong></div>
                     <div style={{ color: 'var(--muted)' }}>You pay: <strong style={{ color: 'var(--primary)' }}>Rs {giftForm.packagePrice}</strong></div>
-                    <div style={{ color: 'var(--muted)' }}>Recipient: <strong style={{ color: '#fff' }}>{giftForm.recipientEmail || '—'}</strong></div>
+                    <div style={{ color: 'var(--muted)' }}>Recipient: <strong style={{ color: '#fff' }}>{giftForm.recipientEmail || 'â€”'}</strong></div>
                   </div>
                 )}
 
                 <button
                   onClick={() => {
                     if (!giftForm.recipientEmail || !giftForm.product || !giftForm.packageName) {
-                      setGiftMsg('❌ Fill in recipient email, product, and package.');
+                      setGiftMsg('âŒ Fill in recipient email, product, and package.');
                       return;
                     }
                     setGiftMsg('');
@@ -1888,7 +1888,7 @@ export default function UserDashboardPage() {
                   }}
                   style={{ padding: '13px', borderRadius: '10px', border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, var(--primary), #c1121f)', color: '#fff', fontFamily: "'Orbitron',sans-serif", fontSize: '0.85rem', fontWeight: 700, letterSpacing: '1px' }}
                 >
-                  🎁 Continue to Payment
+                  ðŸŽ Continue to Payment
                 </button>
               </div>
             )}
@@ -1896,7 +1896,7 @@ export default function UserDashboardPage() {
             {giftStep === 'qr' && (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div style={{ fontSize: '0.85rem', color: 'var(--muted)', textAlign: 'center' }}>
-                  Pay <strong style={{ color: 'var(--primary)' }}>Rs {giftForm.packagePrice}</strong> for <strong style={{ color: '#fff' }}>{giftForm.product} — {giftForm.packageName}</strong>
+                  Pay <strong style={{ color: 'var(--primary)' }}>Rs {giftForm.packagePrice}</strong> for <strong style={{ color: '#fff' }}>{giftForm.product} â€” {giftForm.packageName}</strong>
                 </div>
 
                 {/* Payment method */}
@@ -1937,7 +1937,7 @@ export default function UserDashboardPage() {
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={() => setGiftStep('form')}
                     style={{ flex:1, padding:'12px', borderRadius:'8px', border:'1px solid rgba(255,255,255,0.1)', background:'none', color:'var(--muted)', cursor:'pointer', fontSize:'0.85rem' }}>
-                    ← Back
+                    â† Back
                   </button>
                   <button
                     disabled={giftLoading || !giftForm.transaction.trim()}
@@ -1945,16 +1945,16 @@ export default function UserDashboardPage() {
                       setGiftLoading(true); setGiftMsg('');
                       try {
                         const res = await api.sendGift(giftForm);
-                        if (res?.ok) { setGiftStep('done'); setGiftMsg('✅ ' + res.message); }
-                        else setGiftMsg('❌ ' + (res?.message || 'Failed'));
-                      } catch { setGiftMsg('❌ Network error'); }
+                        if (res?.ok) { setGiftStep('done'); setGiftMsg('âœ… ' + res.message); }
+                        else setGiftMsg('âŒ ' + (res?.message || 'Failed'));
+                      } catch { setGiftMsg('âŒ Network error'); }
                       finally { setGiftLoading(false); }
                     }}
                     style={{ flex:2, padding:'12px', borderRadius:'8px', border:'none', cursor: giftLoading ? 'default' : 'pointer',
                       background: giftLoading ? 'rgba(230,57,70,0.3)' : 'linear-gradient(135deg, var(--primary), #c1121f)',
                       color:'#fff', fontWeight:700, fontSize:'0.85rem', fontFamily:"'Orbitron',sans-serif", letterSpacing:'1px'
                     }}>
-                    {giftLoading ? 'Sending...' : '🎁 Send Gift'}
+                    {giftLoading ? 'Sending...' : 'ðŸŽ Send Gift'}
                   </button>
                 </div>
               </div>
@@ -1962,7 +1962,7 @@ export default function UserDashboardPage() {
 
             {giftStep === 'done' && (
               <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                <div style={{ fontSize: '3rem', marginBottom: '12px' }}>🎁</div>
+                <div style={{ fontSize: '3rem', marginBottom: '12px' }}>ðŸŽ</div>
                 <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: '0.9rem', fontWeight: 700, color: '#4ade80', letterSpacing: '2px', marginBottom: '8px' }}>GIFT SENT!</div>
                 <div style={{ fontSize: '0.85rem', color: 'var(--muted)', lineHeight: 1.6, marginBottom: '16px' }}>
                   Admin will verify payment and deliver the key to <strong style={{ color: '#fff' }}>{giftForm.recipientEmail}</strong> within 40 minutes.
@@ -1980,12 +1980,12 @@ export default function UserDashboardPage() {
             <div className="panel-header"><h2>How Gifting Works</h2></div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {[
-                ['1', '🎯', 'Pick a product & package for your friend'],
-                ['2', '📧', 'Enter their SUSANTEDIT account email'],
-                ['3', '💳', 'Scan QR and pay the amount'],
-                ['4', '🔢', 'Enter your transaction number'],
-                ['5', '⏳', 'Admin verifies payment (up to 40 min)'],
-                ['6', '🔑', 'Key delivered to your friend\'s account automatically'],
+                ['1', 'ðŸŽ¯', 'Pick a product & package for your friend'],
+                ['2', 'ðŸ“§', 'Enter their SUSANTEDIT account email'],
+                ['3', 'ðŸ’³', 'Scan QR and pay the amount'],
+                ['4', 'ðŸ”¢', 'Enter your transaction number'],
+                ['5', 'â³', 'Admin verifies payment (up to 40 min)'],
+                ['6', 'ðŸ”‘', 'Key delivered to your friend\'s account automatically'],
               ].map(([num, icon, text]) => (
                 <div key={num} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ width: '28px', height: '28px', borderRadius: '8px', background: 'linear-gradient(135deg, var(--primary), #c1121f)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 900, color: '#fff', flexShrink: 0, fontFamily: "'Orbitron',sans-serif" }}>{num}</div>
@@ -2096,37 +2096,37 @@ export default function UserDashboardPage() {
                 border: '1px solid rgba(74,222,128,0.3)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '6px' }}>
-                  <span style={{ fontSize: '1.3rem' }}>🟢</span>
+                  <span style={{ fontSize: '1.3rem' }}>ðŸŸ¢</span>
                   <div>
                     <strong style={{ color: '#4ade80', fontSize: '0.95rem' }}>
                       Payment Window is OPEN
                     </strong>
                     <div style={{ fontSize: '0.78rem', color: 'var(--muted)', marginTop: '2px' }}>
                       Your time: <strong style={{ color: 'var(--text)' }}>{userTime}</strong>
-                      {' '}· {userTZ}
+                      {' '}Â· {userTZ}
                     </div>
                   </div>
                 </div>
                 <div style={{ fontSize: '0.82rem', color: 'var(--muted)' }}>
-                  ⏰ Payment Window: <strong style={{ color: '#4ade80' }}>{startStr}</strong>
-                  {' → '}
+                  â° Payment Window: <strong style={{ color: '#4ade80' }}>{startStr}</strong>
+                  {' â†’ '}
                   <strong style={{ color: '#ff6b6b' }}>{endStr}</strong>
                   <div style={{ marginTop: '6px', fontSize: '0.78rem', color: '#fbbf24', fontWeight: 600 }}>
-                    ⚡ You have 2 hours from now to complete your payment
+                    âš¡ You have 2 hours from now to complete your payment
                   </div>
                 </div>
                 <div style={{ marginTop: '8px', fontSize: '0.82rem', color: '#ff6b6b', fontWeight: 600 }}>
-                  ⚠️ Payments made after {endStr} will be rejected automatically.
+                  âš ï¸ Payments made after {endStr} will be rejected automatically.
                 </div>
               </div>
               <p style={{ fontSize: '0.85rem', color: 'var(--muted)', marginBottom: '10px' }}>Next steps:</p>
               <ul style={{ marginTop: '4px', display: 'flex', flexDirection: 'column', gap: '6px', paddingLeft: '4px', listStyle: 'none' }}>
                 {[
-                  ['📝', 'Enter your details'],
-                  ['📱', 'Scan the QR code and pay'],
-                  ['🔢', 'Enter your transaction number'],
-                  ['⏳', 'Wait for admin review (up to 40 min)'],
-                  ['🔑', 'Receive your key/message'],
+                  ['ðŸ“', 'Enter your details'],
+                  ['ðŸ“±', 'Scan the QR code and pay'],
+                  ['ðŸ”¢', 'Enter your transaction number'],
+                  ['â³', 'Wait for admin review (up to 40 min)'],
+                  ['ðŸ”‘', 'Receive your key/message'],
                 ].map(([icon, text]) => (
                   <li key={text} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.85rem', color: 'var(--text)' }}>
                     <span>{icon}</span>{text}
@@ -2183,10 +2183,10 @@ export default function UserDashboardPage() {
             error={formErrors.whatsapp}
           />
           <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '4px', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid var(--line)' }}>
-            💡 Transaction number will be asked <strong style={{ color: 'var(--text)' }}>after</strong> you scan and pay the QR.
+            ðŸ’¡ Transaction number will be asked <strong style={{ color: 'var(--text)' }}>after</strong> you scan and pay the QR.
           </p>
           <p style={{ fontSize: '0.8rem', color: 'var(--muted)', marginTop: '8px', padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', border: '1px solid var(--line)' }}>
-            🧾 In payment remarks, write: <strong style={{ color: 'var(--text)' }}>{formData.name || user?.name || 'Your Name'}</strong>.
+            ðŸ§¾ In payment remarks, write: <strong style={{ color: 'var(--text)' }}>{formData.name || user?.name || 'Your Name'}</strong>.
           </p>
         </form>
       </Modal>
@@ -2222,9 +2222,9 @@ export default function UserDashboardPage() {
               </div>
             </div>
             <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', color: '#fff' }}>Bank Transfer</h3>
-            <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: 0 }}>NMB Bank · Direct transfer</p>
+            <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: 0 }}>NMB Bank Â· Direct transfer</p>
             {formData.paymentMethod === 'bank' && (
-              <div style={{ marginTop: '8px', fontSize: '0.7rem', color: '#60a5fa', fontWeight: 700 }}>✓ SELECTED</div>
+              <div style={{ marginTop: '8px', fontSize: '0.7rem', color: '#60a5fa', fontWeight: 700 }}>âœ“ SELECTED</div>
             )}
           </div>
 
@@ -2253,12 +2253,12 @@ export default function UserDashboardPage() {
             <h3 style={{ margin: '0 0 4px', fontSize: '0.95rem', color: '#fff' }}>eSewa</h3>
             <p style={{ fontSize: '0.75rem', color: 'var(--muted)', margin: 0 }}>eSewa digital wallet</p>
             {formData.paymentMethod === 'esewa' && (
-              <div style={{ marginTop: '8px', fontSize: '0.7rem', color: '#60bb46', fontWeight: 700 }}>✓ SELECTED</div>
+              <div style={{ marginTop: '8px', fontSize: '0.7rem', color: '#60bb46', fontWeight: 700 }}>âœ“ SELECTED</div>
             )}
           </div>
         </div>
         <div style={{ marginTop: '14px', padding: '10px 12px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', fontSize: '0.82rem', color: 'var(--muted)' }}>
-          💡 Add this exact payment remark before paying: <strong style={{ color: 'var(--text)' }}>{formData.name || user?.name || 'Your Name'}</strong>
+          ðŸ’¡ Add this exact payment remark before paying: <strong style={{ color: 'var(--text)' }}>{formData.name || user?.name || 'Your Name'}</strong>
         </div>
       </Modal>
 
@@ -2266,7 +2266,7 @@ export default function UserDashboardPage() {
       <Modal
         isOpen={qrModalOpen}
         onClose={() => {}}
-        title={formData.paymentMethod === 'esewa' ? '📱 eSewa Payment QR' : '🏦 Bank Transfer QR'}
+        title={formData.paymentMethod === 'esewa' ? 'ðŸ“± eSewa Payment QR' : 'ðŸ¦ Bank Transfer QR'}
         size="md"
       >
         <div style={{ textAlign: 'center', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px' }}>
@@ -2294,7 +2294,7 @@ export default function UserDashboardPage() {
               ? (appSettings?.qrEsewa || '/payment.jpeg')
               : (appSettings?.qrBank  || '/bank.jpg')}
             label={formData.paymentMethod === 'esewa' ? 'eSewa' : 'NMB Bank'}
-            amount={`Rs ${selectedPackage?.price || selectedProduct?.price || '—'}`}
+            amount={`Rs ${selectedPackage?.price || selectedProduct?.price || 'â€”'}`}
             color={formData.paymentMethod === 'esewa' ? '#60bb46' : '#60a5fa'}
             filename={`susantedit-${formData.paymentMethod}-qr.jpeg`}
             remark={formData.name || user?.name || ''}
@@ -2307,20 +2307,20 @@ export default function UserDashboardPage() {
             borderRadius: '10px', fontSize: '0.88rem', color: 'var(--text)',
           }}>
             {formData.paymentMethod === 'esewa'
-              ? '📱 Open eSewa → Scan QR → Pay'
-              : '🏦 Open your bank app → Scan QR → Pay'}
+              ? 'ðŸ“± Open eSewa â†’ Scan QR â†’ Pay'
+              : 'ðŸ¦ Open your bank app â†’ Scan QR â†’ Pay'}
             <div style={{ marginTop: '6px', fontSize: '1rem', fontWeight: 700, color: 'var(--primary)' }}>
-              Amount: Rs {selectedPackage?.price || selectedProduct?.price || '—'}
+              Amount: Rs {selectedPackage?.price || selectedProduct?.price || 'â€”'}
             </div>
           </div>
 
           <Button variant="primary" style={{ width: '100%' }} onClick={handleQrPaid}>
-            <i className="fas fa-check" /> I've Paid — Enter Transaction Number
+            <i className="fas fa-check" /> I've Paid â€” Enter Transaction Number
           </Button>
         </div>
       </Modal>
 
-      {/* Transaction Number Modal — shown AFTER payment */}
+      {/* Transaction Number Modal â€” shown AFTER payment */}
       <Modal
         isOpen={transactionModalOpen}
         onClose={() => {}}
@@ -2329,7 +2329,7 @@ export default function UserDashboardPage() {
         actions={
           <div style={{ display: 'flex', gap: '8px' }}>
             <Button variant="ghost" onClick={() => { setTransactionModalOpen(false); setQrModalOpen(true); }}>
-              ← Back to QR
+              â† Back to QR
             </Button>
             <Button variant="primary" onClick={handleTransactionSubmit}>
               Submit Request
@@ -2347,7 +2347,7 @@ export default function UserDashboardPage() {
             color: '#4ade80',
             marginBottom: '16px'
           }}>
-            ✅ Payment done! Now enter the reference/transaction number you received from your payment app.
+            âœ… Payment done! Now enter the reference/transaction number you received from your payment app.
           </div>
           <Input
             label={appSettings?.labels?.transaction || 'Transaction / Reference Number'}
@@ -2393,7 +2393,7 @@ export default function UserDashboardPage() {
             Request ID: <code style={{ color: 'var(--text)' }}>{newRequestId}</code>
           </div>
           <Button variant="primary" style={{ width: '100%', marginTop: '20px' }} onClick={handleProcessingComplete}>
-            Got it — close
+            Got it â€” close
           </Button>
         </div>
       </Modal>
@@ -2460,7 +2460,7 @@ export default function UserDashboardPage() {
             onChange={e => setProfileForm(p => ({ ...p, avatarUrl: e.target.value }))}
           />
           <div style={{ padding: '10px 12px', background: 'rgba(230,57,70,0.08)', border: '1px solid rgba(230,57,70,0.2)', borderRadius: '8px', fontSize: '0.82rem', color: 'var(--muted)' }}>
-            ℹ️ Transaction number is unique per payment — enter it manually each time.
+            â„¹ï¸ Transaction number is unique per payment â€” enter it manually each time.
           </div>
         </div>
       </Modal>
@@ -2479,7 +2479,7 @@ export default function UserDashboardPage() {
       {/* VIP Subscription Modal */}
       <VipModal open={vipModalOpen} onClose={() => setVipModalOpen(false)} />
 
-      {/* ── PWA Install Banner ── */}
+      {/* â”€â”€ PWA Install Banner â”€â”€ */}
       {showPwaBanner && pwaPrompt && (
         <div style={{
           position: 'fixed', bottom: '80px', left: '50%', transform: 'translateX(-50%)',
@@ -2490,7 +2490,7 @@ export default function UserDashboardPage() {
           boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
           display: 'flex', alignItems: 'center', gap: '14px'
         }}>
-          <div style={{ fontSize: '2rem', flexShrink: 0 }}>📱</div>
+          <div style={{ fontSize: '2rem', flexShrink: 0 }}>ðŸ“±</div>
           <div style={{ flex: 1 }}>
             <div style={{ fontWeight: 800, fontSize: '0.9rem', color: '#fff', marginBottom: '2px' }}>
               Add to Home Screen
@@ -2516,7 +2516,7 @@ export default function UserDashboardPage() {
             <button
               onClick={() => setShowPwaBanner(false)}
               style={{ background: 'none', border: '1px solid rgba(255,255,255,0.15)', borderRadius: '8px', color: '#aaa', padding: '8px 10px', cursor: 'pointer', fontSize: '0.78rem' }}
-            >✕</button>
+            >âœ•</button>
           </div>
         </div>
       )}
@@ -2525,68 +2525,180 @@ export default function UserDashboardPage() {
       {chatOrderId && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 99999,
-          background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)',
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'center', padding: '0'
+          background: 'rgba(0,0,0,0.82)', backdropFilter: 'blur(14px)',
+          display: 'flex', alignItems: 'flex-end', justifyContent: 'center'
         }} onClick={() => setChatOrderId(null)}>
-          <div
-            onClick={e => e.stopPropagation()}
-            style={{
-              width: '100%', maxWidth: '480px',
-              background: '#111', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '20px 20px 0 0', padding: '20px',
-              maxHeight: '70vh', display: 'flex', flexDirection: 'column'
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-              <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: '0.85rem', fontWeight: 700, color: '#fff' }}>
-                💬 Order Support Chat
-              </div>
-              <button onClick={() => setChatOrderId(null)} style={{ background: 'none', border: 'none', color: '#aaa', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
-            </div>
-            {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '12px', minHeight: '120px' }}>
-              {chatMessages.length === 0 ? (
-                <p style={{ color: 'var(--muted)', fontSize: '0.82rem', textAlign: 'center', padding: '20px 0' }}>
-                  No messages yet. Ask admin anything about this order.
-                </p>
-              ) : chatMessages.map((m, i) => (
-                <div key={i} style={{
-                  alignSelf: m.from === 'user' ? 'flex-end' : 'flex-start',
-                  maxWidth: '80%', padding: '8px 12px', borderRadius: '12px',
-                  background: m.from === 'user' ? 'rgba(230,57,70,0.2)' : 'rgba(255,255,255,0.08)',
-                  border: `1px solid ${m.from === 'user' ? 'rgba(230,57,70,0.3)' : 'rgba(255,255,255,0.1)'}`,
-                  fontSize: '0.85rem', color: '#fff'
-                }}>
-                  <div style={{ fontSize: '0.7rem', color: '#aaa', marginBottom: '3px' }}>
-                    {m.from === 'admin' ? '👨‍💼 Admin' : '👤 You'}
-                  </div>
-                  {m.text}
+          <style>{`
+            @keyframes chatUp{from{transform:translateY(60px);opacity:0}to{transform:translateY(0);opacity:1}}
+            @keyframes kingPulse{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0.4)}50%{box-shadow:0 0 0 6px rgba(251,191,36,0)}}
+          `}</style>
+          <div onClick={e=>e.stopPropagation()} style={{
+            width:'100%', maxWidth:'500px',
+            background:'linear-gradient(180deg,#0a0a0a 0%,#111 100%)',
+            border:'1px solid rgba(255,255,255,0.07)',
+            borderRadius:'24px 24px 0 0',
+            maxHeight:'78vh', display:'flex', flexDirection:'column',
+            animation:'chatUp 0.35s cubic-bezier(0.34,1.56,0.64,1)',
+            overflow:'hidden'
+          }}>
+            {/* ── Header ── */}
+            <div style={{
+              padding:'14px 18px',
+              background:'linear-gradient(135deg,rgba(251,191,36,0.12),rgba(230,57,70,0.08))',
+              borderBottom:'1px solid rgba(255,255,255,0.06)',
+              display:'flex', alignItems:'center', gap:'12px', flexShrink:0
+            }}>
+              <div style={{
+                width:'44px', height:'44px', borderRadius:'50%', flexShrink:0,
+                background:'linear-gradient(135deg,#fbbf24,#f59e0b)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                fontSize:'1.3rem',
+                boxShadow:'0 0 16px rgba(251,191,36,0.5)',
+                animation:'kingPulse 2.5s ease-in-out infinite'
+              }}>👑</div>
+              <div style={{flex:1}}>
+                <div style={{fontWeight:800, fontSize:'0.95rem', color:'#fff', letterSpacing:'0.5px'}}>SUSANTEDIT Support</div>
+                <div style={{fontSize:'0.7rem', color:'#4ade80', display:'flex', alignItems:'center', gap:'5px', marginTop:'2px'}}>
+                  <span style={{width:'6px',height:'6px',borderRadius:'50%',background:'#4ade80',display:'inline-block',boxShadow:'0 0 6px #4ade80'}}/>
+                  Online — Admin is here
                 </div>
-              ))}
+              </div>
+              <button onClick={()=>setChatOrderId(null)} style={{
+                background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.1)',
+                borderRadius:'50%', color:'#aaa', cursor:'pointer',
+                width:'32px', height:'32px', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.85rem'
+              }}>✕</button>
             </div>
-            {/* Input */}
-            <div style={{ display: 'flex', gap: '8px' }}>
+
+            {/* ── Messages ── */}
+            <div style={{
+              flex:1, overflowY:'auto', padding:'16px 14px',
+              display:'flex', flexDirection:'column', gap:'14px'
+            }}>
+              {chatMessages.length === 0 ? (
+                <div style={{textAlign:'center', padding:'40px 20px'}}>
+                  <div style={{fontSize:'3rem', marginBottom:'12px'}}>💬</div>
+                  <p style={{color:'var(--muted)', fontSize:'0.85rem', lineHeight:1.7}}>
+                    No messages yet.<br/>Ask admin anything about this order.
+                  </p>
+                </div>
+              ) : chatMessages.map((m, i) => {
+                const isAdmin = m.from === 'admin';
+                const time = m.createdAt ? new Date(m.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+                return (
+                  <div key={i} style={{
+                    display:'flex',
+                    flexDirection: isAdmin ? 'row' : 'row-reverse',
+                    alignItems:'flex-end', gap:'8px'
+                  }}>
+                    {/* Avatar */}
+                    <div style={{
+                      width:'34px', height:'34px', borderRadius:'50%', flexShrink:0,
+                      display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem',
+                      background: isAdmin
+                        ? 'linear-gradient(135deg,#fbbf24,#f59e0b)'
+                        : 'linear-gradient(135deg,rgba(230,57,70,0.5),rgba(180,30,50,0.4))',
+                      boxShadow: isAdmin ? '0 0 10px rgba(251,191,36,0.4)' : 'none',
+                      border: isAdmin ? '1.5px solid rgba(251,191,36,0.5)' : '1.5px solid rgba(230,57,70,0.3)'
+                    }}>
+                      {isAdmin ? '👑' : '👤'}
+                    </div>
+
+                    <div style={{
+                      maxWidth:'72%', display:'flex', flexDirection:'column',
+                      alignItems: isAdmin ? 'flex-start' : 'flex-end', gap:'3px'
+                    }}>
+                      {/* Sender label */}
+                      <span style={{
+                        fontSize:'0.65rem', fontWeight:700, letterSpacing:'0.5px',
+                        color: isAdmin ? '#fbbf24' : 'rgba(255,255,255,0.4)',
+                        paddingLeft: isAdmin ? '6px' : 0,
+                        paddingRight: isAdmin ? 0 : '6px'
+                      }}>
+                        {isAdmin ? '👑 SUSANTEDIT Admin' : 'You'}
+                      </span>
+
+                      {isAdmin ? (
+                        /* ── KING ADMIN BUBBLE ── */
+                        <div style={{
+                          position:'relative', overflow:'hidden',
+                          padding:'12px 16px',
+                          borderRadius:'4px 18px 18px 18px',
+                          background:'linear-gradient(135deg,rgba(251,191,36,0.15) 0%,rgba(245,158,11,0.06) 100%)',
+                          border:'1px solid rgba(251,191,36,0.4)',
+                          boxShadow:'0 4px 20px rgba(251,191,36,0.1), inset 0 1px 0 rgba(251,191,36,0.2)',
+                          fontSize:'0.88rem', color:'#fff', lineHeight:1.55
+                        }}>
+                          {/* Gold top bar */}
+                          <div style={{
+                            position:'absolute', top:0, left:0, right:0, height:'2px',
+                            background:'linear-gradient(90deg,#fbbf24,#f59e0b,transparent)'
+                          }}/>
+                          {/* Shimmer */}
+                          <div style={{
+                            position:'absolute', top:0, left:'-100%', width:'60%', height:'100%',
+                            background:'linear-gradient(90deg,transparent,rgba(251,191,36,0.06),transparent)',
+                            pointerEvents:'none'
+                          }}/>
+                          {m.text}
+                          <div style={{fontSize:'0.62rem', color:'rgba(251,191,36,0.5)', marginTop:'5px', textAlign:'right'}}>
+                            {time}
+                          </div>
+                        </div>
+                      ) : (
+                        /* ── USER BUBBLE (Facebook right side) ── */
+                        <div style={{
+                          padding:'11px 15px',
+                          borderRadius:'18px 4px 18px 18px',
+                          background:'linear-gradient(135deg,#e63946,#c1121f)',
+                          boxShadow:'0 3px 14px rgba(230,57,70,0.35)',
+                          fontSize:'0.88rem', color:'#fff', lineHeight:1.55
+                        }}>
+                          {m.text}
+                          <div style={{fontSize:'0.62rem', color:'rgba(255,255,255,0.45)', marginTop:'5px', textAlign:'right'}}>
+                            {time}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* ── Input bar ── */}
+            <div style={{
+              padding:'12px 14px',
+              borderTop:'1px solid rgba(255,255,255,0.06)',
+              background:'rgba(0,0,0,0.4)',
+              display:'flex', gap:'10px', alignItems:'center', flexShrink:0
+            }}>
               <input
                 value={chatInput}
-                onChange={e => setChatInput(e.target.value)}
-                onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSendChatMessage(); } }}
-                placeholder="Type your message..."
+                onChange={e=>setChatInput(e.target.value)}
+                onKeyDown={e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();handleSendChatMessage();}}}
+                placeholder="Type a message..."
                 style={{
-                  flex: 1, padding: '10px 14px', borderRadius: '10px',
-                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-                  color: '#fff', fontSize: '0.88rem', outline: 'none'
+                  flex:1, padding:'11px 16px', borderRadius:'24px',
+                  background:'rgba(255,255,255,0.07)', border:'1px solid rgba(255,255,255,0.1)',
+                  color:'#fff', fontSize:'0.88rem', outline:'none'
                 }}
               />
               <button
                 onClick={handleSendChatMessage}
-                disabled={chatLoading || !chatInput.trim()}
+                disabled={chatLoading||!chatInput.trim()}
                 style={{
-                  background: 'var(--primary)', border: 'none', borderRadius: '10px',
-                  color: '#fff', padding: '10px 16px', cursor: 'pointer', fontWeight: 700,
-                  opacity: chatLoading || !chatInput.trim() ? 0.5 : 1
+                  width:'44px', height:'44px', borderRadius:'50%', flexShrink:0,
+                  background: chatInput.trim()
+                    ? 'linear-gradient(135deg,#e63946,#c1121f)'
+                    : 'rgba(255,255,255,0.07)',
+                  border:'none', color:'#fff', cursor: chatInput.trim() ? 'pointer' : 'default',
+                  display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.9rem',
+                  transition:'all 0.2s',
+                  boxShadow: chatInput.trim() ? '0 3px 14px rgba(230,57,70,0.45)' : 'none'
                 }}
               >
-                {chatLoading ? '...' : <i className="fas fa-paper-plane" />}
+                {chatLoading ? <span style={{fontSize:'0.65rem'}}>...</span> : <i className="fas fa-paper-plane"/>}
               </button>
             </div>
           </div>

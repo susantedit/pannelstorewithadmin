@@ -43,65 +43,138 @@ function AdminOrderChat({ requestId }) {
 
   return (
     <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid var(--line)' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-        <i className="fas fa-comment" style={{ color: '#a78bfa' }} />
-        <span style={{ fontWeight: 700, fontSize: '0.88rem', color: '#fff' }}>Order Chat</span>
-        <span style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>— reply to user messages here</span>
+      <style>{`
+        @keyframes kingPulseAdmin{0%,100%{box-shadow:0 0 0 0 rgba(251,191,36,0.4)}50%{box-shadow:0 0 0 5px rgba(251,191,36,0)}}
+      `}</style>
+
+      {/* Chat header */}
+      <div style={{ display:'flex', alignItems:'center', gap:'10px', marginBottom:'14px' }}>
+        <div style={{
+          width:'32px', height:'32px', borderRadius:'50%',
+          background:'linear-gradient(135deg,#fbbf24,#f59e0b)',
+          display:'flex', alignItems:'center', justifyContent:'center', fontSize:'1rem',
+          boxShadow:'0 0 10px rgba(251,191,36,0.4)',
+          animation:'kingPulseAdmin 2.5s ease-in-out infinite', flexShrink:0
+        }}>👑</div>
+        <div>
+          <span style={{ fontWeight:800, fontSize:'0.88rem', color:'#fff' }}>Order Chat</span>
+          <span style={{ fontSize:'0.72rem', color:'var(--muted)', marginLeft:'8px' }}>reply to user messages</span>
+        </div>
       </div>
 
       {/* Messages */}
       <div style={{
-        maxHeight: '220px', overflowY: 'auto',
-        display: 'flex', flexDirection: 'column', gap: '8px',
-        marginBottom: '10px', padding: '4px 0'
+        maxHeight:'260px', overflowY:'auto',
+        display:'flex', flexDirection:'column', gap:'12px',
+        marginBottom:'12px', padding:'4px 2px'
       }}>
         {messages.length === 0 ? (
-          <p style={{ color: 'var(--muted)', fontSize: '0.8rem', textAlign: 'center', padding: '12px 0' }}>
-            No messages yet on this order.
-          </p>
-        ) : messages.map((m, i) => (
-          <div key={i} style={{
-            alignSelf: m.from === 'admin' ? 'flex-end' : 'flex-start',
-            maxWidth: '80%', padding: '8px 12px', borderRadius: '12px',
-            background: m.from === 'admin'
-              ? 'rgba(230,57,70,0.15)'
-              : 'rgba(255,255,255,0.07)',
-            border: `1px solid ${m.from === 'admin' ? 'rgba(230,57,70,0.3)' : 'rgba(255,255,255,0.1)'}`,
-            fontSize: '0.85rem', color: '#fff'
-          }}>
-            <div style={{ fontSize: '0.68rem', color: '#aaa', marginBottom: '3px' }}>
-              {m.from === 'admin' ? '👨‍💼 You (Admin)' : '👤 User'}
-              {m.createdAt && <span style={{ marginLeft: '6px' }}>{new Date(m.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>}
-            </div>
-            {m.text}
+          <div style={{ textAlign:'center', padding:'20px 0' }}>
+            <div style={{ fontSize:'1.8rem', marginBottom:'6px' }}>💬</div>
+            <p style={{ color:'var(--muted)', fontSize:'0.8rem' }}>No messages on this order yet.</p>
           </div>
-        ))}
+        ) : messages.map((m, i) => {
+          const isAdmin = m.from === 'admin';
+          const time = m.createdAt ? new Date(m.createdAt).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}) : '';
+          return (
+            <div key={i} style={{
+              display:'flex',
+              flexDirection: isAdmin ? 'row-reverse' : 'row',
+              alignItems:'flex-end', gap:'8px'
+            }}>
+              {/* Avatar */}
+              <div style={{
+                width:'30px', height:'30px', borderRadius:'50%', flexShrink:0,
+                display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.85rem',
+                background: isAdmin
+                  ? 'linear-gradient(135deg,#fbbf24,#f59e0b)'
+                  : 'rgba(255,255,255,0.08)',
+                boxShadow: isAdmin ? '0 0 8px rgba(251,191,36,0.4)' : 'none',
+                border: isAdmin ? '1px solid rgba(251,191,36,0.4)' : '1px solid rgba(255,255,255,0.1)'
+              }}>
+                {isAdmin ? '👑' : '👤'}
+              </div>
+
+              <div style={{
+                maxWidth:'74%', display:'flex', flexDirection:'column',
+                alignItems: isAdmin ? 'flex-end' : 'flex-start', gap:'3px'
+              }}>
+                <span style={{
+                  fontSize:'0.62rem', fontWeight:700,
+                  color: isAdmin ? '#fbbf24' : 'rgba(255,255,255,0.35)',
+                  paddingRight: isAdmin ? '4px' : 0,
+                  paddingLeft: isAdmin ? 0 : '4px'
+                }}>
+                  {isAdmin ? '👑 You (Admin)' : '👤 User'}
+                </span>
+
+                {isAdmin ? (
+                  /* ── KING ADMIN BUBBLE ── */
+                  <div style={{
+                    position:'relative', overflow:'hidden',
+                    padding:'11px 15px',
+                    borderRadius:'18px 4px 18px 18px',
+                    background:'linear-gradient(135deg,rgba(251,191,36,0.18),rgba(245,158,11,0.07))',
+                    border:'1px solid rgba(251,191,36,0.4)',
+                    boxShadow:'0 4px 18px rgba(251,191,36,0.12), inset 0 1px 0 rgba(251,191,36,0.2)',
+                    fontSize:'0.85rem', color:'#fff', lineHeight:1.55
+                  }}>
+                    <div style={{
+                      position:'absolute', top:0, left:0, right:0, height:'2px',
+                      background:'linear-gradient(90deg,transparent,#fbbf24,#f59e0b,transparent)'
+                    }}/>
+                    {m.text}
+                    <div style={{fontSize:'0.6rem', color:'rgba(251,191,36,0.5)', marginTop:'4px', textAlign:'right'}}>{time}</div>
+                  </div>
+                ) : (
+                  /* ── USER BUBBLE ── */
+                  <div style={{
+                    padding:'11px 15px',
+                    borderRadius:'4px 18px 18px 18px',
+                    background:'rgba(255,255,255,0.07)',
+                    border:'1px solid rgba(255,255,255,0.1)',
+                    fontSize:'0.85rem', color:'#fff', lineHeight:1.55
+                  }}>
+                    {m.text}
+                    <div style={{fontSize:'0.6rem', color:'rgba(255,255,255,0.3)', marginTop:'4px', textAlign:'right'}}>{time}</div>
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
         <div ref={bottomRef} />
       </div>
 
       {/* Input */}
-      <div style={{ display: 'flex', gap: '8px' }}>
+      <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } }}
-          placeholder="Reply to user..."
+          placeholder="Reply as admin..."
           style={{
-            flex: 1, padding: '9px 12px', borderRadius: '8px',
-            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
-            color: '#fff', fontSize: '0.85rem', outline: 'none'
+            flex:1, padding:'10px 16px', borderRadius:'24px',
+            background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)',
+            color:'#fff', fontSize:'0.85rem', outline:'none'
           }}
         />
         <button
           onClick={send}
           disabled={loading || !input.trim()}
           style={{
-            background: 'var(--primary)', border: 'none', borderRadius: '8px',
-            color: '#fff', padding: '9px 16px', cursor: 'pointer', fontWeight: 700,
-            opacity: loading || !input.trim() ? 0.5 : 1, transition: 'opacity 0.2s'
+            width:'40px', height:'40px', borderRadius:'50%', flexShrink:0,
+            background: input.trim()
+              ? 'linear-gradient(135deg,#fbbf24,#f59e0b)'
+              : 'rgba(255,255,255,0.07)',
+            border:'none', color: input.trim() ? '#000' : '#aaa',
+            cursor: input.trim() ? 'pointer' : 'default',
+            display:'flex', alignItems:'center', justifyContent:'center', fontSize:'0.85rem',
+            transition:'all 0.2s',
+            boxShadow: input.trim() ? '0 3px 12px rgba(251,191,36,0.4)' : 'none'
           }}
         >
-          {loading ? '...' : <i className="fas fa-paper-plane" />}
+          {loading ? '...' : <i className="fas fa-paper-plane"/>}
         </button>
       </div>
     </div>
