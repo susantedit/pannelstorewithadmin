@@ -125,6 +125,13 @@ export const api = {
   reorderProducts: (order) => request('/api/products/reorder', { method: 'PATCH', body: JSON.stringify({ order }) }),
   // Renewal reminders
   sendRenewalReminders: () => request('/api/admin/send-renewal-reminders', { method: 'POST' }),
+  // Admin user notes
+  saveUserNotes: (userId, notes) => request(`/api/admin/users/${userId}/notes`, { method: 'PATCH', body: JSON.stringify({ notes }) }),
+  // Avatar upload
+  uploadAvatar: (avatarUrl) => request('/api/auth/avatar', { method: 'PATCH', body: JSON.stringify({ avatarUrl }) }),
+  // Abandoned checkout
+  startCheckout: (product, packageName) => request('/api/checkout/start', { method: 'POST', body: JSON.stringify({ product, packageName }) }),
+  sendAbandonedRecovery: () => request('/api/admin/send-abandoned-recovery', { method: 'POST' }),
   // VIP Subscription
   getVipStatus: () => request('/api/vip/status'),
   requestVip: (payload) => request('/api/vip/request', { method: 'POST', body: JSON.stringify(payload) }),
@@ -146,4 +153,18 @@ export const api = {
   // Admin notifications
   sendCustomNotification: (payload) => request('/api/admin/notifications/send', { method: 'POST', body: JSON.stringify(payload) }),
   getNotificationStats: () => request('/api/admin/notifications/stats'),
+  
+  // Profile & Avatar
+  updateProfile: (payload) => request('/api/auth/profile', { method: 'PATCH', body: JSON.stringify(payload) }),
+  uploadAvatar: (file) => {
+    const formData = new FormData();
+    formData.append('avatar', file);
+    return request('/api/auth/upload-avatar', { method: 'POST', body: formData });
+  },
+  
+  // Admin user notes
+  updateUserNotes: (userId, notes) => request(`/api/admin/users/${userId}/notes`, { method: 'PATCH', body: JSON.stringify({ notes }) }),
+  
+  // Abandoned checkout tracking
+  trackCheckoutAbandoned: (payload) => request('/api/analytics/checkout-abandoned', { method: 'POST', body: JSON.stringify(payload) }),
 };

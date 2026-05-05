@@ -22,6 +22,9 @@ import { playCashRegister, playKeyDelivered, playNotif, isSoundEnabled, setSound
 import { setupPushNotifications } from '../../utils/pushNotifications';
 import { registerFcmToken, onFcmMessage } from '../../firebase/firebaseConfig';
 import { motion } from 'framer-motion';
+import OrderHistoryPage from './OrderHistoryPage';
+import ReferralShareCard from '../../components/user/ReferralShareCard';
+import AvatarUploadCard from '../../components/user/AvatarUploadCard';
 
 // â”€â”€ LootBox sub-component â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function LootBox({ requestId, keyText }) {
@@ -1072,9 +1075,10 @@ export default function UserDashboardPage() {
       {/* Tab Navigation */}
       <div style={{ display: 'flex', gap: '6px', borderBottom: '1px solid var(--line)', paddingBottom: '0' }}>
         {[
-          { id: 'store', icon: 'fa-gamepad', label: 'Store' },
-          { id: 'squad', icon: 'fa-users', label: 'Squad' },
-          { id: 'gift', icon: 'fa-gift', label: 'Gift' }
+          { id: 'store',   icon: 'fa-gamepad',  label: 'Store'   },
+          { id: 'history', icon: 'fa-history',  label: 'History' },
+          { id: 'squad',   icon: 'fa-users',    label: 'Squad'   },
+          { id: 'gift',    icon: 'fa-gift',     label: 'Gift'    }
         ].map(tab => (
           <button
             key={tab.id}
@@ -1832,6 +1836,10 @@ export default function UserDashboardPage() {
       {/* â”€â”€ SQUAD TAB â”€â”€ */}
       {activeTab === 'squad' && (
         <section style={{ display: 'grid', gap: '16px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', marginBottom: '16px' }}>
+            <ReferralShareCard referralCode={referralCode} />
+            <AvatarUploadCard currentUser={user} onAvatarUpload={(avatarUrl) => { /* Update user avatar */ }} />
+          </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
             <div className="panel">
               <div className="panel-header"><h2>Your Referral Code</h2></div>

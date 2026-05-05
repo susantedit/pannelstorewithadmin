@@ -508,4 +508,79 @@ export async function firebaseSession(req, res) {
   return res.json({ ok: true, user: sanitizeUser(user) });
 }
 
+/**
+ * PATCH /api/auth/profile
+ * Update user profile (displayName, avatarUrl, etc.)
+ */
+export async function updateProfile(req, res) {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ ok: false, message: 'Unauthorized' });
+
+  const { displayName, avatarUrl, birthday, uid, gameId, tiktok, whatsapp } = req.body || {};
+
+  try {
+    const update = { $set: {} };
+    if (displayName !== undefined) update.$set['profile.displayName'] = displayName;
+    if (avatarUrl !== undefined) update.$set['profile.avatarUrl'] = avatarUrl;
+    if (birthday !== undefined) update.$set['profile.birthday'] = birthday;
+    if (uid !== undefined) update.$set['profile.uid'] = uid;
+    if (gameId !== undefined) update.$set['profile.gameId'] = gameId;
+    if (tiktok !== undefined) update.$set['profile.tiktok'] = tiktok;
+    if (whatsapp !== undefined) update.$set['profile.whatsapp'] = whatsapp;
+
+    if (isDbReady()) {
+      await User.updateOne({ _id: userId }, update);
+      const user = await User.findById(userId);
+      return res.json({ ok: true, user: sanitizeUser(user), message: 'Profile updated' });
+    } else {
+      const user = memUsers.find(u => u.id === userId);
+      if (!user) return res.status(404).json({ ok: false, message: 'User not found' });
+      Object.keys(update.$set).forEach(key => {
+        const parts = key.split('.');
+        if (parts.length === 2) {
+          if (!user[parts[0]]) user[parts[0]] = {};
+          user[parts[0]][parts[1]] = update.$set[key];
+        } else {
+          user[key] = update.$set[key];
+        }
+      });
+      return res.json({ ok: true, user: sanitizeUser(user), message: 'Profile updated' });
+    }
+  } catch (err) {
+    return res.status(500).json({ ok: false, message: 'Failed to update profile' });
+  }
+}
+
+/**
+ * POST /api/auth/upload-avatar
+ * Upload avatar image
+ */
+export async function uploadAvatar(req, res) {
+  const userId = req.user?.id;
+  if (!userId) return res.status(401).json({ ok: false, message: 'Unauthorized' });
+
+  try {
+    const file = req.files?.avatar;
+    if (!file) {
+      return res.status(400).json({ ok: false, message: 'No file uploaded' });
+    }
+
+    const base64 = file.data.toString('base64');
+    const dataUrl = `data:${file.mimetype};base64,${base64}`;
+
+    if (isDbReady()) {
+      await User.updateOne({ _id: userId }, { $set: { 'profile.avatarUrl': dataUrl } });
+      return res.json({ ok: true, avatarUrl: dataUrl, message: 'Avatar uploaded' });
+    } else {
+      const user = memUsers.find(u => u.id === userId);
+      if (!user) return res.status(404).json({ ok: false, message: 'User not found' });
+      if (!user.profile) user.profile = {};
+      user.profile.avatarUrl = dataUrl;
+      return res.json({ ok: true, avatarUrl: dataUrl, message: 'Avatar uploaded' });
+    }
+  } catch (err) {
+    return res.status(500).json({ ok: false, message: 'Failed to upload avatar' });
+  }
+}
+
 

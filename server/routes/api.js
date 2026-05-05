@@ -1175,6 +1175,76 @@ router.get('/admin/funnel', requireAuth, requireAdmin, async (req, res) => {
   } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
 });
 
+// ── Admin User Notes ──────────────────────────────────────────────────────
+router.patch('/admin/users/:id/notes', requireAuth, requireAdmin, async (req, res) => {
+  const notes = String(req.body?.notes || '').trim().slice(0, 1000);
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, { adminNotes: notes }, { new: true }).select('name email adminNotes');
+    if (!user) return res.status(404).json({ ok: false, message: 'User not found' });
+    res.json({ ok: true, adminNotes: user.adminNotes });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Avatar Upload (base64, max 200KB) ─────────────────────────────────────
+router.patch('/auth/avatar', requireAuth, async (req, res) => {
+  const { avatarUrl } = req.body || {};
+  if (!avatarUrl) return res.status(400).json({ ok: false, message: 'avatarUrl required' });
+  if (avatarUrl.length > 280000) return res.status(400).json({ ok: false, message: 'Image too large (max ~200KB)' });
+  try {
+    await User.findByIdAndUpdate(req.auth.userId, { 'profile.avatarUrl': avatarUrl });
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Abandoned Checkout Recovery ───────────────────────────────────────────
+// Called when user opens buy modal — stores timestamp. If no order in 30min, notify.
+router.post('/checkout/start', requireAuth, async (req, res) => {
+  const { product, packageName } = req.body || {};
+  try {
+    await User.findByIdAndUpdate(req.auth.userId, {
+      'profile.abandonedProduct': String(product || '').slice(0, 100),
+      'profile.abandonedPackage': String(packageName || '').slice(0, 100),
+      'profile.abandonedAt': new Date()
+    });
+    res.json({ ok: true });
+  } catch { res.json({ ok: true }); }
+});
+
+// Admin trigger: send recovery notifications to users who abandoned checkout 30+ min ago
+router.post('/admin/send-abandoned-recovery', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { NotificationHelpers } = await import('../controllers/notificationController.js');
+    const { default: Request } = await import('../models/Request.js');
+    const thirtyMinAgo = new Date(Date.now() - 30 * 60 * 1000);
+    const twoHoursAgo = new Date(Date.now() - 2 * 60 * 60 * 1000);
+    // Find users who started checkout but didn't complete (no recent order)
+    const users = await User.find({
+      'profile.abandonedAt': { $lt: thirtyMinAgo, $gt: twoHoursAgo },
+      'profile.abandonedProduct': { $exists: true, $ne: '' }
+    }).select('_id profile').lean();
+    let sent = 0;
+    for (const u of users) {
+      // Check if they actually placed an order after abandoning
+      const ordered = await Request.exists({
+        userId: u._id,
+        product: u.profile.abandonedProduct,
+        createdAt: { $gt: new Date(u.profile.abandonedAt) }
+      });
+      if (ordered) continue;
+      await NotificationHelpers.showNotification(
+        u._id,
+        '🛒 You left something behind!',
+        `Your ${u.profile.abandonedProduct} is still available. Complete your order before it sells out!`,
+        'warning'
+      ).catch(() => {});
+      // Clear abandoned state
+      await User.findByIdAndUpdate(u._id, { 'profile.abandonedProduct': '', 'profile.abandonedAt': null });
+      sent++;
+    }
+    res.json({ ok: true, message: `Recovery notifications sent to ${sent} users` });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
 // ── Wishlist ──────────────────────────────────────────────────────────────
 router.get('/wishlist', requireAuth, async (req, res) => {
   try {

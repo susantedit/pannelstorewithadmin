@@ -12,6 +12,7 @@ import { formatDate, getStatusColor } from '../../utils/helpers';
 import { showToast, Notif } from '../../utils/notify';
 import { SupportFab } from '../../components/shared/SupportFab';
 import NotificationSender from '../../components/admin/NotificationSender';
+import UserNotesManager from '../../components/admin/UserNotesManager';
 
 // ── AdminOrderChat sub-component ─────────────────────────────────────────
 function AdminOrderChat({ requestId }) {
@@ -341,6 +342,7 @@ function VipManager() {
                       ❌ Revoke VIP
                     </button>
                   )}
+                </div>
               </div>
             );
           })}
@@ -1142,6 +1144,14 @@ export default function AdminDashboardPage() {
 
               {/* VIP Management */}
               <VipManager />
+
+              {/* User Notes Manager */}
+              <UserNotesManager 
+                users={admins}
+                onNotesUpdate={(userId, notes) => {
+                  // Notes saved successfully
+                }}
+              />
             </div>
           )}
 

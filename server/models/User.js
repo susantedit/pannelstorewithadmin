@@ -54,6 +54,8 @@ const userSchema = new mongoose.Schema(
     wishlist:     { type: [String], default: [] },
     // Renewal reminders — track last sent per product
     renewalReminderSentAt: { type: Map, of: Date, default: {} },
+    // Admin private notes on this user
+    adminNotes:   { type: String, default: '' },
 
     // VIP Subscription — Rs 199/month, hides ads
     vipExpiresAt:        { type: Date, default: null },
