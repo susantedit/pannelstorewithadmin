@@ -72,6 +72,18 @@ export async function createRequest(req, res) {
 
   const shouldUseDb = Request.db && Request.db.readyState === 1;
 
+  // Duplicate transaction check
+  if (transaction && shouldUseDb) {
+    const existing = await Request.findOne({ transaction }).select('userName product').lean();
+    if (existing) {
+      return res.status(400).json({
+        ok: false,
+        message: `⚠️ Duplicate transaction ID! This transaction was already used by ${existing.userName} for ${existing.product}. If this is a mistake, contact support.`,
+        duplicate: true
+      });
+    }
+  }
+
   if (couponCode) {
     const coupon = await resolveCouponCode(couponCode);
     if (!coupon) {
@@ -115,7 +127,8 @@ export async function createRequest(req, res) {
     couponRewardedAt: null,
     paymentMethod,
     status: 'Awaiting review',
-    expiryTime: new Date(Date.now() + 2 * 60 * 60 * 1000) // 2 hours from now
+    expiryTime: new Date(Date.now() + 2 * 60 * 60 * 1000), // 2 hours from now
+    ip: (req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.headers['x-real-ip'] || req.socket?.remoteAddress || '').slice(0, 60)
   };
 
   if (!shouldUseDb) {
@@ -132,6 +145,12 @@ export async function createRequest(req, res) {
   
   // Award XP for request submission (5 XP base)
   await awardXpForPurchase(userId, 0, 5);
+
+  // Increment product order count for conversion funnel
+  try {
+    const { default: Product } = await import('../models/Product.js');
+    await Product.findOneAndUpdate({ name: product }, { $inc: { orderCount: 1 } });
+  } catch {}
   
   // Send in-app notification to user
   await NotificationHelpers.xpGained(userId, 5, 'Request submitted');
@@ -281,18 +300,17 @@ export async function updateRequestStatus(req, res) {
 
   await request.save();
 
-  // ── WhatsApp auto-message when accepted ──────────────────────────────────
-  if (status === 'Accepted' && request.whatsapp && notes) {
+  // ── WhatsApp notification when accepted (no key in URL — security) ─────────
+  if (status === 'Accepted' && request.whatsapp) {
     const waNumber = String(request.whatsapp).replace(/[^0-9]/g, '');
     const waMsg = encodeURIComponent(
-      `🔑 *Your Key is Ready!*\n\n` +
+      `✅ *Your order has been approved!*\n\n` +
       `Product: *${request.product}*\n` +
       `Package: ${request.packageName || 'N/A'}\n\n` +
-      `🗝️ Key: *${notes}*\n\n` +
+      `🔑 Open the app to get your key:\n` +
+      `👉 https://pannelstorewithadmin.vercel.app/dashboard\n\n` +
       `Thank you for ordering from SUSANTEDIT! 🎮`
     );
-    // Store the WhatsApp link in notes so admin can click it from Discord
-    // The actual send happens client-side via wa.me link (no API key needed)
     request.whatsappLink = `https://wa.me/${waNumber}?text=${waMsg}`;
     await request.save();
   }

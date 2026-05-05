@@ -30,6 +30,8 @@ const requestSchema = new mongoose.Schema(
     giftSenderId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
     giftFrom:     { type: String, default: '' },
     giftMessage:  { type: String, default: '' },
+    // Anti-fraud
+    ip:           { type: String, default: '' },
 
     // Order chat messages
     messages: {

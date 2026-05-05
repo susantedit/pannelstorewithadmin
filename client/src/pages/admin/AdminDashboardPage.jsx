@@ -328,7 +328,19 @@ function VipManager() {
                   >
                     {u.isBanned ? '✅ Unban' : '🚫 Ban'}
                   </button>
-                </div>
+                  {isVip && (
+                    <button
+                      onClick={async () => {
+                        if (!window.confirm(`Revoke VIP from ${u.name}?`)) return;
+                        const res = await api.revokeVip(u._id);
+                        if (res?.ok) { setGrantMsg('✅ VIP revoked'); loadUsers(search); }
+                        else setGrantMsg(`❌ ${res?.message || 'Failed'}`);
+                      }}
+                      style={{ padding:'6px 10px', borderRadius:'6px', cursor:'pointer', background:'rgba(251,191,36,0.08)', border:'1px solid rgba(251,191,36,0.2)', color:'#fbbf24', fontSize:'0.72rem', fontWeight:700 }}
+                    >
+                      ❌ Revoke VIP
+                    </button>
+                  )}
               </div>
             );
           })}
@@ -346,6 +358,7 @@ const TABS = [
   { id: 'coupons',    icon: 'fa-ticket-alt',     label: 'Coupons'   },
   { id: 'notifications', icon: 'fa-bell',        label: 'Notifications' },
   { id: 'analytics',  icon: 'fa-chart-bar',      label: 'Analytics' },
+  { id: 'funnel',     icon: 'fa-filter',         label: 'Funnel'    },
   { id: 'settings',   icon: 'fa-cog',            label: 'Settings'  },
 ];
 
@@ -414,6 +427,12 @@ export default function AdminDashboardPage() {
   const [analytics, setAnalytics] = useState(null);
   const [analyticsLoading, setAnalyticsLoading] = useState(false);
 
+  // Funnel / LTV / Suspicious
+  const [funnelData, setFunnelData] = useState([]);
+  const [ltvData, setLtvData] = useState([]);
+  const [suspiciousData, setSuspiciousData] = useState([]);
+  const [funnelLoading, setFunnelLoading] = useState(false);
+
   useEffect(() => {
     if (!isAdmin) { navigate('/dashboard'); return; }
     loadRequests();
@@ -451,6 +470,18 @@ export default function AdminDashboardPage() {
     if (activeTab === 'analytics') {
       setAnalyticsLoading(true);
       api.getAnalytics().then(res => { if (res?.ok) setAnalytics(res); }).catch(() => {}).finally(() => setAnalyticsLoading(false));
+    }
+    if (activeTab === 'funnel') {
+      setFunnelLoading(true);
+      Promise.all([
+        api.getConversionFunnel().catch(() => ({ ok: false })),
+        api.getUserLtv().catch(() => ({ ok: false })),
+        api.getSuspiciousOrders().catch(() => ({ ok: false }))
+      ]).then(([f, l, s]) => {
+        if (f?.ok) setFunnelData(f.funnel || []);
+        if (l?.ok) setLtvData(l.ltv || []);
+        if (s?.ok) setSuspiciousData(s.suspicious || []);
+      }).finally(() => setFunnelLoading(false));
     }
   }, [activeTab]);
 
@@ -678,6 +709,20 @@ export default function AdminDashboardPage() {
     const matchFilter = filter === 'all' || r.status.toLowerCase().includes(filter);
     const matchSearch = !searchTerm || r.userName?.toLowerCase().includes(searchTerm.toLowerCase()) || r.product?.toLowerCase().includes(searchTerm.toLowerCase()) || String(r.id||'').toLowerCase().includes(searchTerm.toLowerCase());
     return matchFilter && matchSearch;
+  }).sort((a, b) => {
+    // Smart priority: pending/awaiting first, then by price descending
+    const statusPriority = (s) => {
+      const sl = s.toLowerCase();
+      if (sl.includes('awaiting') || sl.includes('pending')) return 0;
+      if (sl.includes('accept')) return 1;
+      return 2;
+    };
+    const sp = statusPriority(a.status) - statusPriority(b.status);
+    if (sp !== 0) return sp;
+    // Within same status group — sort by price descending (high value first)
+    const priceA = parseFloat(String(a.packagePrice || a.finalPrice || 0).replace(/[^0-9.]/g, '')) || 0;
+    const priceB = parseFloat(String(b.packagePrice || b.finalPrice || 0).replace(/[^0-9.]/g, '')) || 0;
+    return priceB - priceA;
   });
 
   const stats = {
@@ -808,7 +853,16 @@ export default function AdminDashboardPage() {
             <div style={{ animation: 'fadeIn 0.3s ease' }}>
               <div className="section-header">
                 <h1>Requests Queue</h1>
-                <span style={{ color:'var(--muted)', fontSize:'0.85rem' }}>{filteredRequests.length} requests</span>
+                <div style={{ display:'flex', gap:'8px', alignItems:'center' }}>
+                  <span style={{ color:'var(--muted)', fontSize:'0.85rem' }}>{filteredRequests.length} requests</span>
+                  <a
+                    href={api.exportOrdersCsv()}
+                    download
+                    style={{ padding:'7px 14px', borderRadius:'8px', background:'rgba(74,222,128,0.1)', border:'1px solid rgba(74,222,128,0.3)', color:'#4ade80', fontSize:'0.78rem', fontWeight:700, textDecoration:'none', display:'flex', alignItems:'center', gap:'6px' }}
+                  >
+                    <i className="fas fa-download" /> Export CSV
+                  </a>
+                </div>
               </div>
 
               <div style={{ display:'flex', gap:'10px', marginBottom:'16px', flexWrap:'wrap' }}>
@@ -849,9 +903,21 @@ export default function AdminDashboardPage() {
                       <tbody>
                         {filteredRequests.map(r => {
                           const isVip = r.product === '⭐ VIP Subscription';
+                          const priceVal = parseFloat(String(r.packagePrice || r.finalPrice || 0).replace(/[^0-9.]/g, '')) || 0;
+                          const isHighValue = priceVal >= 500;
+                          // Duplicate transaction detection
+                          const isDuplicate = r.transaction && filteredRequests.filter(x => x.transaction === r.transaction && x.transaction).length > 1;
                           return (
-                          <tr key={r.id} style={isVip ? { background: 'rgba(251,191,36,0.04)', borderLeft: '3px solid rgba(251,191,36,0.5)' } : {}}>
-                            <td><strong style={{ color:'#fff' }}>{r.userName}</strong></td>
+                          <tr key={r.id} style={
+                            isVip ? { background: 'rgba(251,191,36,0.04)', borderLeft: '3px solid rgba(251,191,36,0.5)' } :
+                            isHighValue ? { background: 'rgba(230,57,70,0.03)', borderLeft: '3px solid rgba(230,57,70,0.4)' } : {}
+                          }>
+                            <td>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                {isHighValue && <span title="High value order" style={{ fontSize: '0.7rem', background: 'rgba(230,57,70,0.15)', border: '1px solid rgba(230,57,70,0.3)', color: '#ff6b6b', padding: '1px 6px', borderRadius: '4px', fontWeight: 700, fontFamily: "'Orbitron',sans-serif", letterSpacing: '0.5px' }}>🔥 VIP</span>}
+                                <strong style={{ color:'#fff' }}>{r.userName}</strong>
+                              </div>
+                            </td>
                             <td>
                               {isVip
                                 ? <span style={{ color:'#fbbf24', fontWeight:700 }}>⭐ VIP Subscription</span>
@@ -862,6 +928,11 @@ export default function AdminDashboardPage() {
                               <Badge variant={r.paymentMethod === 'esewa' ? 'success' : 'info'}>
                                 {r.paymentMethod === 'esewa' ? 'eSewa' : 'Bank'}
                               </Badge>
+                              {isDuplicate && (
+                                <div style={{ marginTop:'3px', fontSize:'0.65rem', color:'#ff6b6b', fontWeight:700, display:'flex', alignItems:'center', gap:'3px' }}>
+                                  <i className="fas fa-triangle-exclamation" /> DUPLICATE TXN
+                                </div>
+                              )}
                             </td>
                             <td>
                               <select
@@ -925,11 +996,35 @@ export default function AdminDashboardPage() {
                   <div className="table-wrapper">
                     <table className="table">
                       <thead>
-                        <tr><th>Product</th><th>Category</th><th>Price</th><th>Status</th><th>Packages</th><th>Actions</th></tr>
+                        <tr><th>Order</th><th>Product</th><th>Category</th><th>Price</th><th>Status</th><th>Packages</th><th>Actions</th></tr>
                       </thead>
                       <tbody>
-                        {products.map(p => (
+                        {products.map((p, idx) => (
                           <tr key={p._id || p.id}>
+                            <td>
+                              <div style={{ display:'flex', flexDirection:'column', gap:'2px' }}>
+                                <button
+                                  disabled={idx === 0}
+                                  onClick={async () => {
+                                    const newOrder = [...products];
+                                    [newOrder[idx-1], newOrder[idx]] = [newOrder[idx], newOrder[idx-1]];
+                                    setProducts(newOrder);
+                                    await api.reorderProducts(newOrder.map(x => x._id || x.id));
+                                  }}
+                                  style={{ background:'none', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'4px', color: idx===0?'rgba(255,255,255,0.2)':'var(--muted)', cursor: idx===0?'default':'pointer', padding:'2px 6px', fontSize:'0.7rem' }}
+                                >▲</button>
+                                <button
+                                  disabled={idx === products.length-1}
+                                  onClick={async () => {
+                                    const newOrder = [...products];
+                                    [newOrder[idx], newOrder[idx+1]] = [newOrder[idx+1], newOrder[idx]];
+                                    setProducts(newOrder);
+                                    await api.reorderProducts(newOrder.map(x => x._id || x.id));
+                                  }}
+                                  style={{ background:'none', border:'1px solid rgba(255,255,255,0.1)', borderRadius:'4px', color: idx===products.length-1?'rgba(255,255,255,0.2)':'var(--muted)', cursor: idx===products.length-1?'default':'pointer', padding:'2px 6px', fontSize:'0.7rem' }}
+                                >▼</button>
+                              </div>
+                            </td>
                             <td>
                               <div style={{ display:'flex', alignItems:'center', gap:'10px' }}>
                                 {p.img && <img src={p.img} alt={p.name} style={{ width:'34px', height:'34px', objectFit:'cover', borderRadius:'6px' }} />}
@@ -1006,6 +1101,20 @@ export default function AdminDashboardPage() {
                   Notif.showNotification('✅ Campaign Sent', res?.message || 'Done', 'success', 4000);
                 }}>
                   <i className="fas fa-heart" /> Send Reactivation Credits
+                </Button>
+              </div>
+
+              {/* Renewal Reminder tool */}
+              <div className="panel" style={{ marginTop: '16px' }}>
+                <div className="panel-header"><h2>⏰ Subscription Renewal Reminders</h2></div>
+                <p style={{ color:'var(--muted)', fontSize:'0.85rem', marginBottom:'14px' }}>
+                  Send "Your access expires soon — renew now!" to users whose orders expire within 3 days.
+                </p>
+                <Button variant="primary" onClick={async () => {
+                  const res = await api.sendRenewalReminders();
+                  Notif.showNotification('✅ Reminders Sent', res?.message || 'Done', 'success', 4000);
+                }}>
+                  <i className="fas fa-bell" /> Send Renewal Reminders
                 </Button>
               </div>
 
@@ -1258,6 +1367,116 @@ export default function AdminDashboardPage() {
                 <span style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Send custom notifications to users</span>
               </div>
               <NotificationSender />
+            </div>
+          )}
+
+          {/* ── FUNNEL / LTV / SUSPICIOUS ── */}
+          {activeTab === 'funnel' && (
+            <div style={{ animation: 'fadeIn 0.3s ease' }}>
+              <div className="section-header"><h1>Funnel & Intelligence</h1></div>
+
+              {funnelLoading ? (
+                <p style={{ color:'var(--muted)', padding:'40px', textAlign:'center' }}>Loading...</p>
+              ) : (<>
+
+              {/* Suspicious Orders */}
+              {suspiciousData.length > 0 && (
+                <div className="panel" style={{ marginBottom:'16px', border:'1px solid rgba(230,57,70,0.3)', background:'rgba(230,57,70,0.04)' }}>
+                  <div className="panel-header">
+                    <h2 style={{ color:'#ff6b6b' }}>🚨 Suspicious Orders ({suspiciousData.length})</h2>
+                    <span style={{ fontSize:'0.75rem', color:'var(--muted)' }}>3+ orders from same IP/WhatsApp in 1 hour</span>
+                  </div>
+                  <div className="table-wrapper">
+                    <table className="table">
+                      <thead><tr><th>User</th><th>Product</th><th>WhatsApp</th><th>IP</th><th>Time</th></tr></thead>
+                      <tbody>
+                        {suspiciousData.map((o,i) => (
+                          <tr key={i} style={{ background:'rgba(230,57,70,0.04)' }}>
+                            <td><strong style={{ color:'#ff6b6b' }}>{o.userName}</strong></td>
+                            <td>{o.product}</td>
+                            <td style={{ color:'var(--muted)', fontSize:'0.82rem' }}>{o.whatsapp || '—'}</td>
+                            <td style={{ color:'var(--muted)', fontSize:'0.82rem' }}><code>{o.ip || '—'}</code></td>
+                            <td style={{ color:'var(--muted)', fontSize:'0.82rem' }}>{formatDate(o.createdAt)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {/* User Lifetime Value */}
+              <div className="panel" style={{ marginBottom:'16px' }}>
+                <div className="panel-header">
+                  <h2>💰 Top Customers by Lifetime Value</h2>
+                  <span style={{ fontSize:'0.75rem', color:'var(--muted)' }}>Accepted orders only</span>
+                </div>
+                <div className="table-wrapper">
+                  <table className="table">
+                    <thead><tr><th>Rank</th><th>Customer</th><th>Total Spend</th><th>Orders</th><th>Last Order</th></tr></thead>
+                    <tbody>
+                      {ltvData.length === 0 ? (
+                        <tr><td colSpan={5} style={{ textAlign:'center', color:'var(--muted)', padding:'20px' }}>No data yet</td></tr>
+                      ) : ltvData.map((u,i) => (
+                        <tr key={i}>
+                          <td>
+                            <span style={{ fontFamily:"'Orbitron',sans-serif", fontSize:'0.75rem', fontWeight:700, color: i===0?'#fbbf24':i===1?'#aaa':i===2?'#cd7f32':'var(--muted)' }}>
+                              {i===0?'🥇':i===1?'🥈':i===2?'🥉':`#${i+1}`}
+                            </span>
+                          </td>
+                          <td>
+                            <strong style={{ color:'#fff' }}>{u.name || 'Unknown'}</strong>
+                            <p style={{ margin:0, fontSize:'0.75rem', color:'var(--muted)' }}>{u.email}</p>
+                          </td>
+                          <td style={{ color:'#4ade80', fontWeight:700, fontFamily:"'Orbitron',sans-serif" }}>Rs {Math.round(u.totalSpend).toLocaleString()}</td>
+                          <td style={{ color:'var(--muted)' }}>{u.orderCount}</td>
+                          <td style={{ color:'var(--muted)', fontSize:'0.82rem' }}>{u.lastOrder ? formatDate(u.lastOrder) : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Conversion Funnel */}
+              <div className="panel">
+                <div className="panel-header">
+                  <h2>📊 Conversion Funnel</h2>
+                  <span style={{ fontSize:'0.75rem', color:'var(--muted)' }}>Views → Orders → Accepted</span>
+                </div>
+                <div className="table-wrapper">
+                  <table className="table">
+                    <thead><tr><th>Product</th><th>Views</th><th>Orders</th><th>Accepted</th><th>Conv %</th><th>Rating</th></tr></thead>
+                    <tbody>
+                      {funnelData.length === 0 ? (
+                        <tr><td colSpan={6} style={{ textAlign:'center', color:'var(--muted)', padding:'20px' }}>No data yet — views tracked when users open product cards</td></tr>
+                      ) : funnelData.map((p,i) => (
+                        <tr key={i}>
+                          <td><strong style={{ color:'#fff' }}>{p.name}</strong></td>
+                          <td style={{ color:'var(--muted)' }}>{p.views}</td>
+                          <td style={{ color:'#60a5fa', fontWeight:700 }}>{p.orders}</td>
+                          <td style={{ color:'#4ade80', fontWeight:700 }}>{p.accepted}</td>
+                          <td>
+                            <span style={{
+                              padding:'2px 8px', borderRadius:'4px', fontSize:'0.75rem', fontWeight:700,
+                              background: p.convRate >= 20 ? 'rgba(74,222,128,0.15)' : p.convRate >= 5 ? 'rgba(251,191,36,0.15)' : 'rgba(255,255,255,0.05)',
+                              color: p.convRate >= 20 ? '#4ade80' : p.convRate >= 5 ? '#fbbf24' : 'var(--muted)'
+                            }}>{p.convRate}%</span>
+                          </td>
+                          <td>
+                            {p.ratingCount > 0 ? (
+                              <span style={{ color:'#fbbf24', fontSize:'0.82rem' }}>
+                                {'★'.repeat(Math.round(p.avgRating))}{'☆'.repeat(5-Math.round(p.avgRating))} {p.avgRating} ({p.ratingCount})
+                              </span>
+                            ) : <span style={{ color:'var(--muted)', fontSize:'0.78rem' }}>No ratings</span>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              </>)}
             </div>
           )}
 

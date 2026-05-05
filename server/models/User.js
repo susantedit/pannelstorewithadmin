@@ -50,6 +50,11 @@ const userSchema = new mongoose.Schema(
     banReason:    { type: String, default: '' },
     bannedAt:     { type: Date, default: null },
 
+    // Wishlist — product names user wants to watch
+    wishlist:     { type: [String], default: [] },
+    // Renewal reminders — track last sent per product
+    renewalReminderSentAt: { type: Map, of: Date, default: {} },
+
     // VIP Subscription — Rs 199/month, hides ads
     vipExpiresAt:        { type: Date, default: null },
 

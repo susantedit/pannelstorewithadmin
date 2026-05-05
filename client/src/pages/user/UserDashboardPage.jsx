@@ -147,6 +147,73 @@ function FlashCountdown({ endsAt }) {
   );
 }
 
+// ── ProductRater sub-component ────────────────────────────────────────────
+function ProductRater({ productId, productName, onRated }) {
+  const [stars, setStars] = useState(0);
+  const [hover, setHover] = useState(0);
+  const [comment, setComment] = useState('');
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [done, setDone] = useState(() => {
+    try { return localStorage.getItem(`rated_${productId}`) === '1'; } catch { return false; }
+  });
+
+  if (done) return (
+    <div style={{ fontSize:'0.72rem', color:'#4ade80', display:'flex', alignItems:'center', gap:'4px' }}>
+      <i className="fas fa-check-circle" /> You rated this product
+    </div>
+  );
+
+  const submit = async () => {
+    if (!stars) return;
+    setLoading(true);
+    try {
+      const res = await api.rateProduct(productId, stars, comment);
+      if (res?.ok) {
+        try { localStorage.setItem(`rated_${productId}`, '1'); } catch {}
+        setDone(true); setOpen(false);
+        if (onRated) onRated();
+      }
+    } catch {}
+    finally { setLoading(false); }
+  };
+
+  if (!open) return (
+    <button
+      onClick={() => setOpen(true)}
+      style={{ background:'none', border:'1px solid rgba(251,191,36,0.25)', borderRadius:'6px', color:'#fbbf24', padding:'4px 10px', cursor:'pointer', fontSize:'0.72rem', fontWeight:700, display:'flex', alignItems:'center', gap:'4px' }}
+    >
+      <i className="fas fa-star" /> Rate this product
+    </button>
+  );
+
+  return (
+    <div style={{ padding:'12px', borderRadius:'10px', background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)' }}>
+      <div style={{ fontSize:'0.78rem', fontWeight:700, color:'#fbbf24', marginBottom:'8px' }}>Rate {productName}</div>
+      <div style={{ display:'flex', gap:'4px', marginBottom:'8px' }}>
+        {[1,2,3,4,5].map(s => (
+          <button key={s} onMouseEnter={() => setHover(s)} onMouseLeave={() => setHover(0)} onClick={() => setStars(s)}
+            style={{ background:'none', border:'none', cursor:'pointer', fontSize:'1.4rem', color: s <= (hover||stars) ? '#fbbf24' : 'rgba(255,255,255,0.15)', transition:'color 0.1s', padding:'0 2px' }}>
+            ★
+          </button>
+        ))}
+      </div>
+      <input
+        value={comment} onChange={e => setComment(e.target.value)}
+        placeholder="Optional comment..."
+        style={{ width:'100%', padding:'7px 10px', borderRadius:'7px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', color:'#fff', fontSize:'0.8rem', outline:'none', boxSizing:'border-box', marginBottom:'8px' }}
+      />
+      <div style={{ display:'flex', gap:'6px' }}>
+        <button onClick={submit} disabled={!stars||loading}
+          style={{ flex:1, padding:'7px', borderRadius:'7px', background: stars ? 'linear-gradient(135deg,#fbbf24,#f59e0b)' : 'rgba(255,255,255,0.05)', border:'none', color: stars ? '#000' : '#aaa', fontWeight:700, cursor: stars ? 'pointer' : 'default', fontSize:'0.8rem' }}>
+          {loading ? '...' : 'Submit'}
+        </button>
+        <button onClick={() => setOpen(false)} style={{ padding:'7px 12px', borderRadius:'7px', background:'none', border:'1px solid rgba(255,255,255,0.1)', color:'#aaa', cursor:'pointer', fontSize:'0.8rem' }}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
 export default function UserDashboardPage() {
   const navigate = useNavigate();
   const { user, logout, isVip } = useAuth();
@@ -219,10 +286,21 @@ export default function UserDashboardPage() {
   const [showSpinWheel, setShowSpinWheel] = useState(false);
   const isFirstOrderRef = useRef(false);
 
-  // Price drop watchlist
-  const [watchlist, setWatchlist] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('price_watchlist') || '[]'); } catch { return []; }
-  });
+  // Wishlist (server-synced, replaces old localStorage watchlist)
+  const [watchlist, setWatchlist] = useState([]);
+
+  const toggleWatch = async (productName) => {
+    try {
+      const res = await api.toggleWishlist(productName);
+      if (res?.ok) {
+        setWishlist(res.wishlist || []);
+        if (res.added) Notif.showNotification('🔔 Added to Wishlist', `We'll notify you when ${productName} price drops!`, 'info', 3000);
+      }
+    } catch {
+      // fallback local toggle
+      setWatchlist(prev => prev.includes(productName) ? prev.filter(n => n !== productName) : [...prev, productName]);
+    }
+  };
 
   // Product category filter & search
   const [productCategory, setProductCategory] = useState('All');
@@ -235,6 +313,12 @@ export default function UserDashboardPage() {
   // Birthday celebration
   const [showBirthdayCelebration, setShowBirthdayCelebration] = useState(false);
   const [birthdayMsg, setBirthdayMsg] = useState('');
+
+  // Wishlist (server-synced)
+  const [wishlist, setWishlist] = useState([]);
+
+  // Receipt modal
+  const [receiptRequest, setReceiptRequest] = useState(null);
 
   // PWA install prompt
   const [pwaPrompt, setPwaPrompt] = useState(null);
@@ -267,14 +351,6 @@ export default function UserDashboardPage() {
   const [giftStep, setGiftStep] = useState('form'); // 'form' | 'qr' | 'done'
   const [giftLoading, setGiftLoading] = useState(false);
   const [giftMsg, setGiftMsg] = useState('');
-  const toggleWatch = (productName) => {
-    setWatchlist(prev => {
-      const next = prev.includes(productName) ? prev.filter(n => n !== productName) : [...prev, productName];
-      try { localStorage.setItem('price_watchlist', JSON.stringify(next)); } catch {}
-      if (!prev.includes(productName)) Notif.showNotification('ðŸ”” Price Alert Set', `We'll notify you when ${productName} price drops!`, 'info', 3000);
-      return next;
-    });
-  };
 
   // Ask for notification permission on mount â€” gate handles the blocking UI
   useEffect(() => {
@@ -323,6 +399,8 @@ export default function UserDashboardPage() {
     }).catch(() => {});
     // Load notification count
     loadNotificationCount();
+    // Load wishlist from server
+    api.getWishlist().then(res => { if (res?.ok) setWishlist(res.wishlist || []); }).catch(() => {});
   }, []);
 
   const prevUnreadCountRef = useRef(0);
@@ -1236,6 +1314,47 @@ export default function UserDashboardPage() {
                       <strong>{request.product}</strong>
                       {request.packageName && <p>{request.packageName}</p>}
                       <p style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{reqId}</p>
+
+                      {/* ── Order Tracking Timeline ── */}
+                      <div style={{ marginTop:'10px', display:'flex', alignItems:'center', gap:'0' }}>
+                        {[
+                          { label:'Submitted', icon:'fa-paper-plane', done: true },
+                          { label:'Under Review', icon:'fa-search', done: !isPending || request.status?.toLowerCase().includes('awaiting') },
+                          { label:'Approved', icon:'fa-check-circle', done: isAccepted },
+                          { label:'Key Delivered', icon:'fa-key', done: isAccepted && !!request.notes }
+                        ].map((step, si, arr) => {
+                          const isActive = (() => {
+                            if (si === 0) return true;
+                            if (si === 1) return request.status?.toLowerCase().includes('awaiting') || request.status?.toLowerCase().includes('pending');
+                            if (si === 2) return isAccepted;
+                            if (si === 3) return isAccepted && !!request.notes;
+                            return false;
+                          })();
+                          return (
+                            <div key={si} style={{ display:'flex', alignItems:'center', flex: si < arr.length-1 ? 1 : 'none' }}>
+                              <div style={{ display:'flex', flexDirection:'column', alignItems:'center', gap:'3px' }}>
+                                <div style={{
+                                  width:'26px', height:'26px', borderRadius:'50%',
+                                  display:'flex', alignItems:'center', justifyContent:'center',
+                                  fontSize:'0.65rem',
+                                  background: step.done ? 'rgba(74,222,128,0.2)' : isActive ? 'rgba(251,191,36,0.15)' : 'rgba(255,255,255,0.05)',
+                                  border: `1.5px solid ${step.done ? '#4ade80' : isActive ? '#fbbf24' : 'rgba(255,255,255,0.1)'}`,
+                                  color: step.done ? '#4ade80' : isActive ? '#fbbf24' : 'var(--muted)',
+                                  transition:'all 0.3s'
+                                }}>
+                                  <i className={`fas ${step.icon}`} />
+                                </div>
+                                <span style={{ fontSize:'0.55rem', color: step.done ? '#4ade80' : isActive ? '#fbbf24' : 'var(--muted)', fontWeight:600, whiteSpace:'nowrap', textAlign:'center', maxWidth:'50px' }}>
+                                  {step.label}
+                                </span>
+                              </div>
+                              {si < arr.length-1 && (
+                                <div style={{ flex:1, height:'1.5px', background: step.done ? '#4ade80' : 'rgba(255,255,255,0.08)', margin:'0 2px', marginBottom:'14px', transition:'background 0.3s' }} />
+                              )}
+                            </div>
+                          );
+                        })}
+                      </div>
                       
                       {/* Payment countdown for pending orders */}
                       {isPending && !isExpired && (
@@ -1287,6 +1406,22 @@ export default function UserDashboardPage() {
                         {formatDate(request.updatedAt)}
                       </p>
                       {hasKey && <LootBox requestId={reqId} keyText={request.notes} />}
+                      {/* View Receipt button for accepted orders */}
+                      {isAccepted && (
+                        <button
+                          onClick={() => setReceiptRequest(request)}
+                          style={{
+                            marginTop: '6px', background: 'none',
+                            border: '1px solid rgba(74,222,128,0.3)',
+                            borderRadius: '6px', color: '#4ade80',
+                            padding: '4px 10px', cursor: 'pointer',
+                            fontSize: '0.72rem', fontWeight: 700,
+                            display: 'inline-flex', alignItems: 'center', gap: '4px'
+                          }}
+                        >
+                          <i className="fas fa-receipt" /> Receipt
+                        </button>
+                      )}
                       {/* Chat button */}
                       <button
                         onClick={() => openOrderChat(reqId)}
@@ -1527,6 +1662,24 @@ export default function UserDashboardPage() {
                       <i className={`fas ${watchlist.includes(product.name) ? 'fa-bell' : 'fa-bell-slash'}`} />
                       {watchlist.includes(product.name) ? 'Watching for price drop' : 'Notify me if price drops'}
                     </button>
+
+                    {/* ── Star Rating Display ── */}
+                    {(product.avgRating > 0 || product.ratingCount > 0) && (
+                      <div style={{ display:'flex', alignItems:'center', gap:'6px', fontSize:'0.75rem' }}>
+                        <span style={{ color:'#fbbf24' }}>
+                          {[1,2,3,4,5].map(s => (
+                            <i key={s} className={`fas fa-star`} style={{ color: s <= Math.round(product.avgRating||0) ? '#fbbf24' : 'rgba(255,255,255,0.15)', fontSize:'0.7rem' }} />
+                          ))}
+                        </span>
+                        <span style={{ color:'#fbbf24', fontWeight:700 }}>{product.avgRating}</span>
+                        <span style={{ color:'var(--muted)' }}>({product.ratingCount} reviews)</span>
+                      </div>
+                    )}
+
+                    {/* ── Rate this product (only if user has accepted order) ── */}
+                    {requests.some(r => r.product === product.name && r.status?.toLowerCase().includes('accept')) && (
+                      <ProductRater productId={product._id || product.id} productName={product.name} onRated={() => loadData()} />
+                    )}
                   </article>
                 );
               })}
@@ -2478,6 +2631,84 @@ export default function UserDashboardPage() {
 
       {/* VIP Subscription Modal */}
       <VipModal open={vipModalOpen} onClose={() => setVipModalOpen(false)} />
+
+      {/* ── Order Receipt Modal ── */}
+      {receiptRequest && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 99998,
+          background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(12px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px'
+        }} onClick={() => setReceiptRequest(null)}>
+          <div onClick={e => e.stopPropagation()} style={{
+            width: '100%', maxWidth: '420px',
+            background: 'linear-gradient(180deg, #0d0d0d, #111)',
+            border: '1px solid rgba(74,222,128,0.3)',
+            borderRadius: '20px', overflow: 'hidden',
+            boxShadow: '0 0 40px rgba(74,222,128,0.1)'
+          }}>
+            {/* Receipt header */}
+            <div style={{
+              padding: '20px 24px',
+              background: 'linear-gradient(135deg, rgba(74,222,128,0.12), rgba(74,222,128,0.04))',
+              borderBottom: '1px dashed rgba(74,222,128,0.2)',
+              textAlign: 'center'
+            }}>
+              <div style={{ fontSize: '2.5rem', marginBottom: '8px' }}>🧾</div>
+              <div style={{ fontFamily: "'Orbitron',sans-serif", fontSize: '1rem', fontWeight: 900, color: '#4ade80', letterSpacing: '2px' }}>
+                ORDER RECEIPT
+              </div>
+              <div style={{ fontSize: '0.75rem', color: 'var(--muted)', marginTop: '4px' }}>SUSANTEDIT</div>
+            </div>
+
+            {/* Receipt body */}
+            <div style={{ padding: '20px 24px' }}>
+              {[
+                ['Order ID', String(receiptRequest.id || receiptRequest._id || '').slice(-8).toUpperCase()],
+                ['Product', receiptRequest.product],
+                ['Package', receiptRequest.packageName || '—'],
+                ['Amount', `Rs ${receiptRequest.packagePrice || receiptRequest.finalPrice || '—'}`],
+                ['Payment', receiptRequest.paymentMethod === 'esewa' ? 'eSewa' : 'Bank Transfer'],
+                ['Transaction', receiptRequest.transaction || '—'],
+                ['Status', receiptRequest.status],
+                ['Date', receiptRequest.createdAt ? new Date(receiptRequest.createdAt).toLocaleDateString('en-NP', { year:'numeric', month:'long', day:'numeric' }) : '—'],
+              ].map(([label, val]) => (
+                <div key={label} style={{
+                  display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                  padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.04)'
+                }}>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--muted)' }}>{label}</span>
+                  <span style={{ fontSize: '0.82rem', color: '#fff', fontWeight: 600, textAlign: 'right', maxWidth: '60%' }}>{val}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer */}
+            <div style={{ padding: '16px 24px', borderTop: '1px dashed rgba(255,255,255,0.08)', textAlign: 'center' }}>
+              <p style={{ fontSize: '0.72rem', color: 'var(--muted)', marginBottom: '14px' }}>
+                Thank you for ordering from SUSANTEDIT 🎮
+              </p>
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => {
+                    const text = `🧾 SUSANTEDIT Receipt\nProduct: ${receiptRequest.product}\nPackage: ${receiptRequest.packageName}\nAmount: Rs ${receiptRequest.packagePrice}\nTxn: ${receiptRequest.transaction}\nDate: ${new Date(receiptRequest.createdAt).toLocaleDateString()}`;
+                    navigator.clipboard.writeText(text);
+                    Notif.showNotification('✅ Copied!', 'Receipt copied to clipboard', 'success', 2000);
+                  }}
+                  style={{ flex: 1, padding: '10px', borderRadius: '10px', background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', cursor: 'pointer', fontWeight: 700, fontSize: '0.8rem' }}
+                >
+                  <i className="fas fa-copy" /> Copy
+                </button>
+                <button
+                  onClick={() => setReceiptRequest(null)}
+                  style={{ flex: 1, padding: '10px', borderRadius: '10px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#aaa', cursor: 'pointer', fontSize: '0.8rem' }}
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* â”€â”€ PWA Install Banner â”€â”€ */}
       {showPwaBanner && pwaPrompt && (

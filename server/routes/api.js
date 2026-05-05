@@ -1038,4 +1038,221 @@ router.post('/push/register', requireAuth, async (req, res) => {
   }
 });
 
+// ── VIP Revoke ────────────────────────────────────────────────────────────
+router.post('/vip/revoke', requireAuth, requireAdmin, async (req, res) => {
+  const { userId } = req.body || {};
+  if (!userId) return res.status(400).json({ ok: false, message: 'userId required' });
+  try {
+    const user = await User.findByIdAndUpdate(userId, { vipExpiresAt: null }, { new: true });
+    if (!user) return res.status(404).json({ ok: false, message: 'User not found' });
+    res.json({ ok: true, message: `VIP revoked for ${user.email}` });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Product Ratings ───────────────────────────────────────────────────────
+router.post('/products/:id/rate', requireAuth, async (req, res) => {
+  const { stars, comment = '' } = req.body || {};
+  if (!stars || stars < 1 || stars > 5) return res.status(400).json({ ok: false, message: 'stars must be 1-5' });
+  try {
+    const { default: Product } = await import('../models/Product.js');
+    const { default: Request } = await import('../models/Request.js');
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ ok: false, message: 'Product not found' });
+    // Only users who have an accepted order for this product can rate
+    const hasOrder = await Request.exists({ userId: req.auth.userId, product: product.name, status: 'Accepted' });
+    if (!hasOrder) return res.status(403).json({ ok: false, message: 'You can only rate products you have purchased' });
+    // Remove existing rating from this user
+    product.ratings = (product.ratings || []).filter(r => String(r.userId) !== String(req.auth.userId));
+    product.ratings.push({ userId: req.auth.userId, userName: req.user?.name || 'User', stars: Number(stars), comment: String(comment).trim().slice(0, 300) });
+    // Recalculate avg
+    const total = product.ratings.reduce((s, r) => s + r.stars, 0);
+    product.avgRating = Math.round((total / product.ratings.length) * 10) / 10;
+    product.ratingCount = product.ratings.length;
+    await product.save();
+    res.json({ ok: true, avgRating: product.avgRating, ratingCount: product.ratingCount });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+router.get('/products/:id/ratings', async (req, res) => {
+  try {
+    const { default: Product } = await import('../models/Product.js');
+    const product = await Product.findById(req.params.id).select('ratings avgRating ratingCount name').lean();
+    if (!product) return res.status(404).json({ ok: false, message: 'Not found' });
+    res.json({ ok: true, ratings: product.ratings || [], avgRating: product.avgRating || 0, ratingCount: product.ratingCount || 0 });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Product View Tracking (conversion funnel) ─────────────────────────────
+router.post('/products/:id/view', async (req, res) => {
+  try {
+    const { default: Product } = await import('../models/Product.js');
+    await Product.findByIdAndUpdate(req.params.id, { $inc: { viewCount: 1 } });
+    res.json({ ok: true });
+  } catch { res.json({ ok: true }); }
+});
+
+// ── CSV Export ────────────────────────────────────────────────────────────
+router.get('/admin/export/orders', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { default: Request } = await import('../models/Request.js');
+    const orders = await Request.find({}).sort({ createdAt: -1 }).lean();
+    const headers = ['ID','User','Product','Package','Price','Payment','Status','TikTok','WhatsApp','Transaction','Date'];
+    const rows = orders.map(o => [
+      String(o._id),
+      o.userName || '',
+      o.product || '',
+      o.packageName || '',
+      o.packagePrice || '',
+      o.paymentMethod || '',
+      o.status || '',
+      o.tikTok || '',
+      o.whatsapp || '',
+      o.transaction || '',
+      o.createdAt ? new Date(o.createdAt).toISOString().slice(0,10) : ''
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(','));
+    const csv = [headers.join(','), ...rows].join('\n');
+    res.setHeader('Content-Type', 'text/csv');
+    res.setHeader('Content-Disposition', `attachment; filename="orders-${new Date().toISOString().slice(0,10)}.csv"`);
+    res.send(csv);
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── User Lifetime Value (admin) ───────────────────────────────────────────
+router.get('/admin/user-ltv', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { default: Request } = await import('../models/Request.js');
+    const ltv = await Request.aggregate([
+      { $match: { status: 'Accepted' } },
+      { $group: { _id: '$userId', totalSpend: { $sum: { $toDouble: '$packagePrice' } }, orderCount: { $sum: 1 }, lastOrder: { $max: '$createdAt' } } },
+      { $sort: { totalSpend: -1 } },
+      { $limit: 20 },
+      { $lookup: { from: 'users', localField: '_id', foreignField: '_id', as: 'user' } },
+      { $unwind: { path: '$user', preserveNullAndEmpty: true } },
+      { $project: { name: '$user.name', email: '$user.email', totalSpend: 1, orderCount: 1, lastOrder: 1 } }
+    ]);
+    res.json({ ok: true, ltv });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Suspicious Order Detection ────────────────────────────────────────────
+router.get('/admin/suspicious', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { default: Request } = await import('../models/Request.js');
+    const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000);
+    // Find IPs or WhatsApp numbers with 3+ orders in last hour
+    const recentOrders = await Request.find({ createdAt: { $gte: oneHourAgo } }).lean();
+    const ipCounts = {}, waCounts = {};
+    recentOrders.forEach(o => {
+      if (o.ip) ipCounts[o.ip] = (ipCounts[o.ip] || 0) + 1;
+      if (o.whatsapp) waCounts[o.whatsapp] = (waCounts[o.whatsapp] || 0) + 1;
+    });
+    const suspicious = recentOrders.filter(o =>
+      (o.ip && ipCounts[o.ip] >= 3) || (o.whatsapp && waCounts[o.whatsapp] >= 3)
+    );
+    res.json({ ok: true, suspicious, count: suspicious.length });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Conversion Funnel ─────────────────────────────────────────────────────
+router.get('/admin/funnel', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { default: Product } = await import('../models/Product.js');
+    const { default: Request } = await import('../models/Request.js');
+    const products = await Product.find({}).select('name viewCount orderCount avgRating ratingCount').lean();
+    // Enrich with actual order counts from requests
+    const orderCounts = await Request.aggregate([
+      { $group: { _id: '$product', orders: { $sum: 1 }, accepted: { $sum: { $cond: [{ $eq: ['$status','Accepted'] }, 1, 0] } } } }
+    ]);
+    const orderMap = {};
+    orderCounts.forEach(o => { orderMap[o._id] = { orders: o.orders, accepted: o.accepted }; });
+    const funnel = products.map(p => {
+      const oc = orderMap[p.name] || { orders: 0, accepted: 0 };
+      const views = p.viewCount || 0;
+      const convRate = views > 0 ? Math.round((oc.orders / views) * 100) : 0;
+      return { name: p.name, views, orders: oc.orders, accepted: oc.accepted, convRate, avgRating: p.avgRating || 0, ratingCount: p.ratingCount || 0 };
+    }).sort((a, b) => b.orders - a.orders);
+    res.json({ ok: true, funnel });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Wishlist ──────────────────────────────────────────────────────────────
+router.get('/wishlist', requireAuth, async (req, res) => {
+  try {
+    const user = await User.findById(req.auth.userId).select('wishlist');
+    res.json({ ok: true, wishlist: user?.wishlist || [] });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+router.post('/wishlist/toggle', requireAuth, async (req, res) => {
+  const productName = String(req.body?.productName || '').trim();
+  if (!productName) return res.status(400).json({ ok: false, message: 'productName required' });
+  try {
+    const user = await User.findById(req.auth.userId);
+    if (!user) return res.status(404).json({ ok: false, message: 'User not found' });
+    const idx = user.wishlist.indexOf(productName);
+    let added = false;
+    if (idx === -1) { user.wishlist.push(productName); added = true; }
+    else { user.wishlist.splice(idx, 1); added = false; }
+    await user.save();
+    res.json({ ok: true, added, wishlist: user.wishlist });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Product Sort Order (admin reorder) ────────────────────────────────────
+router.patch('/products/reorder', requireAuth, requireAdmin, async (req, res) => {
+  // body: { order: ['id1','id2','id3',...] }
+  const { order } = req.body || {};
+  if (!Array.isArray(order)) return res.status(400).json({ ok: false, message: 'order array required' });
+  try {
+    const { default: Product } = await import('../models/Product.js');
+    await Promise.all(order.map((id, i) => Product.findByIdAndUpdate(id, { sortOrder: i })));
+    res.json({ ok: true });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Duplicate Transaction Check ───────────────────────────────────────────
+router.get('/requests/check-duplicate', requireAuth, async (req, res) => {
+  const txn = String(req.query.transaction || '').trim();
+  if (!txn) return res.json({ ok: true, duplicate: false });
+  try {
+    const { default: Request } = await import('../models/Request.js');
+    const existing = await Request.findOne({ transaction: txn }).select('userName product createdAt').lean();
+    if (existing) return res.json({ ok: true, duplicate: true, existing });
+    res.json({ ok: true, duplicate: false });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
+// ── Subscription Renewal Reminder (admin trigger or cron) ─────────────────
+router.post('/admin/send-renewal-reminders', requireAuth, requireAdmin, async (req, res) => {
+  try {
+    const { default: Request } = await import('../models/Request.js');
+    const { NotificationHelpers } = await import('../controllers/notificationController.js');
+    const threeDaysFromNow = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    // Find accepted orders where expiryTime is within 3 days and reminder not sent recently
+    const expiringOrders = await Request.find({
+      status: 'Accepted',
+      expiryTime: { $gt: new Date(), $lt: threeDaysFromNow }
+    }).lean();
+    let sent = 0;
+    for (const order of expiringOrders) {
+      const user = await User.findById(order.userId).select('renewalReminderSentAt');
+      if (!user) continue;
+      const lastSent = user.renewalReminderSentAt?.get?.(order.product);
+      if (lastSent && new Date(lastSent) > oneDayAgo) continue; // already sent today
+      await NotificationHelpers.showNotification(
+        order.userId,
+        '⏰ Access Expiring Soon!',
+        `Your ${order.product} access expires in less than 3 days. Renew now to keep access!`,
+        'warning'
+      ).catch(() => {});
+      if (!user.renewalReminderSentAt) user.renewalReminderSentAt = new Map();
+      user.renewalReminderSentAt.set(order.product, new Date());
+      await user.save();
+      sent++;
+    }
+    res.json({ ok: true, message: `Renewal reminders sent to ${sent} users` });
+  } catch (e) { res.status(500).json({ ok: false, message: e.message }); }
+});
+
 export default router;

@@ -142,14 +142,15 @@ export function buildStatusEmbed({ userName, product, packageName, price, paymen
   ];
 
   if (notes) {
-    fields.push({ name: '📝 Notes / Key', value: `\`${notes}\``, inline: false });
+    // ⚠️ SECURITY: Never send the actual key to Discord — key stays in app only
+    fields.push({ name: '📝 Delivery', value: '✅ Key delivered via app (not shown here for security)', inline: false });
   }
 
-  // If accepted and WhatsApp link available, add one-click send button
+  // If accepted and WhatsApp link available, add one-click send button (no key in URL)
   if (status === 'Accepted' && whatsappLink) {
     fields.push({
-      name:  '📲 SEND KEY VIA WHATSAPP',
-      value: `[👉 Click to send key to ${userName}](${whatsappLink})`,
+      name:  '📲 NOTIFY USER VIA WHATSAPP',
+      value: `[👉 Click to message ${userName} on WhatsApp](${whatsappLink})`,
       inline: false,
     });
   }
@@ -260,7 +261,7 @@ export async function sendStatusAlert(data) {
     `📱 <b>WhatsApp:</b> ${whatsapp || '—'}\n` +
     `🎵 <b>TikTok:</b>   ${tikTok || '—'}\n` +
     `🆔 <b>Txn ID:</b>   <code>${transaction || '—'}</code>\n` +
-    (notes ? `📝 <b>Notes:</b>    <code>${notes}</code>\n` : '') +
+    (notes ? `📝 <b>Delivery:</b> ✅ Key sent via app\n` : '') +
     `━━━━━━━━━━━━━━━━━━━━━━\n` +
     `👉 https://pannelstorewithadmin.vercel.app/admin`;
 

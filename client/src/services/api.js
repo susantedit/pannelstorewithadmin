@@ -104,6 +104,27 @@ export const api = {
   // Order chat
   getOrderMessages: (id) => request(`/api/requests/${id}/messages`),
   sendOrderMessage: (id, text) => request(`/api/requests/${id}/messages`, { method: 'POST', body: JSON.stringify({ text }) }),
+  // VIP revoke
+  revokeVip: (userId) => request('/api/vip/revoke', { method: 'POST', body: JSON.stringify({ userId }) }),
+  // Product ratings
+  rateProduct: (id, stars, comment) => request(`/api/products/${id}/rate`, { method: 'POST', body: JSON.stringify({ stars, comment }) }),
+  getProductRatings: (id) => request(`/api/products/${id}/ratings`),
+  trackProductView: (id) => request(`/api/products/${id}/view`, { method: 'POST' }),
+  // CSV export
+  exportOrdersCsv: () => `${window.location.origin}/api/admin/export/orders`,
+  // User LTV
+  getUserLtv: () => request('/api/admin/user-ltv'),
+  // Suspicious orders
+  getSuspiciousOrders: () => request('/api/admin/suspicious'),
+  // Conversion funnel
+  getConversionFunnel: () => request('/api/admin/funnel'),
+  // Wishlist
+  getWishlist: () => request('/api/wishlist'),
+  toggleWishlist: (productName) => request('/api/wishlist/toggle', { method: 'POST', body: JSON.stringify({ productName }) }),
+  // Product reorder
+  reorderProducts: (order) => request('/api/products/reorder', { method: 'PATCH', body: JSON.stringify({ order }) }),
+  // Renewal reminders
+  sendRenewalReminders: () => request('/api/admin/send-renewal-reminders', { method: 'POST' }),
   // VIP Subscription
   getVipStatus: () => request('/api/vip/status'),
   requestVip: (payload) => request('/api/vip/request', { method: 'POST', body: JSON.stringify(payload) }),

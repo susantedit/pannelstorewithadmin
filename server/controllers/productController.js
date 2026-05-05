@@ -245,7 +245,7 @@ export async function listProducts(_req, res) {
   }
 
   try {
-    const products = await Product.find().sort({ createdAt: -1 }).lean();
+    const products = await Product.find().sort({ sortOrder: 1, createdAt: -1 }).lean();
     // If DB is empty, serve the fallback catalog so the UI always has data
     if (!products || products.length === 0) {
       return res.json({ ok: true, products: fallbackProducts });
