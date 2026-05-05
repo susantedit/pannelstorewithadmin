@@ -1,4 +1,5 @@
 import Request from '../models/Request.js';
+import Coupon from '../models/Coupon.js';
 import User from '../models/User.js';
 import { resolveCouponCode } from './couponController.js';
 import { NotificationHelpers } from './notificationController.js';
@@ -296,6 +297,17 @@ export async function updateRequestStatus(req, res) {
       $inc: { couponBalance: Number(request.referralRewardAmount || 30) }
     });
     request.couponRewardedAt = new Date();
+  }
+
+  if (status === 'Accepted' && request.couponCode) {
+    const coupon = await Coupon.findOne({ code: String(request.couponCode).trim().toUpperCase() });
+    if (coupon) {
+      coupon.usedCount = Number(coupon.usedCount || 0) + 1;
+      if (coupon.usageLimit > 0 && coupon.usedCount >= coupon.usageLimit) {
+        coupon.active = false;
+      }
+      await coupon.save();
+    }
   }
 
   await request.save();
