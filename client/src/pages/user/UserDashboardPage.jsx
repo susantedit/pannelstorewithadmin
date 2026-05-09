@@ -532,6 +532,8 @@ export default function UserDashboardPage() {
     setSelectedProduct(product);
     setSelectedPackage(product.packages?.[0] || null);
     setBuyModalOpen(true);
+    // Track abandoned checkout — if user doesn't complete in 30min, admin can send recovery
+    api.startCheckout(product.name, product.packages?.[0]?.label || '').catch(() => {});
   };
 
   const handleConfirmBuy = () => {
@@ -1832,6 +1834,12 @@ export default function UserDashboardPage() {
       
 
       </>)}
+
+
+      {/* ── HISTORY TAB ── */}
+      {activeTab === 'history' && (
+        <OrderHistoryPage onViewReceipt={(r) => setReceiptRequest(r)} />
+      )}
 
       {/* â”€â”€ SQUAD TAB â”€â”€ */}
       {activeTab === 'squad' && (

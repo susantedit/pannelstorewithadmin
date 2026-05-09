@@ -182,6 +182,91 @@ function AdminOrderChat({ requestId }) {
   );
 }
 
+// ── UserNotesManager sub-component ───────────────────────────────────────
+function UserNotesManager() {
+  const [search, setSearch] = useState('');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [noteText, setNoteText] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const loadUsers = async (q = '') => {
+    setLoading(true);
+    try {
+      const res = await api.listUsers({ search: q, limit: 20 });
+      if (res?.ok) setUsers(res.users || []);
+    } catch {} finally { setLoading(false); }
+  };
+
+  useEffect(() => { loadUsers(); }, []);
+
+  const handleSearch = (e) => {
+    setSearch(e.target.value);
+    clearTimeout(window._notesSearchTimer);
+    window._notesSearchTimer = setTimeout(() => loadUsers(e.target.value), 400);
+  };
+
+  const handleSave = async (userId) => {
+    setSaving(true); setMsg('');
+    try {
+      const res = await api.saveUserNotes(userId, noteText);
+      if (res?.ok) { setMsg('✅ Notes saved'); setEditingId(null); loadUsers(search); }
+      else setMsg(`❌ ${res?.message || 'Failed'}`);
+    } catch { setMsg('❌ Error'); } finally { setSaving(false); }
+  };
+
+  return (
+    <div className="panel" style={{ marginTop: '16px' }}>
+      <div className="panel-header">
+        <h2>📝 Admin Notes on Users</h2>
+        <span style={{ fontSize: '0.75rem', color: 'var(--muted)' }}>Private — never shown to users</span>
+      </div>
+      {msg && <div style={{ marginBottom: '10px', fontSize: '0.82rem', color: msg.startsWith('✅') ? '#4ade80' : '#ff6b6b' }}>{msg}</div>}
+      <input value={search} onChange={handleSearch} placeholder="Search user..."
+        style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', marginBottom: '12px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--text)', fontSize: '0.85rem', outline: 'none', boxSizing: 'border-box' }} />
+      {loading ? <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>Loading...</p> : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {users.map(u => (
+            <div key={u._id} style={{ padding: '10px 12px', borderRadius: '8px', background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: editingId === u._id ? '8px' : 0 }}>
+                <div>
+                  <div style={{ fontWeight: 700, fontSize: '0.85rem', color: '#fff' }}>{u.name}</div>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--muted)' }}>{u.email}</div>
+                  {u.adminNotes && editingId !== u._id && (
+                    <div style={{ fontSize: '0.75rem', color: '#fbbf24', marginTop: '4px', fontStyle: 'italic' }}>📝 {u.adminNotes}</div>
+                  )}
+                </div>
+                <button onClick={() => { setEditingId(u._id); setNoteText(u.adminNotes || ''); setMsg(''); }}
+                  style={{ padding: '5px 10px', borderRadius: '6px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--muted)', cursor: 'pointer', fontSize: '0.72rem' }}>
+                  {u.adminNotes ? '✏️ Edit' : '+ Add Note'}
+                </button>
+              </div>
+              {editingId === u._id && (
+                <div>
+                  <textarea value={noteText} onChange={e => setNoteText(e.target.value)} placeholder="e.g. Paid twice, refunded on May 1..."
+                    rows={2} style={{ width: '100%', padding: '8px 10px', borderRadius: '7px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', fontSize: '0.82rem', outline: 'none', resize: 'vertical', boxSizing: 'border-box', marginBottom: '6px' }} />
+                  <div style={{ display: 'flex', gap: '6px' }}>
+                    <button onClick={() => handleSave(u._id)} disabled={saving}
+                      style={{ padding: '6px 14px', borderRadius: '6px', background: 'rgba(74,222,128,0.15)', border: '1px solid rgba(74,222,128,0.3)', color: '#4ade80', cursor: 'pointer', fontSize: '0.78rem', fontWeight: 700 }}>
+                      {saving ? '...' : '💾 Save'}
+                    </button>
+                    <button onClick={() => setEditingId(null)}
+                      style={{ padding: '6px 10px', borderRadius: '6px', background: 'none', border: '1px solid rgba(255,255,255,0.1)', color: 'var(--muted)', cursor: 'pointer', fontSize: '0.78rem' }}>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── VIP Manager sub-component ─────────────────────────────────────────────
 function VipManager() {
   const [users, setUsers] = useState([]);
@@ -1112,12 +1197,21 @@ export default function AdminDashboardPage() {
                 <p style={{ color:'var(--muted)', fontSize:'0.85rem', marginBottom:'14px' }}>
                   Send "Your access expires soon — renew now!" to users whose orders expire within 3 days.
                 </p>
-                <Button variant="primary" onClick={async () => {
-                  const res = await api.sendRenewalReminders();
-                  Notif.showNotification('✅ Reminders Sent', res?.message || 'Done', 'success', 4000);
-                }}>
-                  <i className="fas fa-bell" /> Send Renewal Reminders
-                </Button>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                  <Button variant="primary" onClick={async () => {
+                    const res = await api.sendRenewalReminders();
+                    Notif.showNotification('✅ Reminders Sent', res?.message || 'Done', 'success', 4000);
+                  }}>
+                    <i className="fas fa-bell" /> Send Renewal Reminders
+                  </Button>
+                  <Button variant="ghost" onClick={async () => {
+                    if (!window.confirm('Send recovery notifications to users who abandoned checkout 30+ min ago?')) return;
+                    const res = await api.sendAbandonedRecovery();
+                    Notif.showNotification('✅ Recovery Sent', res?.message || 'Done', 'success', 4000);
+                  }}>
+                    <i className="fas fa-cart-arrow-down" /> Send Abandoned Cart Recovery
+                  </Button>
+                </div>
               </div>
 
               {/* Admin list */}
@@ -1146,12 +1240,7 @@ export default function AdminDashboardPage() {
               <VipManager />
 
               {/* User Notes Manager */}
-              <UserNotesManager 
-                users={admins}
-                onNotesUpdate={(userId, notes) => {
-                  // Notes saved successfully
-                }}
-              />
+              <UserNotesManager />
             </div>
           )}
 
